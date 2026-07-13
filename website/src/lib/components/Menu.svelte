@@ -23,6 +23,7 @@
         Moon,
         Layers,
         ListTree,
+        Route,
         Languages,
         Settings,
         Info,
@@ -53,6 +54,7 @@
     import { anySelectedLayer } from '$lib/components/map/layer-control/utils';
     import { defaultOverlays } from '$lib/assets/layers';
     import LayerControlSettings from '$lib/components/map/layer-control/LayerControlSettings.svelte';
+    import RoutingSettings from '$lib/components/toolbar/tools/routing/RoutingSettings.svelte';
     import { ListFileItem, ListTrackItem } from '$lib/components/file-list/file-list';
     import Export from '$lib/components/export/Export.svelte';
     import { mode, setMode } from 'mode-watcher';
@@ -107,6 +109,7 @@
     }
 
     let layerSettingsOpen = $state(false);
+    let routingSettingsOpen = $state(false);
     let fullscreen = $state(false);
 
     function toggleFullscreen() {
@@ -526,6 +529,10 @@
                         <Layers size="16" />
                         {i18n._('menu.layers')}
                     </Menubar.Item>
+                    <Menubar.Item onclick={() => (routingSettingsOpen = true)}>
+                        <Route size="16" />
+                        {i18n._('toolbar.routing.provider.title')}
+                    </Menubar.Item>
                 </Menubar.Content>
             </Menubar.Menu>
         </Menubar.Root>
@@ -561,6 +568,7 @@
 
 <Export />
 <LayerControlSettings bind:open={layerSettingsOpen} />
+<RoutingSettings bind:open={routingSettingsOpen} />
 
 <svelte:window
     on:keydown={(e) => {

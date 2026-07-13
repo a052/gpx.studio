@@ -194,7 +194,26 @@
                 "to": "The end point is too far from the nearest road",
                 "distance": "The end point is too far from the start point",
                 "connection": "No connection found between the points",
-                "timeout": "Route calculation took too long, try adding points closer together"
+                "timeout": "Route calculation took too long, try adding points closer together",
+                "api_key": "Invalid or missing GraphHopper API key. Check your key in the routing API settings.",
+                "quota": "GraphHopper API request limit reached. Try again later or use another provider.",
+                "profile": "This activity is not supported by the official GraphHopper API (only bike, foot and car are available on the free plan). Switch to Bike or Run/hike, or use the default or a custom server.",
+                "unsupported_feature": "Blocking private roads is not supported by the official GraphHopper free plan. Turn on \"Allow private roads\", or use the default or a custom server."
+            },
+            "provider": {
+                "title": "Routing API",
+                "help": "Choose which GraphHopper routing server to use. The default server is provided by gpx.studio and requires no configuration.",
+                "provider": "Provider",
+                "providers": {
+                    "default": "Default (gpx.studio)",
+                    "official": "Official GraphHopper",
+                    "custom": "Custom URL"
+                },
+                "api_key": "API key",
+                "api_key_placeholder": "Your GraphHopper API key",
+                "official_warning": "On the free plan, only Bike, Run/hike and car are supported. Road bike, gravel bike, mountain bike and motorcycle, as well as private-road blocking, may not work.",
+                "custom_url": "API URL",
+                "custom_url_help": "Full URL of the GraphHopper route endpoint (e.g. https://your-server/route)."
             }
         },
         "scissors": {

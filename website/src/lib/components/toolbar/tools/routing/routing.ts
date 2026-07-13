@@ -4,7 +4,11 @@ import { settings } from '$lib/logic/settings';
 import { getElevation } from '$lib/utils';
 import { get } from 'svelte/store';
 
-const { routing, routingProfile, privateRoads } = settings;
+const { routing, routingProfile, privateRoads, routingProvider, graphhopperApiKey, graphhopperCustomUrl } =
+    settings;
+
+const DEFAULT_GRAPHHOPPER_URL = 'https://graphhopper.gpx.studio/route';
+const OFFICIAL_GRAPHHOPPER_URL = 'https://graphhopper.com/api/1/route';
 
 export type RoutingProfile = {
     engine: 'graphhopper' | 'brouter';
@@ -109,39 +113,84 @@ async function getGraphHopperRoute(
     graphHopperProfile: string,
     privateRoads: boolean
 ): Promise<TrackPoint[]> {
-    let response = await fetch('https://graphhopper.gpx.studio/route', {
+    const provider = get(routingProvider);
+    const official = provider === 'official';
+
+    let url: string;
+    if (provider === 'official') {
+        url = `${OFFICIAL_GRAPHHOPPER_URL}?key=${encodeURIComponent(get(graphhopperApiKey))}`;
+    } else if (provider === 'custom') {
+        url = get(graphhopperCustomUrl).trim() || DEFAULT_GRAPHHOPPER_URL;
+    } else {
+        url = DEFAULT_GRAPHHOPPER_URL;
+    }
+
+    const customModel = privateRoads
+        ? {}
+        : graphhopperBlockPrivateCustomModels[graphHopperProfile] || {};
+    const hasCustomModel = Object.keys(customModel).length > 0;
+
+    // hike_rating / mtb_rating are only exposed by the self-hosted config; the
+    // official server would reject them, so request only the common details there.
+    const requestedDetails = official ? ['road_class', 'surface'] : graphhopperDetails;
+
+    const body: { [key: string]: any } = {
+        points: points.map((point) => [point.lon, point.lat]),
+        profile: graphHopperProfile,
+        elevation: true,
+        points_encoded: false,
+        details: requestedDetails,
+    };
+    if (official) {
+        // On the official API, sending any custom_model (even an empty one)
+        // requires ch.disable=true. When private roads are allowed we send no
+        // custom_model at all so the free plan's speed mode handles the request.
+        if (hasCustomModel) {
+            body.custom_model = customModel;
+            body['ch.disable'] = true;
+        }
+    } else {
+        body.custom_model = customModel;
+    }
+
+    let response = await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            points: points.map((point) => [point.lon, point.lat]),
-            profile: graphHopperProfile,
-            elevation: true,
-            points_encoded: false,
-            details: graphhopperDetails,
-            custom_model: privateRoads
-                ? {}
-                : graphhopperBlockPrivateCustomModels[graphHopperProfile] || {},
-        }),
+        body: JSON.stringify(body),
     });
 
     if (!response.ok) {
-        const error = await response.json();
-        if (error.message.includes('Cannot find point 0')) {
+        const error = await response.json().catch(() => ({}));
+        const message: string = error?.message ?? '';
+        const hintDetails: string = error?.hints?.[0]?.details ?? '';
+
+        if (message.includes('Cannot find point 0')) {
             throw new Error('toolbar.routing.error.from');
-        } else if (error.message.includes('Cannot find point 1')) {
+        } else if (message.includes('Cannot find point 1')) {
             if (points.length == 3) {
                 throw new Error('toolbar.routing.error.via');
             } else {
                 throw new Error('toolbar.routing.error.to');
             }
-        } else if (error.hints[0].details.includes('PointDistanceExceededException')) {
+        } else if (hintDetails.includes('PointDistanceExceededException')) {
             throw new Error('toolbar.routing.error.distance');
-        } else if (error.hints[0].details.includes('ConnectionNotFoundException')) {
+        } else if (hintDetails.includes('ConnectionNotFoundException')) {
             throw new Error('toolbar.routing.error.connection');
+        } else if (official && (response.status === 401 || /api key|unauthorized/i.test(message))) {
+            throw new Error('toolbar.routing.error.api_key');
+        } else if (official && (response.status === 429 || /limit|quota/i.test(message))) {
+            throw new Error('toolbar.routing.error.quota');
+        } else if (official && /profile/i.test(message)) {
+            throw new Error('toolbar.routing.error.profile');
+        } else if (
+            official &&
+            /custom_model|ch\.disable|encoded value|details/i.test(message)
+        ) {
+            throw new Error('toolbar.routing.error.unsupported_feature');
         } else {
-            throw new Error(error.message);
+            throw new Error(message || 'toolbar.routing.error.connection');
         }
     }
 
@@ -164,7 +213,7 @@ async function getGraphHopperRoute(
         );
     }
 
-    for (let key of graphhopperDetails) {
+    for (let key of requestedDetails) {
         let detail = details[key];
         for (let i = 0; i < detail.length; i++) {
             for (let j = detail[i][0]; j < detail[i][1] + (i == detail.length - 1); j++) {

@@ -210,6 +210,7 @@ type RoutingProfile =
     | 'motorcycle'
     | 'water'
     | 'railway';
+type RoutingProvider = 'default' | 'official' | 'custom';
 type TerrainSource = 'mapterhorn';
 type StreetViewSource = 'mapillary' | 'google';
 
@@ -261,6 +262,13 @@ export const settings = {
         )
     ),
     privateRoads: new Setting('privateRoads', false),
+    routingProvider: new Setting<RoutingProvider>(
+        'routingProvider',
+        'default',
+        getValueValidator<RoutingProvider>(['default', 'official', 'custom'], 'default')
+    ),
+    graphhopperApiKey: new Setting<string>('graphhopperApiKey', ''),
+    graphhopperCustomUrl: new Setting<string>('graphhopperCustomUrl', ''),
     currentBasemap: new Setting(
         'currentBasemap',
         defaultBasemap,

@@ -1,0 +1,238 @@
+
+> website@0.0.1 check
+> svelte-kit sync && svelte-check --tsconfig ./tsconfig.json
+
+Loading svelte-check in workspace: c:\F\code\gpx.studio\website
+Getting Svelte diagnostics...
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\collapsible-tree\CollapsibleTree.svelte[39m:19:48
+[33mWarn[39m: This reference only captures the initial value of `defaultState`. Did you mean to reference it inside a derived instead?
+https://svelte.dev/e/state_referenced_locally (svelte)
+[36m
+    let open = $state(new CollapsibleTreeState([35mdefaultState[36m));[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\collapsible-tree\CollapsibleTree.svelte[39m:22:41
+[33mWarn[39m: This reference only captures the initial value of `side`. Did you mean to reference it inside a closure instead?
+https://svelte.dev/e/state_referenced_locally (svelte)
+[36m    setContext('collapsible-tree-state', open);
+    setContext('collapsible-tree-side', [35mside[36m);
+    setContext('collapsible-tree-nohover', nohover);[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\collapsible-tree\CollapsibleTree.svelte[39m:23:44
+[33mWarn[39m: This reference only captures the initial value of `nohover`. Did you mean to reference it inside a closure instead?
+https://svelte.dev/e/state_referenced_locally (svelte)
+[36m    setContext('collapsible-tree-side', side);
+    setContext('collapsible-tree-nohover', [35mnohover[36m);
+    setContext('collapsible-tree-parent-id', 'root');[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\collapsible-tree\CollapsibleTree.svelte[39m:25:56
+[33mWarn[39m: This reference only captures the initial value of `slotInsideTrigger`. Did you mean to reference it inside a closure instead?
+https://svelte.dev/e/state_referenced_locally (svelte)
+[36m    setContext('collapsible-tree-parent-id', 'root');
+    setContext('collapsible-tree-slot-inside-trigger', [35mslotInsideTrigger[36m);
+</script>[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\collapsible-tree\CollapsibleTreeNode.svelte[39m:22:33
+[33mWarn[39m: This reference only captures the initial value of `props`. Did you mean to reference it inside a closure instead?
+https://svelte.dev/e/state_referenced_locally (svelte)
+[36m
+    let fullId = `${parentId}.${[35m[36mprops.id}`;
+    setContext('collapsible-tree-parent-id', fullId);[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\elevation-profile\elevation-profile.ts[39m:288:26
+[31mError[39m: Type '() => boolean' is not assignable to type 'boolean | undefined'. 
+[36m                },
+                reverse: [35m() => id === 'speed' && get(velocityUnits) === 'pace'[36m,
+                display: false,[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\map\style.ts[39m:110:27
+[31mError[39m: 'e' is of type 'unknown'. 
+[36m        } catch (e) {
+            console.error([35me[36m.message);
+        }[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\map\style.ts[39m:180:39
+[31mError[39m: 'e' is of type 'unknown'. 
+[36m                    } catch (e) {
+                        console.error([35me[36m.message);
+                    }[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\map\map.ts[39m:119:20
+[31mError[39m: Property '_map' does not exist on type 'Window & typeof globalThis'. Did you mean 'Map'? 
+[36m            this._mapStore.set(map); // only set the store after the map has loaded
+            window.[35m_map[36m = map; // entry point for extensions
+            this.resize();[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\file-list\sortable-file-list.ts[39m:2:42
+[31mError[39m: Could not find a declaration file for module 'sortablejs/Sortable'. 'c:/F/code/gpx.studio/website/node_modules/sortablejs/Sortable.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/sortablejs` if it exists or add a new declaration (.d.ts) file containing `declare module 'sortablejs/Sortable';` 
+[36mimport { isMac } from '$lib/utils';
+import Sortable, { type Direction } from [35m'sortablejs/Sortable'[36m;
+import { ListItem, ListLevel, ListRootItem } from './file-list';[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\file-list\sortable-file-list.ts[39m:121:67
+[31mError[39m: Parameter 'i' implicitly has an 'any' type. 
+[36m                let oldIndices: number[] =
+                    e.oldIndicies.length > 0 ? e.oldIndicies.map(([35mi[36m) => i.index) : [e.oldIndex];
+                oldIndices = oldIndices.filter((i) => i >= 0);[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\file-list\sortable-file-list.ts[39m:136:67
+[31mError[39m: Parameter 'i' implicitly has an 'any' type. 
+[36m                let newIndices: number[] =
+                    e.newIndicies.length > 0 ? e.newIndicies.map(([35mi[36m) => i.index) : [e.newIndex];
+                newIndices = newIndices.filter((i) => i >= 0);[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\map\layer-control\extension-api.ts[39m:88:13
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'boolean | LayerTreeType'.
+  No index signature with a parameter of type 'string' was found on type 'boolean | LayerTreeType'. 
+[36m        if (!overlayTree.overlays.hasOwnProperty(overlay.extensionName)) {
+            [35moverlayTree.overlays[overlay.extensionName][36m = {};
+        }[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\map\layer-control\extension-api.ts[39m:91:9
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'boolean | LayerTreeType'.
+  No index signature with a parameter of type 'string' was found on type 'boolean | LayerTreeType'. 
+[36m
+        [35moverlayTree.overlays[overlay.extensionName][36m[overlay.id] = true;[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\map\street-view-control\mapillary.ts[39m:2:49
+[31mError[39m: Could not find a declaration file for module 'mapillary-js/dist/mapillary.module'. 'c:/F/code/gpx.studio/website/node_modules/mapillary-js/dist/mapillary.module.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/mapillary-js` if it exists or add a new declaration (.d.ts) file containing `declare module 'mapillary-js/dist/mapillary.module';` 
+[36mimport maplibregl, { type LayerSpecification, type VectorSourceSpecification } from 'maplibre-gl';
+import { Viewer, type ViewerBearingEvent } from [35m'mapillary-js/dist/mapillary.module'[36m;
+import 'mapillary-js/dist/mapillary.css';[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\AlgoliaDocSearch.svelte[39m:63:70
+[31mError[39m: Type 'true' is not assignable to type '"" | "anonymous" | "use-credentials" | null | undefined'. (ts)
+[36m<svelte:head>
+    <link rel="preconnect" href="https://21XLD94PE3-dsn.algolia.net" [35mcrossorigin[36m />
+</svelte:head>[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\map\layer-control\LayerTreeNode.svelte[39m:56:34
+[31mError[39m: Type 'boolean | LayerTreeType' is not assignable to type 'boolean | undefined'.
+  Type 'LayerTreeType' is not assignable to type 'boolean | undefined'. (ts)
+[36m                            value={id}
+                            bind:[35mchecked[36m={checked[id]}
+                            class="scale-90"[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\map\layer-control\LayerTreeNode.svelte[39m:93:29
+[31mError[39m: Type 'boolean | LayerTreeType' is not assignable to type 'LayerTreeType'.
+  Type 'boolean' is not assignable to type 'LayerTreeType'. (ts)
+[36m                        <Self
+                            [35mnode[36m={node[id]}
+                            {name}[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\map\layer-control\LayerTreeNode.svelte[39m:98:34
+[31mError[39m: Type 'boolean | LayerTreeType' is not assignable to type 'LayerTreeType'.
+  Type 'boolean' is not assignable to type 'LayerTreeType'. (ts)
+[36m                            {multiple}
+                            bind:[35mchecked[36m={checked[id]}
+                        />[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\map\layer-control\CustomLayers.svelte[39m:258:21
+[31mError[39m: Element implicitly has an 'any' type because expression of type '"custom"' can't be used to index type 'boolean | LayerTreeType'.
+  Property 'custom' does not exist on type 'boolean | LayerTreeType'. (ts)
+[36m                    $customBasemapOrder = customBasemapItems.map((item) => item.id);
+                    [35m$selectedBasemapTree.basemaps['custom'][36m = customBasemapItems.reduce(
+                        (acc, item) => {[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\map\layer-control\CustomLayers.svelte[39m:260:29
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'. (ts)
+[36m                        (acc, item) => {
+                            [35macc[item.id][36m = true;
+                            return acc;[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\map\layer-control\CustomLayers.svelte[39m:318:21
+[31mError[39m: Element implicitly has an 'any' type because expression of type '"custom"' can't be used to index type 'boolean | LayerTreeType'.
+  Property 'custom' does not exist on type 'boolean | LayerTreeType'. (ts)
+[36m                    $customOverlayOrder = customOverlayItems.map((item) => item.id);
+                    [35m$selectedOverlayTree.overlays['custom'][36m = customOverlayItems.reduce(
+                        (acc, item) => {[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\map\layer-control\CustomLayers.svelte[39m:320:29
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'. (ts)
+[36m                        (acc, item) => {
+                            [35macc[item.id][36m = true;
+                            return acc;[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\file-list\FileListNodeContent.svelte[39m:28:9
+[33mWarn[39m: This reference only captures the initial value of `node`. Did you mean to reference it inside a closure instead?
+https://svelte.dev/e/state_referenced_locally (svelte)
+[36m    let sortableLevel: ListLevel =
+        [35m[36mnode instanceof Map
+            ? ListLevel.FILE[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\file-list\FileListNodeContent.svelte[39m:30:15
+[33mWarn[39m: This reference only captures the initial value of `node`. Did you mean to reference it inside a closure instead?
+https://svelte.dev/e/state_referenced_locally (svelte)
+[36m            ? ListLevel.FILE
+            : [35m[36mnode instanceof GPXFile
+              ? waypointRoot[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\file-list\FileListNodeContent.svelte[39m:31:17
+[33mWarn[39m: This reference only captures the initial value of `waypointRoot`. Did you mean to reference it inside a closure instead?
+https://svelte.dev/e/state_referenced_locally (svelte)
+[36m            : node instanceof GPXFile
+              ? [35m[36mwaypointRoot
+                  ? ListLevel.WAYPOINTS[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\file-list\FileListNodeContent.svelte[39m:33:21
+[33mWarn[39m: This reference only captures the initial value of `item`. Did you mean to reference it inside a closure instead?
+https://svelte.dev/e/state_referenced_locally (svelte)
+[36m                  ? ListLevel.WAYPOINTS
+                  : [35m[36mitem instanceof ListWaypointsItem
+                    ? ListLevel.WAYPOINT[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\file-list\FileListNodeContent.svelte[39m:36:17
+[33mWarn[39m: This reference only captures the initial value of `node`. Did you mean to reference it inside a closure instead?
+https://svelte.dev/e/state_referenced_locally (svelte)
+[36m                    : ListLevel.TRACK
+              : [35m[36mnode instanceof Track
+                ? ListLevel.SEGMENT[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\file-list\FileListNodeLabel.svelte[39m:99:51
+[31mError[39m: Property '_data' does not exist on type 'Waypoint | Waypoint[] | GPXTreeElement<AnyGPXTreeElement>'.
+  Property '_data' does not exist on type 'Waypoint[]'. (ts)
+[36m    let hidden = $derived(
+        item.level === ListLevel.WAYPOINTS ? node.[35m_data[36m.hiddenWpt : node._data.hidden
+    );[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\file-list\FileListNodeLabel.svelte[39m:99:74
+[31mError[39m: Property '_data' does not exist on type 'Waypoint | Waypoint[] | GPXTreeElement<AnyGPXTreeElement>'.
+  Property '_data' does not exist on type 'Waypoint[]'. (ts)
+[36m    let hidden = $derived(
+        item.level === ListLevel.WAYPOINTS ? node._data.hiddenWpt : node.[35m_data[36m.hidden
+    );[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\file-list\FileList.svelte[39m:27:31
+[33mWarn[39m: This reference only captures the initial value of `orientation`. Did you mean to reference it inside a closure instead?
+https://svelte.dev/e/state_referenced_locally (svelte)
+[36m
+    setContext('orientation', [35morientation[36m);
+    setContext('recursive', recursive);[39m
+
+c:\F\code\gpx.studio\website\[32msrc\lib\components\file-list\FileList.svelte[39m:28:29
+[33mWarn[39m: This reference only captures the initial value of `recursive`. Did you mean to reference it inside a closure instead?
+https://svelte.dev/e/state_referenced_locally (svelte)
+[36m    setContext('orientation', orientation);
+    setContext('recursive', [35mrecursive[36m);[39m
+
+c:\F\code\gpx.studio\website\[32msrc\routes\[[language]]\help\[...guide]\+page.svelte[39m:12:51
+[31mError[39m: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'. (ts)
+[36m
+    let previousGuide = $derived(getPreviousGuide([35mpage.params.guide[36m));
+    let nextGuide = $derived(getNextGuide(page.params.guide));[39m
+
+c:\F\code\gpx.studio\website\[32msrc\routes\[[language]]\help\[...guide]\+page.svelte[39m:13:43
+[31mError[39m: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'. (ts)
+[36m    let previousGuide = $derived(getPreviousGuide(page.params.guide));
+    let nextGuide = $derived(getNextGuide([35mpage.params.guide[36m));
+</script>[39m
+
+====================================
+[31msvelte-check found 22 errors and 12 warnings in 15 files
+[39m
