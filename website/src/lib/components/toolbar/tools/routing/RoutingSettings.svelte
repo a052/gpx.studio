@@ -24,7 +24,7 @@
                 <Sheet.Description>
                     {i18n._('toolbar.routing.provider.help')}
                 </Sheet.Description>
-                <div class="flex flex-col gap-4 mt-2">
+                <div class="flex flex-col gap-4 mt-2 px-1">
                     <div class="flex flex-col gap-1.5">
                         <Label>{i18n._('toolbar.routing.provider.provider')}</Label>
                         <Select.Root type="single" bind:value={$routingProvider}>

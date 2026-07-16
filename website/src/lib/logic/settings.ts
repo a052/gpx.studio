@@ -269,6 +269,7 @@ export const settings = {
     ),
     graphhopperApiKey: new Setting<string>('graphhopperApiKey', ''),
     graphhopperCustomUrl: new Setting<string>('graphhopperCustomUrl', ''),
+    corsProxyUrl: new Setting<string>('corsProxyUrl', ''),
     currentBasemap: new Setting(
         'currentBasemap',
         defaultBasemap,

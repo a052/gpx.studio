@@ -56,6 +56,12 @@
         "google": "Google",
         "toggle_street_view": "Street view",
         "layers": "Map layers...",
+        "cors_proxy": {
+            "title": "CORS proxy...",
+            "help": "When hosting gpx.studio yourself, some requests may fail because of missing CORS headers. Set a CORS proxy and failed requests will automatically retry through it.",
+            "url": "Proxy URL",
+            "url_help": "The target URL is appended directly to this address. Leave empty to disable. Example: https://your-proxy/ turns a request for https://example.com/x into https://your-proxy/https://example.com/x."
+        },
         "distance_markers": "Distance markers",
         "direction_markers": "Direction arrows",
         "help": "Help",

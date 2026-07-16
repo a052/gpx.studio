@@ -20,6 +20,7 @@
     import { getURLForGoogleDriveFile } from '$lib/components/embedding/embedding';
     import { db } from '$lib/db';
     import { fileStateCollection } from '$lib/logic/file-state';
+    import { installCorsProxyFetch } from '$lib/logic/cors-proxy';
 
     const {
         treeFileView,
@@ -36,6 +37,7 @@
     );
 
     onMount(async () => {
+        installCorsProxyFetch();
         settings.connectToDatabase(db);
         fileStateCollection.connectToDatabase(db).then(() => {
             let files: string[] = JSON.parse(page.url.searchParams.get('files') || '[]');

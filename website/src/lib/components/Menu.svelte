@@ -46,6 +46,7 @@
         Maximize,
         Maximize2,
         Minimize2,
+        Waypoints,
     } from '@lucide/svelte';
     import { map } from '$lib/components/map/map';
     import { editMetadata } from '$lib/components/file-list/metadata/utils.svelte';
@@ -55,6 +56,7 @@
     import { defaultOverlays } from '$lib/assets/layers';
     import LayerControlSettings from '$lib/components/map/layer-control/LayerControlSettings.svelte';
     import RoutingSettings from '$lib/components/toolbar/tools/routing/RoutingSettings.svelte';
+    import CorsProxySettings from '$lib/components/CorsProxySettings.svelte';
     import { ListFileItem, ListTrackItem } from '$lib/components/file-list/file-list';
     import Export from '$lib/components/export/Export.svelte';
     import { mode, setMode } from 'mode-watcher';
@@ -110,6 +112,7 @@
 
     let layerSettingsOpen = $state(false);
     let routingSettingsOpen = $state(false);
+    let corsProxySettingsOpen = $state(false);
     let fullscreen = $state(false);
 
     function toggleFullscreen() {
@@ -533,6 +536,10 @@
                         <Route size="16" />
                         {i18n._('toolbar.routing.provider.title')}
                     </Menubar.Item>
+                    <Menubar.Item onclick={() => (corsProxySettingsOpen = true)}>
+                        <Waypoints size="16" />
+                        {i18n._('menu.cors_proxy.title')}
+                    </Menubar.Item>
                 </Menubar.Content>
             </Menubar.Menu>
         </Menubar.Root>
@@ -569,6 +576,7 @@
 <Export />
 <LayerControlSettings bind:open={layerSettingsOpen} />
 <RoutingSettings bind:open={routingSettingsOpen} />
+<CorsProxySettings bind:open={corsProxySettingsOpen} />
 
 <svelte:window
     on:keydown={(e) => {
