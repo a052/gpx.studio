@@ -98,6 +98,60 @@ export function getClosestTrackSegments(
     return closest.indices;
 }
 
+const elevationTileCache = new Map<string, ImageData | null>();
+const elevationTileInflight = new Map<string, Promise<ImageData | null>>();
+
+function loadElevationTile(zoom: number, x: number, y: number): Promise<ImageData | null> {
+    const key = `${zoom}/${x}/${y}`;
+
+    if (elevationTileCache.has(key)) {
+        return Promise.resolve(elevationTileCache.get(key)!);
+    }
+    const inflight = elevationTileInflight.get(key);
+    if (inflight) {
+        return inflight;
+    }
+
+    const promise = fetch(`https://tiles.gpx.studio/mapterhorn/${zoom}/${x}/${y}.webp`, {
+        cache: 'force-cache',
+    })
+        .then((response) => response.blob())
+        .then(
+            (blob) =>
+                new Promise<ImageData | null>((resolve) => {
+                    const url = URL.createObjectURL(blob);
+                    const img = new Image();
+                    img.onload = () => {
+                        let imageData: ImageData | null = null;
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        if (ctx) {
+                            ctx.drawImage(img, 0, 0);
+                            imageData = ctx.getImageData(0, 0, img.width, img.height);
+                        }
+                        URL.revokeObjectURL(url);
+                        resolve(imageData);
+                    };
+                    img.onerror = () => {
+                        URL.revokeObjectURL(url);
+                        resolve(null);
+                    };
+                    img.src = url;
+                })
+        )
+        .catch(() => null)
+        .then((imageData) => {
+            elevationTileCache.set(key, imageData);
+            elevationTileInflight.delete(key);
+            return imageData;
+        });
+
+    elevationTileInflight.set(key, promise);
+    return promise;
+}
+
 export function getElevation(
     points: (TrackPoint | Waypoint | Coordinates)[],
     ELEVATION_ZOOM: number = 12,
@@ -121,35 +175,11 @@ export function getElevation(
     };
 
     let promises = uniqueTiles.map((tile) =>
-        fetch(`https://tiles.gpx.studio/mapterhorn/${ELEVATION_ZOOM}/${tile[0]}/${tile[1]}.webp`, {
-            cache: 'force-cache',
+        loadElevationTile(ELEVATION_ZOOM, tile[0], tile[1]).then((imageData) => {
+            if (imageData) {
+                images.set(tile.join(','), imageData);
+            }
         })
-            .then((response) => response.blob())
-            .then(
-                (blob) =>
-                    new Promise<void>((resolve) => {
-                        const url = URL.createObjectURL(blob);
-                        const img = new Image();
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            canvas.width = img.width;
-                            canvas.height = img.height;
-                            const ctx = canvas.getContext('2d');
-                            if (ctx) {
-                                ctx.drawImage(img, 0, 0);
-                                const imageData = ctx.getImageData(0, 0, img.width, img.height);
-                                images.set(tile.join(','), imageData);
-                            }
-                            URL.revokeObjectURL(url);
-                            resolve();
-                        };
-                        img.onerror = () => {
-                            URL.revokeObjectURL(url);
-                            resolve();
-                        };
-                        img.src = url;
-                    })
-            )
     );
 
     return Promise.all(promises).then(() =>
