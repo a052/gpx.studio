@@ -285,7 +285,7 @@ export class ElevationProfile {
                 grid: {
                     display: false,
                 },
-                reverse: () => id === 'speed' && get(velocityUnits) === 'pace',
+                reverse: id === 'speed' && get(velocityUnits) === 'pace',
                 display: false,
             };
         });

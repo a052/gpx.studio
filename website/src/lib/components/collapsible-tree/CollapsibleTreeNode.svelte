@@ -2,7 +2,7 @@
     import * as Collapsible from '$lib/components/ui/collapsible';
     import { Button } from '$lib/components/ui/button';
     import { ChevronDown, ChevronLeft, ChevronRight } from '@lucide/svelte';
-    import { getContext, setContext, type Snippet } from 'svelte';
+    import { getContext, setContext, untrack, type Snippet } from 'svelte';
     import type { ClassValue } from 'svelte/elements';
     import type { CollapsibleTreeState } from './utils.svelte';
 
@@ -19,7 +19,9 @@
     let slotInsideTrigger = getContext<boolean>('collapsible-tree-slot-inside-trigger');
     let parentId = getContext<string>('collapsible-tree-parent-id');
 
-    let fullId = `${parentId}.${props.id}`;
+    // The node id is stable for a component instance (keyed each blocks), and
+    // fullId feeds setContext below, which cannot be updated after init anyway.
+    let fullId = untrack(() => `${parentId}.${props.id}`);
     setContext('collapsible-tree-parent-id', fullId);
 
     let open = state.get(fullId);

@@ -107,7 +107,7 @@ export class StyleManager {
                 }
             }
         } catch (e) {
-            console.error(e.message);
+            console.error(e instanceof Error ? e.message : e);
         }
         this.merge(style, basemapStyle);
 
@@ -177,7 +177,7 @@ export class StyleManager {
                         }
                         this._pastOverlays.add(overlay);
                     } catch (e) {
-                        console.error(e.message);
+                        console.error(e instanceof Error ? e.message : e);
                     }
                 }
             }

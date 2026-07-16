@@ -24,7 +24,7 @@
     } = $props();
 
     let container: HTMLElement;
-    let sortableLevel: ListLevel =
+    let sortableLevel: ListLevel = $derived.by(() =>
         node instanceof Map
             ? ListLevel.FILE
             : node instanceof GPXFile
@@ -35,7 +35,8 @@
                     : ListLevel.TRACK
               : node instanceof Track
                 ? ListLevel.SEGMENT
-                : ListLevel.WAYPOINT;
+                : ListLevel.WAYPOINT
+    );
     let orientation = getContext<'vertical' | 'horizontal'>('orientation');
 
     let canDrop = $derived($dragging !== null && allowedMoves[$dragging].includes(sortableLevel));

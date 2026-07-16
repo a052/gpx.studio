@@ -2,7 +2,7 @@
     import { ScrollArea } from '$lib/components/ui/scroll-area/index';
     import * as ContextMenu from '$lib/components/ui/context-menu';
     import FileListNode from './FileListNode.svelte';
-    import { onMount, setContext } from 'svelte';
+    import { onMount, setContext, untrack } from 'svelte';
     import { ListFileItem, ListLevel, ListRootItem } from './file-list';
     import { ClipboardPaste, FileStack, Plus } from '@lucide/svelte';
     import Shortcut from '$lib/components/Shortcut.svelte';
@@ -24,8 +24,16 @@
         style?: string;
     } = $props();
 
-    setContext('orientation', orientation);
-    setContext('recursive', recursive);
+    // orientation/recursive are intentionally captured once: they are passed as
+    // literals at every call site and seed context, which cannot change after init.
+    setContext(
+        'orientation',
+        untrack(() => orientation)
+    );
+    setContext(
+        'recursive',
+        untrack(() => recursive)
+    );
 
     onMount(() => {
         if (orientation === 'horizontal') {

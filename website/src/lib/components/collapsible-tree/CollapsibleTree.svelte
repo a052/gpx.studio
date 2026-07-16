@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { setContext, type Snippet } from 'svelte';
+    import { setContext, untrack, type Snippet } from 'svelte';
     import { CollapsibleTreeState } from './utils.svelte';
 
     const {
@@ -16,13 +16,24 @@
         children: Snippet;
     } = $props();
 
-    let open = $state(new CollapsibleTreeState(defaultState));
+    // The props below are intentionally captured once at init: they seed the
+    // tree state and context, which cannot be updated after creation anyway.
+    let open = $state(untrack(() => new CollapsibleTreeState(defaultState)));
 
     setContext('collapsible-tree-state', open);
-    setContext('collapsible-tree-side', side);
-    setContext('collapsible-tree-nohover', nohover);
+    setContext(
+        'collapsible-tree-side',
+        untrack(() => side)
+    );
+    setContext(
+        'collapsible-tree-nohover',
+        untrack(() => nohover)
+    );
     setContext('collapsible-tree-parent-id', 'root');
-    setContext('collapsible-tree-slot-inside-trigger', slotInsideTrigger);
+    setContext(
+        'collapsible-tree-slot-inside-trigger',
+        untrack(() => slotInsideTrigger)
+    );
 </script>
 
 {@render children()}

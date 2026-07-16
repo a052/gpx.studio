@@ -53,7 +53,7 @@
                             id="{name}-{id}"
                             {name}
                             value={id}
-                            bind:checked={checked[id]}
+                            bind:checked={(checked as Record<string, boolean>)[id]}
                             class="scale-90"
                             aria-label={i18n._(`layers.label.${id}`)}
                         />
@@ -90,12 +90,12 @@
                 {#snippet content()}
                     <div class="ml-2">
                         <Self
-                            node={node[id]}
+                            node={node[id] as LayerTreeType}
                             {name}
                             {selected}
                             {onselect}
                             {multiple}
-                            bind:checked={checked[id]}
+                            bind:checked={(checked as Record<string, LayerTreeType>)[id]}
                         />
                     </div>
                 {/snippet}

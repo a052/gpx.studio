@@ -31,6 +31,9 @@ export const allowedPastes: Record<ListLevel, ListLevel[]> = {
 
 export const dragging = writable<ListLevel | null>(null);
 
+type SortableWithItem = Sortable & { _item: ListItem; _waypointRoot: boolean };
+type SortableSelectEvent = Sortable.SortableEvent & { originalEvent?: MouseEvent };
+
 export class SortableFileList {
     private _node:
         | Map<string, Readable<GPXFileWithStatistics | undefined>>
@@ -63,8 +66,8 @@ export class SortableFileList {
         this._container = container;
         this._sortable = Sortable.create(container, {
             group: {
-                name: sortableLevel,
-                pull: allowedMoves[sortableLevel],
+                name: sortableLevel.toString(),
+                pull: allowedMoves[sortableLevel].map((l) => l.toString()),
                 put: true,
             },
             direction: orientation,
@@ -99,8 +102,8 @@ export class SortableFileList {
     onSort(e: Sortable.SortableEvent) {
         this.updateToFileOrder();
 
-        const from = Sortable.get(e.from);
-        const to = Sortable.get(e.to);
+        const from = Sortable.get(e.from) as SortableWithItem | null;
+        const to = Sortable.get(e.to) as SortableWithItem | null;
 
         if (!from || !to) {
             return;
@@ -117,12 +120,14 @@ export class SortableFileList {
             if (from._waypointRoot) {
                 fromItems = [fromItem.extend('waypoints')];
             } else {
-                let oldIndices: number[] =
+                let oldIndices: (number | undefined)[] =
                     e.oldIndicies.length > 0 ? e.oldIndicies.map((i) => i.index) : [e.oldIndex];
-                oldIndices = oldIndices.filter((i) => i >= 0);
-                oldIndices.sort((a, b) => a - b);
+                let filteredOldIndices = oldIndices.filter(
+                    (i): i is number => i !== undefined && i >= 0
+                );
+                filteredOldIndices.sort((a, b) => a - b);
 
-                fromItems = oldIndices.map((i) => fromItem.extend(i));
+                fromItems = filteredOldIndices.map((i) => fromItem.extend(i));
             }
 
             if (from._waypointRoot && to._waypointRoot) {
@@ -132,19 +137,21 @@ export class SortableFileList {
                     toItem = toItem.extend('waypoints');
                 }
 
-                let newIndices: number[] =
+                let newIndices: (number | undefined)[] =
                     e.newIndicies.length > 0 ? e.newIndicies.map((i) => i.index) : [e.newIndex];
-                newIndices = newIndices.filter((i) => i >= 0);
-                newIndices.sort((a, b) => a - b);
+                let filteredNewIndices = newIndices.filter(
+                    (i): i is number => i !== undefined && i >= 0
+                );
+                filteredNewIndices.sort((a, b) => a - b);
 
                 if (toItem instanceof ListRootItem) {
-                    let newFileIds = getFileIds(newIndices.length);
-                    toItems = newIndices.map((i, index) => {
+                    let newFileIds = getFileIds(filteredNewIndices.length);
+                    toItems = filteredNewIndices.map((i, index) => {
                         get(fileOrder).splice(i, 0, newFileIds[index]);
                         return this._item.extend(newFileIds[index]);
                     });
                 } else {
-                    toItems = newIndices.map((i) => toItem.extend(i));
+                    toItems = filteredNewIndices.map((i) => toItem.extend(i));
                 }
             }
 
@@ -192,9 +199,11 @@ export class SortableFileList {
                 );
             });
 
+            const originalEvent = (e as Sortable.SortableEvent & { originalEvent?: MouseEvent })
+                .originalEvent;
             if (
-                e.originalEvent &&
-                !(e.originalEvent.ctrlKey || e.originalEvent.metaKey || e.originalEvent.shiftKey) &&
+                originalEvent &&
+                !(originalEvent.ctrlKey || originalEvent.metaKey || originalEvent.shiftKey) &&
                 ($selection.size > 1 ||
                     !$selection.has(this._item.extend(this.getRealId(changed[0]))))
             ) {

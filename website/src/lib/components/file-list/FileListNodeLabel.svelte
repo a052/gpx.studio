@@ -96,7 +96,9 @@
     );
 
     let hidden = $derived(
-        item.level === ListLevel.WAYPOINTS ? node._data.hiddenWpt : node._data.hidden
+        item.level === ListLevel.WAYPOINTS
+            ? (node as Exclude<typeof node, Waypoint[]>)._data.hiddenWpt
+            : (node as Exclude<typeof node, Waypoint[]>)._data.hidden
     );
 </script>
 

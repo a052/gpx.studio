@@ -1,7 +1,7 @@
 import { settings } from '$lib/logic/settings';
 import { derived, get, writable, type Writable } from 'svelte/store';
 import { isSelected, remove, removeAll } from './utils';
-import { overlays, overlayTree } from '$lib/assets/layers';
+import { overlays, overlayTree, type LayerTreeType } from '$lib/assets/layers';
 import { browser } from '$app/environment';
 import { map } from '$lib/components/map/map';
 
@@ -85,10 +85,12 @@ export class ExtensionAPI {
         };
 
         if (!overlayTree.overlays.hasOwnProperty(overlay.extensionName)) {
-            overlayTree.overlays[overlay.extensionName] = {};
+            (overlayTree.overlays as LayerTreeType)[overlay.extensionName] = {};
         }
 
-        overlayTree.overlays[overlay.extensionName][overlay.id] = true;
+        ((overlayTree.overlays as LayerTreeType)[overlay.extensionName] as LayerTreeType)[
+            overlay.id
+        ] = true;
 
         selectedOverlayTree.update((selected) => {
             if (!selected.overlays.hasOwnProperty(overlay.extensionName)) {
