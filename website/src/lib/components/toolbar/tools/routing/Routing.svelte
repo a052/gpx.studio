@@ -20,6 +20,7 @@
         Repeat,
         SquareArrowUpLeft,
         SquareArrowOutDownRight,
+        Undo2,
     } from '@lucide/svelte';
     import { routingProfiles } from '$lib/components/toolbar/tools/routing/routing';
     import { i18n } from '$lib/i18n.svelte';
@@ -39,6 +40,7 @@
     import { fileStateCollection, GPXFileStateCollectionObserver } from '$lib/logic/file-state';
     import { selection } from '$lib/logic/selection';
     import { fileActions, getFileIds, newGPXFile } from '$lib/logic/file-actions';
+    import { fileActionManager } from '$lib/logic/file-action-manager';
     import { mapCursor, MapCursorState } from '$lib/logic/map-cursor';
     import { RoutingControls, routingControls } from './routing-controls';
 
@@ -57,6 +59,8 @@
     } = $props();
 
     const { privateRoads, routing, routingProfile } = settings;
+
+    const canUndo = fileActionManager.canUndo;
 
     let fileStateCollectionObserver: GPXFileStateCollectionObserver;
 
@@ -129,7 +133,7 @@
         </Button>
     </div>
 {:else}
-    <div class="flex flex-col gap-3 w-full max-w-80 {className ?? ''}">
+    <div class="flex flex-col gap-3 w-full max-w-88 {className ?? ''}">
         <div class="flex flex-col gap-3">
             <Label class="justify-between">
                 <span class="flex flex-row items-center gap-1">
@@ -187,7 +191,7 @@
                 </div>
             {/if}
         </div>
-        <div class="flex flex-row flex-wrap justify-center gap-1">
+        <div class="flex flex-row flex-wrap gap-1">
             <ButtonWithTooltip
                 label={i18n._('toolbar.routing.reverse.tooltip')}
                 variant="outline"
@@ -241,6 +245,15 @@
                 onclick={fileActions.createRoundTripForSelection}
             >
                 <Repeat class="size-3" />{i18n._('toolbar.routing.round_trip.button')}
+            </ButtonWithTooltip>
+            <ButtonWithTooltip
+                label={i18n._('menu.undo')}
+                variant="outline"
+                class="gap-1 text-xs px-1.5 py-1.5 h-fit"
+                disabled={!$canUndo}
+                onclick={() => fileActionManager.undo()}
+            >
+                <Undo2 class="size-3" />{i18n._('menu.undo')}
             </ButtonWithTooltip>
         </div>
         <div class="w-full flex flex-row gap-1 items-end justify-between">

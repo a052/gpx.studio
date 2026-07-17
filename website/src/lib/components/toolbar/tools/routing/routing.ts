@@ -4,8 +4,14 @@ import { settings } from '$lib/logic/settings';
 import { getElevation } from '$lib/utils';
 import { get } from 'svelte/store';
 
-const { routing, routingProfile, privateRoads, routingProvider, graphhopperApiKey, graphhopperCustomUrl } =
-    settings;
+const {
+    routing,
+    routingProfile,
+    privateRoads,
+    routingProvider,
+    graphhopperApiKey,
+    graphhopperCustomUrl,
+} = settings;
 
 const DEFAULT_GRAPHHOPPER_URL = 'https://graphhopper.gpx.studio/route';
 const OFFICIAL_GRAPHHOPPER_URL = 'https://graphhopper.com/api/1/route';
@@ -184,10 +190,7 @@ async function getGraphHopperRoute(
             throw new Error('toolbar.routing.error.quota');
         } else if (official && /profile/i.test(message)) {
             throw new Error('toolbar.routing.error.profile');
-        } else if (
-            official &&
-            /custom_model|ch\.disable|encoded value|details/i.test(message)
-        ) {
+        } else if (official && /custom_model|ch\.disable|encoded value|details/i.test(message)) {
             throw new Error('toolbar.routing.error.unsupported_feature');
         } else {
             throw new Error(message || 'toolbar.routing.error.connection');
