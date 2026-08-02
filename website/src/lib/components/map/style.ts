@@ -42,6 +42,7 @@ export class StyleManager {
     private _map: Writable<maplibregl.Map | null>;
     private _maptilerKey: string;
     private _pastOverlays: Set<string> = new Set();
+    private _basemapUpdateId = 0;
 
     constructor(map: Writable<maplibregl.Map | null>, maptilerKey: string) {
         this._map = map;
@@ -70,8 +71,12 @@ export class StyleManager {
         const map_ = get(this._map);
         if (!map_) return;
         let basemap = get(currentBasemap);
+        const updateId = ++this._basemapUpdateId;
         this.buildStyle(basemap).then((style) => {
-            if (get(currentBasemap) === basemap) map_.setStyle(style);
+            // Only the most recent update may apply its style. This prevents a stale build
+            // (e.g. the default-basemap fallback produced while customLayers was still loading
+            // on page load) from overwriting the correct basemap once its async build resolves.
+            if (this._basemapUpdateId === updateId) map_.setStyle(style);
         });
     }
 
