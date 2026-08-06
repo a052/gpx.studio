@@ -36,13 +36,28 @@ export function route(points: Coordinates[]): Promise<TrackPoint[]> {
     if (get(routing)) {
         const profile = routingProfiles[get(routingProfile)];
         if (profile.engine === 'graphhopper') {
-            return getGraphHopperRoute(points, profile.profile, get(privateRoads));
+            return getGraphHopperRoute(points, profile.profile, get(privateRoads)).then(
+                withMapterhornElevation
+            );
         } else {
-            return getBRouterRoute(points, profile.profile);
+            return getBRouterRoute(points, profile.profile).then(withMapterhornElevation);
         }
     } else {
         return getIntermediatePoints(points);
     }
+}
+
+// Resample every point's elevation from the Mapterhorn DEM so that draw-time elevation matches the
+// terrain shown on the map and the "Request elevation data" action, regardless of the routing engine.
+// Without this, GraphHopper/BRouter routes carry the routing provider's own DEM, which disagrees with
+// Mapterhorn and yields different elevation gain/loss.
+function withMapterhornElevation(route: TrackPoint[]): Promise<TrackPoint[]> {
+    return getElevation(route).then((elevations) => {
+        route.forEach((point, i) => {
+            point.ele = elevations[i];
+        });
+        return route;
+    });
 }
 
 const graphhopperDetails = ['road_class', 'surface', 'hike_rating', 'mtb_rating'];
@@ -348,10 +363,5 @@ function getIntermediatePoints(points: Coordinates[]): Promise<TrackPoint[]> {
         })
     );
 
-    return getElevation(route).then((elevations) => {
-        route.forEach((point, i) => {
-            point.ele = elevations[i];
-        });
-        return route;
-    });
+    return withMapterhornElevation(route);
 }
