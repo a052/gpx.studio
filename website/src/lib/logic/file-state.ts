@@ -1,7 +1,7 @@
 import { updateAnchorPoints } from '$lib/components/toolbar/tools/routing/simplify';
 import { type Database } from '$lib/db';
 import { liveQuery } from 'dexie';
-import { GPXFile } from 'gpx';
+import { GPXFile, setElevationOptions } from 'gpx';
 import { GPXStatisticsTree, type GPXFileWithStatistics } from '$lib/logic/statistics-tree';
 import { settings } from '$lib/logic/settings';
 import { get, writable, type Subscriber, type Writable } from 'svelte/store';
@@ -31,6 +31,19 @@ export class GPXFileState {
 
     subscribe(run: Subscriber<GPXFileWithStatistics | undefined>, invalidate?: () => void) {
         return this._file.subscribe(run, invalidate);
+    }
+
+    // Rebuild the statistics tree from the current in-memory file without re-reading the database.
+    // Used when a setting that only affects computed statistics (e.g. elevation gain/loss options)
+    // changes, since those do not modify the stored file and therefore do not trigger the liveQuery.
+    recomputeStatistics() {
+        const current = get(this._file);
+        if (current !== undefined) {
+            this._file.set({
+                file: current.file,
+                statistics: new GPXStatisticsTree(current.file),
+            });
+        }
     }
 
     destroy() {
@@ -158,10 +171,33 @@ export class GPXFileStateCollection {
             }
         });
     }
+
+    recomputeAllStatistics() {
+        get(this._files).forEach((fileState) => {
+            fileState.recomputeStatistics();
+        });
+    }
 }
 
 // Collection of all file states
 export const fileStateCollection = new GPXFileStateCollection();
+
+// Recompute statistics for all open files whenever an elevation option changes. These settings only
+// affect the derived statistics (gain/loss), not the stored file, so the database liveQuery would not
+// otherwise pick them up. `skip` avoids an initial redundant recompute on subscription.
+let elevationOptionsInitialized = false;
+function onElevationOptionChange() {
+    setElevationOptions({
+        gainThresholdMeters: get(settings.elevationGainThreshold),
+        smoothingWindowMeters: get(settings.elevationSmoothingWindow),
+    });
+    if (elevationOptionsInitialized) {
+        fileStateCollection.recomputeAllStatistics();
+    }
+}
+settings.elevationGainThreshold.subscribe(onElevationOptionChange);
+settings.elevationSmoothingWindow.subscribe(onElevationOptionChange);
+elevationOptionsInitialized = true;
 
 export type GPXFileStateCallback = (files: Map<string, GPXFileState>) => void;
 export class GPXFileStateCollectionObserver {

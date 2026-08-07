@@ -146,6 +146,15 @@ function getValueValidator<V>(allowed: V[], fallback: V) {
     return (value: V) => (dict.has(value) ? value : fallback);
 }
 
+function getNumberValidator(min: number, max: number, fallback: number) {
+    return (value: number) => {
+        if (typeof value !== 'number' || Number.isNaN(value)) {
+            return fallback;
+        }
+        return Math.min(max, Math.max(min, value));
+    };
+}
+
 function getArrayValidator<V>(allowed: V[]) {
     const dict = new Set<V>(allowed);
     return (value: V[]) => value.filter((v) => dict.has(v));
@@ -231,6 +240,16 @@ export const settings = {
         getValueValidator<TemperatureUnits>(['celsius', 'fahrenheit'], 'celsius')
     ),
     elevationProfile: new Setting<boolean>('elevationProfile', true),
+    elevationGainThreshold: new Setting<number>(
+        'elevationGainThreshold',
+        3,
+        getNumberValidator(0, 20, 3)
+    ),
+    elevationSmoothingWindow: new Setting<number>(
+        'elevationSmoothingWindow',
+        20,
+        getNumberValidator(0, 200, 20)
+    ),
     additionalDatasets: new Setting<AdditionalDataset[]>(
         'additionalDatasets',
         [],

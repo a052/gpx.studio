@@ -27,6 +27,25 @@ function cloneJSON<T>(obj: T): T {
     return JSON.parse(JSON.stringify(obj));
 }
 
+// Tunable parameters for the cumulative elevation gain/loss computation (see _elevationComputation).
+// - smoothingWindowMeters: width of the distance-based moving average applied to raw elevations before
+//   accumulating gain/loss, to remove high-frequency DEM/GPS/barometric noise. 0 disables smoothing.
+// - gainThresholdMeters: minimum elevation change (hysteresis) that must be exceeded before it is added
+//   to the cumulative gain/loss. This is the standard technique used by Strava, GPS Visualizer, etc. to
+//   avoid noise inflating the totals. 0 counts every smoothed delta.
+export const elevationOptions = {
+    smoothingWindowMeters: 20,
+    gainThresholdMeters: 3,
+};
+
+export function setElevationOptions(options: Partial<typeof elevationOptions>): void {
+    Object.assign(elevationOptions, options);
+}
+
+// Epsilon (in meters) for the Ramer-Douglas-Peucker simplification used only to derive per-segment
+// slope shading (slope.segment). It no longer affects cumulative gain/loss.
+const SLOPE_SEGMENT_EPSILON = 8;
+
 // An abstract class that groups functions that need to be computed recursively in the GPX file hierarchy
 export abstract class GPXTreeElement<T extends GPXTreeElement<any>> {
     _data: { [key: string]: any } = {};
@@ -983,63 +1002,75 @@ export class TrackSegment extends GPXTreeLeaf {
     }
 
     _elevationComputation(statistics: GPXStatistics) {
-        let simplified = ramerDouglasPeucker(
-            this.trkpt,
-            20,
-            getElevationDistanceFunction(statistics)
-        );
+        const points = this.trkpt;
+        const n = points.length;
 
-        for (let i = 0; i < simplified.length - 1; i++) {
-            let start = simplified[i].point._data.index;
-            let end = simplified[i + 1].point._data.index;
-
+        // 1. Smooth the raw elevation profile with a distance-based moving average to remove
+        //    high-frequency noise (coarse-DEM stair-stepping, GPS/barometric jitter) before any
+        //    gain/loss is accumulated.
+        const smoothed = new Array<number>(n);
+        const window = elevationOptions.smoothingWindowMeters / 1000; // meters -> km
+        if (window <= 0 || n === 0) {
+            for (let i = 0; i < n; i++) {
+                smoothed[i] = points[i].ele ?? 0;
+            }
+        } else {
             let cumulEle = 0;
-            let currentStart = start;
-            let currentEnd = start;
-            let prevSmoothedEle = 0;
+            let currentStart = 0;
+            let currentEnd = 0;
             distanceWindowSmoothing(
-                start,
-                end + 1,
+                0,
+                n,
                 statistics,
-                0.1,
+                window,
                 (s, e) => {
-                    for (let i = currentStart; i < s; i++) {
-                        cumulEle -= this.trkpt[i].ele ?? 0;
+                    for (let k = currentStart; k < s; k++) {
+                        cumulEle -= points[k].ele ?? 0;
                     }
-                    for (let i = currentEnd; i <= e; i++) {
-                        cumulEle += this.trkpt[i].ele ?? 0;
+                    for (let k = currentEnd; k <= e; k++) {
+                        cumulEle += points[k].ele ?? 0;
                     }
                     currentStart = s;
                     currentEnd = e + 1;
                     return cumulEle / (e - s + 1);
                 },
-                (smoothedEle, j) => {
-                    if (j === start) {
-                        smoothedEle = this.trkpt[start].ele ?? 0;
-                        prevSmoothedEle = smoothedEle;
-                    } else if (j === end) {
-                        smoothedEle = this.trkpt[end].ele ?? 0;
-                    }
-                    const ele = smoothedEle - prevSmoothedEle;
-                    if (ele > 0) {
-                        statistics.global.elevation.gain += ele;
-                    } else if (ele < 0) {
-                        statistics.global.elevation.loss -= ele;
-                    }
-                    prevSmoothedEle = smoothedEle;
-                    if (j < end) {
-                        statistics.local.data[j].elevation.gain = statistics.global.elevation.gain;
-                        statistics.local.data[j].elevation.loss = statistics.global.elevation.loss;
-                    }
+                (value, index) => {
+                    smoothed[index] = value;
                 }
             );
         }
-        if (statistics.global.length > 0) {
-            statistics.local.data[statistics.global.length - 1].elevation.gain =
-                statistics.global.elevation.gain;
-            statistics.local.data[statistics.global.length - 1].elevation.loss =
-                statistics.global.elevation.loss;
+
+        // 2. Accumulate gain/loss over the smoothed profile with a minimum-change threshold
+        //    (hysteresis): a move is only committed once it exceeds `threshold` from the last
+        //    committed reference elevation, so sub-threshold noise never inflates the totals.
+        const threshold = Math.max(0, elevationOptions.gainThresholdMeters);
+        let gain = 0;
+        let loss = 0;
+        if (n > 0) {
+            let reference = smoothed[0];
+            for (let i = 0; i < n; i++) {
+                const d = smoothed[i] - reference;
+                if (d > 0 && d >= threshold) {
+                    gain += d;
+                    reference = smoothed[i];
+                } else if (d < 0 && -d >= threshold) {
+                    loss += -d;
+                    reference = smoothed[i];
+                }
+                statistics.local.data[i].elevation.gain = gain;
+                statistics.local.data[i].elevation.loss = loss;
+            }
         }
+        statistics.global.elevation.gain = gain;
+        statistics.global.elevation.loss = loss;
+
+        // 3. Per-point slope shading. RDP segments the profile into significant climbs/descents to
+        //    derive an average "segment slope"; a short distance window gives the instantaneous slope.
+        let simplified = ramerDouglasPeucker(
+            this.trkpt,
+            SLOPE_SEGMENT_EPSILON,
+            getElevationDistanceFunction(statistics)
+        );
 
         for (let i = 0; i < simplified.length - 1; i++) {
             let start = simplified[i].point._data.index;
