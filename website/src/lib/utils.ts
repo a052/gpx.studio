@@ -7,6 +7,7 @@ import maplibregl from 'maplibre-gl';
 import { pointToTile, pointToTileFraction } from '@mapbox/tilebelt';
 import type { GPXStatisticsTree } from '$lib/logic/statistics-tree';
 import { ListTrackSegmentItem } from '$lib/components/file-list/file-list';
+import { getElevationTileUrl } from '$lib/logic/elevation-source';
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -102,7 +103,9 @@ const elevationTileCache = new Map<string, ImageData | null>();
 const elevationTileInflight = new Map<string, Promise<ImageData | null>>();
 
 function loadElevationTile(zoom: number, x: number, y: number): Promise<ImageData | null> {
-    const key = `${zoom}/${x}/${y}`;
+    // Key the cache by the resolved URL so switching sources doesn't return stale tiles.
+    const url = getElevationTileUrl(zoom, x, y);
+    const key = url;
 
     if (elevationTileCache.has(key)) {
         return Promise.resolve(elevationTileCache.get(key)!);
@@ -112,7 +115,7 @@ function loadElevationTile(zoom: number, x: number, y: number): Promise<ImageDat
         return inflight;
     }
 
-    const promise = fetch(`https://tiles.gpx.studio/mapterhorn/${zoom}/${x}/${y}.webp`, {
+    const promise = fetch(url, {
         cache: 'force-cache',
     })
         .then((response) => response.blob())
@@ -154,8 +157,7 @@ function loadElevationTile(zoom: number, x: number, y: number): Promise<ImageDat
 
 export function getElevation(
     points: (TrackPoint | Waypoint | Coordinates)[],
-    ELEVATION_ZOOM: number = 12,
-    tileSize = 512
+    ELEVATION_ZOOM: number = 12
 ): Promise<number[]> {
     let coordinates = points.map((point) =>
         point instanceof TrackPoint || point instanceof Waypoint ? point.getCoordinates() : point
@@ -192,20 +194,24 @@ export function getElevation(
             }
 
             let tf = pointToTileFraction(coord.lon, coord.lat, ELEVATION_ZOOM);
-            let x = tileSize * (tf[0] - tile[0]);
-            let y = tileSize * (tf[1] - tile[1]);
+            // Derive the tile pixel size from the decoded image so sources with
+            // different tile sizes (e.g. 256px AWS vs 512px Mapterhorn) both sample correctly.
+            let tileWidth = imageData.width;
+            let tileHeight = imageData.height;
+            let x = tileWidth * (tf[0] - tile[0]);
+            let y = tileHeight * (tf[1] - tile[1]);
             let _x = Math.floor(x);
             let _y = Math.floor(y);
             let dx = x - _x;
             let dy = y - _y;
 
             const p00 = getPixelFromImageData(imageData, _x, _y);
-            const p01 = getPixelFromImageData(imageData, _x, _y + (_y + 1 == tileSize ? 0 : 1));
-            const p10 = getPixelFromImageData(imageData, _x + (_x + 1 == tileSize ? 0 : 1), _y);
+            const p01 = getPixelFromImageData(imageData, _x, _y + (_y + 1 == tileHeight ? 0 : 1));
+            const p10 = getPixelFromImageData(imageData, _x + (_x + 1 == tileWidth ? 0 : 1), _y);
             const p11 = getPixelFromImageData(
                 imageData,
-                _x + (_x + 1 == tileSize ? 0 : 1),
-                _y + (_y + 1 == tileSize ? 0 : 1)
+                _x + (_x + 1 == tileWidth ? 0 : 1),
+                _y + (_y + 1 == tileHeight ? 0 : 1)
             );
 
             let ele00 = -32768 + p00[0] * 256 + p00[1] + p00[2] / 256;

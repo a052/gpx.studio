@@ -48,6 +48,7 @@
         Minimize2,
         Waypoints,
         Mountain,
+        MountainSnow,
     } from '@lucide/svelte';
     import { map } from '$lib/components/map/map';
     import { editMetadata } from '$lib/components/file-list/metadata/utils.svelte';
@@ -59,6 +60,7 @@
     import RoutingSettings from '$lib/components/toolbar/tools/routing/RoutingSettings.svelte';
     import CorsProxySettings from '$lib/components/CorsProxySettings.svelte';
     import ElevationSettings from '$lib/components/ElevationSettings.svelte';
+    import ElevationSourceSettings from '$lib/components/ElevationSourceSettings.svelte';
     import { ListFileItem, ListTrackItem } from '$lib/components/file-list/file-list';
     import Export from '$lib/components/export/Export.svelte';
     import { mode, setMode } from 'mode-watcher';
@@ -116,6 +118,7 @@
     let routingSettingsOpen = $state(false);
     let corsProxySettingsOpen = $state(false);
     let elevationSettingsOpen = $state(false);
+    let elevationSourceSettingsOpen = $state(false);
 
     let fullscreen = $state(false);
 
@@ -478,6 +481,10 @@
                         <Mountain size="16" />
                         {i18n._('menu.elevation_computation')}
                     </Menubar.Item>
+                    <Menubar.Item onclick={() => (elevationSourceSettingsOpen = true)}>
+                        <MountainSnow size="16" />
+                        {i18n._('menu.elevation_source.title')}
+                    </Menubar.Item>
                     <Menubar.Separator />
                     <Menubar.Sub>
                         <Menubar.SubTrigger>
@@ -586,6 +593,7 @@
 <RoutingSettings bind:open={routingSettingsOpen} />
 <CorsProxySettings bind:open={corsProxySettingsOpen} />
 <ElevationSettings bind:open={elevationSettingsOpen} />
+<ElevationSourceSettings bind:open={elevationSourceSettingsOpen} />
 
 <svelte:window
     on:keydown={(e) => {

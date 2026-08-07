@@ -51,6 +51,19 @@
         "elevation_threshold_help": "Minimum elevation change counted, to filter out noise. Higher values reduce inflated gain/loss.",
         "elevation_smoothing": "Smoothing",
         "elevation_smoothing_help": "Distance over which elevation is averaged before computing gain/loss.",
+        "elevation_source": {
+            "title": "Elevation data source",
+            "help": "Choose where trackpoint elevations are sampled from — used for elevation gain/loss, routing, drawing and the \"Request elevation data\" action. All sources use Terrarium-encoded tiles.",
+            "source": "Source",
+            "sources": {
+                "default": "Default (gpx.studio)",
+                "mapterhorn": "Mapterhorn",
+                "aws": "AWS Terrain Tiles",
+                "custom": "Custom URL"
+            },
+            "custom_url": "Tile URL template",
+            "custom_url_help": "Full XYZ tile URL with {z}/{x}/{y} placeholders, Terrarium-encoded. Example: https://tiles.mapterhorn.com/{z}/{x}/{y}.webp"
+        },
         "language": "Language",
         "mode": "Theme",
         "system": "System",
