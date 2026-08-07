@@ -78,26 +78,37 @@ export class ElevationProfile {
             Chart.register(module.default);
             this.initialize();
 
+            // These callbacks run inside the shared stores' notification loops. Wrapping each in a guard
+            // ensures a throw during a chart update (e.g. malformed statistics) cannot propagate back out
+            // of the store's .set() and abort the reactive update chain, which would freeze the whole UI.
+            const guard = (fn: () => void) => {
+                try {
+                    fn();
+                } catch (error) {
+                    console.error('Elevation profile update failed:', error);
+                }
+            };
+
             this._gpxStatistics.subscribe(() => {
-                this.updateData();
+                guard(() => this.updateData());
             });
             this._slicedGPXStatistics.subscribe(() => {
-                this.updateOverlay();
+                guard(() => this.updateOverlay());
             });
             distanceUnits.subscribe(() => {
-                this.updateData();
+                guard(() => this.updateData());
             });
             velocityUnits.subscribe(() => {
-                this.updateData();
+                guard(() => this.updateData());
             });
             temperatureUnits.subscribe(() => {
-                this.updateData();
+                guard(() => this.updateData());
             });
             this._additionalDatasets.subscribe(() => {
-                this.updateDataVisibility();
+                guard(() => this.updateDataVisibility());
             });
             this._elevationFill.subscribe(() => {
-                this.updateFill();
+                guard(() => this.updateFill());
             });
         });
     }
@@ -361,25 +372,36 @@ export class ElevationProfile {
                     if (startIndex === undefined) {
                         startIndex = endIndex;
                     } else if (startIndex !== endIndex) {
-                        this._slicedGPXStatistics.set([
-                            get(this._gpxStatistics).sliced(
+                        try {
+                            this._slicedGPXStatistics.set([
+                                get(this._gpxStatistics).sliced(
+                                    Math.min(startIndex, endIndex),
+                                    Math.max(startIndex, endIndex)
+                                ),
                                 Math.min(startIndex, endIndex),
-                                Math.max(startIndex, endIndex)
-                            ),
-                            Math.min(startIndex, endIndex),
-                            Math.max(startIndex, endIndex),
-                        ]);
+                                Math.max(startIndex, endIndex),
+                            ]);
+                        } catch (error) {
+                            // Slice computation can throw when indices are stale (e.g. captured against a
+                            // longer track, then reused after switching to a shorter one). Log and continue;
+                            // the drag gesture stays active and updateOverlay will handle the stale indices.
+                            console.error('Failed to update slice during drag:', error);
+                        }
                     }
                 }
             }
         };
         const onMouseUp = (evt: PointerEvent) => {
-            dragStarted = false;
-            this._dragging = false;
-            this._canvas.style.cursor = '';
-            endIndex = getIndex(evt);
-            if (startIndex === endIndex) {
-                this._slicedGPXStatistics.set(undefined);
+            try {
+                endIndex = getIndex(evt);
+                if (startIndex === endIndex) {
+                    this._slicedGPXStatistics.set(undefined);
+                }
+            } finally {
+                // Always reset drag state even if the slice-set threw, so the UI doesn't stay frozen.
+                dragStarted = false;
+                this._dragging = false;
+                this._canvas.style.cursor = '';
             }
         };
         this._canvas.addEventListener('pointerdown', onMouseDown);

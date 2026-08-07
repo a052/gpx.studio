@@ -243,7 +243,8 @@
             "artificial": "Create realistic time data",
             "update": "Update time data",
             "help": "Use the form to set new time data.",
-            "help_invalid_selection": "Select a single trace to manage its time data."
+            "help_invalid_selection": "Select a single trace to manage its time data.",
+            "error": "Could not update the time data for this selection."
         },
         "merge": {
             "merge_traces": "Connect the traces",

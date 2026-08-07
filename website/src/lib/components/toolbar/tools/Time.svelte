@@ -27,6 +27,7 @@
     import { settings } from '$lib/logic/settings';
     import { fileActionManager } from '$lib/logic/file-action-manager';
     import { gpxStatistics } from '$lib/logic/statistics';
+    import { toast } from 'svelte-sonner';
 
     let props: {
         class?: string;
@@ -348,54 +349,59 @@
 
                 let item = $selection.getSelected()[0];
                 let fileId = item.getFileId();
-                fileActionManager.applyToFile(fileId, (file) => {
-                    if (item instanceof ListFileItem) {
-                        if (artificial && !$gpxStatistics.global.time.moving) {
-                            file.createArtificialTimestamps(
-                                getDate(startDate!, startTime!),
-                                movingTime!
-                            );
-                        } else {
-                            file.changeTimestamps(
-                                getDate(startDate!, startTime!),
-                                effectiveSpeed,
-                                ratio
-                            );
+                try {
+                    fileActionManager.applyToFile(fileId, (file) => {
+                        if (item instanceof ListFileItem) {
+                            if (artificial && !$gpxStatistics.global.time.moving) {
+                                file.createArtificialTimestamps(
+                                    getDate(startDate!, startTime!),
+                                    movingTime!
+                                );
+                            } else {
+                                file.changeTimestamps(
+                                    getDate(startDate!, startTime!),
+                                    effectiveSpeed,
+                                    ratio
+                                );
+                            }
+                        } else if (item instanceof ListTrackItem) {
+                            if (artificial && !$gpxStatistics.global.time.moving) {
+                                file.createArtificialTimestamps(
+                                    getDate(startDate!, startTime!),
+                                    movingTime!,
+                                    item.getTrackIndex()
+                                );
+                            } else {
+                                file.changeTimestamps(
+                                    getDate(startDate!, startTime!),
+                                    effectiveSpeed,
+                                    ratio,
+                                    item.getTrackIndex()
+                                );
+                            }
+                        } else if (item instanceof ListTrackSegmentItem) {
+                            if (artificial && !$gpxStatistics.global.time.moving) {
+                                file.createArtificialTimestamps(
+                                    getDate(startDate!, startTime!),
+                                    movingTime!,
+                                    item.getTrackIndex(),
+                                    item.getSegmentIndex()
+                                );
+                            } else {
+                                file.changeTimestamps(
+                                    getDate(startDate!, startTime!),
+                                    effectiveSpeed,
+                                    ratio,
+                                    item.getTrackIndex(),
+                                    item.getSegmentIndex()
+                                );
+                            }
                         }
-                    } else if (item instanceof ListTrackItem) {
-                        if (artificial && !$gpxStatistics.global.time.moving) {
-                            file.createArtificialTimestamps(
-                                getDate(startDate!, startTime!),
-                                movingTime!,
-                                item.getTrackIndex()
-                            );
-                        } else {
-                            file.changeTimestamps(
-                                getDate(startDate!, startTime!),
-                                effectiveSpeed,
-                                ratio,
-                                item.getTrackIndex()
-                            );
-                        }
-                    } else if (item instanceof ListTrackSegmentItem) {
-                        if (artificial && !$gpxStatistics.global.time.moving) {
-                            file.createArtificialTimestamps(
-                                getDate(startDate!, startTime!),
-                                movingTime!,
-                                item.getTrackIndex(),
-                                item.getSegmentIndex()
-                            );
-                        } else {
-                            file.changeTimestamps(
-                                getDate(startDate!, startTime!),
-                                effectiveSpeed,
-                                ratio,
-                                item.getTrackIndex(),
-                                item.getSegmentIndex()
-                            );
-                        }
-                    }
-                });
+                    });
+                } catch (e) {
+                    console.error('Time update failed:', e);
+                    toast.error(i18n._('toolbar.time.error'));
+                }
             }}
         >
             <CalendarClock size="16" class="shrink-0" />

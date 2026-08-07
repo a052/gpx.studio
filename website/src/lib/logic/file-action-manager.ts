@@ -165,29 +165,18 @@ export class FileActionManager {
     }
 
     applyGlobal(callback: (files: Map<string, GPXFile>) => void) {
-        const [newFileCollection, patch, inversePatch] = produceWithPatches(this._files, callback);
-
-        this.storePatches(patch, inversePatch);
-
-        return this.commitFileStateChange(newFileCollection, patch);
+        return this._applyWithPatches(callback);
     }
 
     applyToFiles(fileIds: string[], callback: (file: WritableDraft<GPXFile>) => void) {
-        const [newFileCollection, patch, inversePatch] = produceWithPatches(
-            this._files,
-            (draft) => {
-                fileIds.forEach((fileId) => {
-                    let file = draft.get(fileId);
-                    if (file) {
-                        callback(file);
-                    }
-                });
-            }
-        );
-
-        this.storePatches(patch, inversePatch);
-
-        return this.commitFileStateChange(newFileCollection, patch);
+        return this._applyWithPatches((draft) => {
+            fileIds.forEach((fileId) => {
+                let file = draft.get(fileId);
+                if (file) {
+                    callback(file);
+                }
+            });
+        });
     }
 
     applyToFile(fileId: string, callback: (file: WritableDraft<GPXFile>) => void) {
@@ -200,22 +189,38 @@ export class FileActionManager {
         globalCallback: (files: Map<string, GPXFile>, context?: any) => void,
         context?: any
     ) {
-        const [newFileCollection, patch, inversePatch] = produceWithPatches(
-            this._files,
-            (draft) => {
-                fileIds.forEach((fileId, index) => {
-                    let file = draft.get(fileId);
-                    if (file) {
-                        callbacks[index](file, context);
-                    }
-                });
-                globalCallback(draft, context);
-            }
-        );
+        return this._applyWithPatches((draft) => {
+            fileIds.forEach((fileId, index) => {
+                let file = draft.get(fileId);
+                if (file) {
+                    callbacks[index](file, context);
+                }
+            });
+            globalCallback(draft, context);
+        });
+    }
 
-        this.storePatches(patch, inversePatch);
+    // Shared implementation for every mutation: run the callback inside immer's producer, persist the
+    // patches, and commit the new state to the database. All mutation paths flow through here so that
+    // an exception thrown by any operation (e.g. timestamp math on a malformed track) cannot escape
+    // into the caller — it is logged and re-thrown so button handlers can show user feedback without
+    // the error aborting a reactive store update or leaving the app half-mutated.
+    private _applyWithPatches(
+        producer: (draft: Map<string, WritableDraft<GPXFile>>) => void
+    ): Promise<void> {
+        try {
+            const [newFileCollection, patch, inversePatch] = produceWithPatches(
+                this._files,
+                producer
+            );
 
-        return this.commitFileStateChange(newFileCollection, patch);
+            this.storePatches(patch, inversePatch);
+
+            return this.commitFileStateChange(newFileCollection, patch);
+        } catch (error) {
+            console.error('File mutation failed:', error);
+            throw error;
+        }
     }
 
     async storePatches(patch: Patch[], inversePatch: Patch[]) {

@@ -20,11 +20,18 @@ export class GPXFileState {
     connectToDatabase(db: Database) {
         if (this._subscription) return;
         this._subscription = liveQuery(() => db.files.get(this._fileId)).subscribe((value) => {
-            if (value !== undefined) {
-                let file = new GPXFile(value);
-                updateAnchorPoints(file);
-                let statistics = new GPXStatisticsTree(file);
-                this._file.set({ file, statistics });
+            try {
+                if (value !== undefined) {
+                    let file = new GPXFile(value);
+                    updateAnchorPoints(file);
+                    let statistics = new GPXStatisticsTree(file);
+                    this._file.set({ file, statistics });
+                }
+            } catch (error) {
+                // Rehydration/statistics computation can fail on malformed data. Swallowing the error
+                // here prevents a single broken file from aborting the reactive update chain and
+                // freezing the whole UI. The stored file is left as-is for the next liveQuery event.
+                console.error(`Failed to rehydrate file ${this._fileId}:`, error);
             }
         });
     }
@@ -39,10 +46,15 @@ export class GPXFileState {
     recomputeStatistics() {
         const current = get(this._file);
         if (current !== undefined) {
-            this._file.set({
-                file: current.file,
-                statistics: new GPXStatisticsTree(current.file),
-            });
+            try {
+                this._file.set({
+                    file: current.file,
+                    statistics: new GPXStatisticsTree(current.file),
+                });
+            } catch (error) {
+                // Keep the previous statistics rather than breaking the reactive graph.
+                console.error(`Failed to recompute statistics for file ${this._fileId}:`, error);
+            }
         }
     }
 
@@ -187,12 +199,18 @@ export const fileStateCollection = new GPXFileStateCollection();
 // otherwise pick them up. `skip` avoids an initial redundant recompute on subscription.
 let elevationOptionsInitialized = false;
 function onElevationOptionChange() {
-    setElevationOptions({
-        gainThresholdMeters: get(settings.elevationGainThreshold),
-        smoothingWindowMeters: get(settings.elevationSmoothingWindow),
-    });
-    if (elevationOptionsInitialized) {
-        fileStateCollection.recomputeAllStatistics();
+    try {
+        setElevationOptions({
+            gainThresholdMeters: get(settings.elevationGainThreshold),
+            smoothingWindowMeters: get(settings.elevationSmoothingWindow),
+        });
+        if (elevationOptionsInitialized) {
+            fileStateCollection.recomputeAllStatistics();
+        }
+    } catch (error) {
+        // This runs inside a settings-store subscriber. An uncaught throw here would propagate out of
+        // the store's .set() and corrupt the shared reactive graph, freezing the UI until refresh.
+        console.error('Failed to apply elevation option change:', error);
     }
 }
 settings.elevationGainThreshold.subscribe(onElevationOptionChange);

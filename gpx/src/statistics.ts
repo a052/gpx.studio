@@ -340,7 +340,17 @@ export class GPXStatisticsGroup {
         cumulative: GPXGlobalStatistics,
         statistics: GPXStatistics,
         index: number
-    ): TrackPointWithLocalStatistics {
+    ): TrackPointWithLocalStatistics | undefined {
+        // Guard against out-of-bounds / misaligned indices. Stale slice indices (e.g. captured against
+        // a longer track, then reused after switching to a shorter one) can land here; returning
+        // undefined lets callers handle it gracefully instead of throwing and freezing the UI.
+        if (
+            index < 0 ||
+            index >= statistics.local.points.length ||
+            index >= statistics.local.data.length
+        ) {
+            return undefined;
+        }
         const point = statistics.local.points[index];
         return {
             trkpt: point,

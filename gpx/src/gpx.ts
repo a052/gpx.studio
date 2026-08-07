@@ -1809,6 +1809,13 @@ function withShiftedAndCompressedTimestamps(
     lastPoint: TrackPoint
 ): TrackPoint[] {
     let start = getTimestamp(lastPoint, points[0], speed);
+    if (start === undefined) {
+        // getTimestamp returns undefined when the reference point has no time. This happens when a
+        // segment has partial timestamps (later points have time but the first does not). Shift each
+        // remaining point by a fixed 1s interval rather than throwing.
+        console.warn('Cannot shift timestamps: start timestamp is undefined');
+        return withTimestamps(points, speed, lastPoint);
+    }
     let last = points[0];
     return points.map((point) => {
         let pt = point.clone();
@@ -1816,7 +1823,7 @@ function withShiftedAndCompressedTimestamps(
             pt.time = getTimestamp(last, point, speed);
         } else {
             pt.time = new Date(
-                start.getTime() + ratio * (point.time.getTime() - points[0].time.getTime())
+                start.getTime() + ratio * (point.time.getTime() - points[0].time!.getTime())
             );
         }
         last = pt;
@@ -1841,22 +1848,35 @@ function withArtificialTimestamps(
         totalWeight += w;
     }
 
+    if (totalWeight === 0) {
+        // All points are coincident (or all slopes degenerate), so no weight to distribute. Fall back
+        // to evenly spaced timestamps rather than dividing by zero (which would produce Invalid Dates).
+        console.warn('Cannot distribute artificial timestamps: total weight is 0');
+        return points.map((point, i) => {
+            let pt = point.clone();
+            pt.time = new Date(startTime.getTime() + (totalTime * 1000 * i) / Math.max(1, points.length - 1));
+            return pt;
+        });
+    }
+
     let last = lastPoint;
     return points.map((point, i) => {
         let pt = point.clone();
         if (i === 0) {
             pt.time = lastPoint?.time ?? startTime;
-        } else {
+        } else if (last !== undefined && last.time !== undefined) {
             pt.time = new Date(
                 last.time.getTime() + (totalTime * 1000 * weight[i - 1]) / totalWeight
             );
+        } else {
+            pt.time = startTime;
         }
         last = pt;
         return pt;
     });
 }
 
-function getTimestamp(a: TrackPoint, b: TrackPoint, speed: number): Date {
+function getTimestamp(a: TrackPoint, b: TrackPoint, speed: number): Date | undefined {
     if (a.time === undefined) {
         return undefined;
     } else if (speed === undefined) {
