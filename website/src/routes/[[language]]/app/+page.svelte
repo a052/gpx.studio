@@ -10,6 +10,7 @@
     import LayerControl from '$lib/components/map/layer-control/LayerControl.svelte';
     import CoordinatesPopup from '$lib/components/map/CoordinatesPopup.svelte';
     import ViewToggles from '$lib/components/ViewToggles.svelte';
+    import CoordinateReadout from '$lib/components/CoordinateReadout.svelte';
     import Resizer from '$lib/components/Resizer.svelte';
     import { Toaster } from '$lib/components/ui/sonner';
     import { i18n } from '$lib/i18n.svelte';
@@ -120,16 +121,17 @@
             <GPXLayers />
             <CoordinatesPopup />
             <Toaster richColors />
-            {#if !$treeFileView}
-                <div
-                    class="h-10 -translate-y-10 w-full pointer-events-none absolute z-30 flex flex-row"
-                >
+            <div class="h-10 -translate-y-10 w-full pointer-events-none absolute z-30 flex flex-row">
+                {#if !$treeFileView}
                     <div class="grow min-w-0">
                         <FileList orientation="horizontal" />
                     </div>
-                    <ViewToggles />
-                </div>
-            {/if}
+                {:else}
+                    <div class="grow min-w-0"></div>
+                {/if}
+                <CoordinateReadout />
+                <ViewToggles />
+            </div>
         </div>
         {#if $elevationProfile}
             <Resizer

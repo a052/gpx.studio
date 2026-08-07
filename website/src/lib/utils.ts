@@ -99,8 +99,75 @@ export function getClosestTrackSegments(
     return closest.indices;
 }
 
+// Decoded elevation tiles are large (~1MB per 512px tile), so this cache is LRU-bounded,
+// mirroring how MapLibre bounds its own tile cache (dynamically ~maxTileCacheZoomLevels x
+// viewport tiles) and evicts old, out-of-view tiles. Map iteration is insertion-ordered, so
+// the oldest key is evicted first; reads bump recency via `cacheElevationTile`.
+const ELEVATION_TILE_CACHE_SIZE = 256;
 const elevationTileCache = new Map<string, ImageData | null>();
 const elevationTileInflight = new Map<string, Promise<ImageData | null>>();
+
+function cacheElevationTile(key: string, imageData: ImageData | null) {
+    // Re-insert so the key becomes the most-recently-used, then evict from the front.
+    elevationTileCache.delete(key);
+    elevationTileCache.set(key, imageData);
+    while (elevationTileCache.size > ELEVATION_TILE_CACHE_SIZE) {
+        const oldest = elevationTileCache.keys().next().value;
+        if (oldest === undefined) {
+            break;
+        }
+        elevationTileCache.delete(oldest);
+    }
+}
+
+// Below this map zoom the cursor readout does not load elevation tiles: at low zoom the DEM area
+// (especially under globe projection) is too large to load, so the caller shows a "zoom in" hint.
+export const MIN_ELEVATION_MAP_ZOOM = 10;
+
+// Canonical DEM zoom for elevation VALUES. Must match `getElevation`'s default so the readout
+// reports the same elevation a track point at that location would get, and — crucially — so the
+// value does not change as the user zooms the map. Only prefetch tile loading is affected by map
+// zoom (via the safety cap below); the sampled value is always taken at this fixed accuracy.
+const ELEVATION_DATA_ZOOM = 12;
+
+// Runaway guard for the bulk viewport prefetch. Kept safely BELOW ELEVATION_TILE_CACHE_SIZE so a
+// prefetched batch can never exceed the cache and evict its own members mid-pass (that eviction
+// thrash caused the same tiles to be refetched ~10x on every moveend/hover). When a z12 viewport
+// would exceed this (very low zoom / steep pitch), the bulk prefetch is skipped and hover still
+// lazily loads the single z12 tile under the cursor — same value, just not pre-warmed.
+const MAX_PREFETCH_TILES_SAFETY = 192;
+
+// Prefetch the z12 DEM tiles covering `bounds` into the shared elevation tile cache, so (1) cursor
+// elevation reads resolve instantly and (2) later track creation/routing over the same area reuses
+// these tiles instead of re-requesting them. Returns whether elevation is available at all: false
+// when `mapZoom` is below `minMapZoom`. Duplicate tiles are deduplicated by `loadElevationTile`.
+export function prefetchElevationTiles(
+    bounds: maplibregl.LngLatBounds,
+    mapZoom: number,
+    minMapZoom: number = MIN_ELEVATION_MAP_ZOOM
+): boolean {
+    if (!Number.isFinite(mapZoom) || mapZoom < minMapZoom) {
+        return false;
+    }
+    const tl = pointToTile(bounds.getWest(), bounds.getNorth(), ELEVATION_DATA_ZOOM);
+    const br = pointToTile(bounds.getEast(), bounds.getSouth(), ELEVATION_DATA_ZOOM);
+    const xMin = Math.min(tl[0], br[0]);
+    const xMax = Math.max(tl[0], br[0]);
+    const yMin = Math.min(tl[1], br[1]);
+    const yMax = Math.max(tl[1], br[1]);
+    const count = (xMax - xMin + 1) * (yMax - yMin + 1);
+    // Too many tiles to bulk-prefetch safely (would exceed the cache): keep elevation available and
+    // let hover lazily load the single tile under the cursor instead. Never thrash the cache.
+    if (!Number.isFinite(count) || count > MAX_PREFETCH_TILES_SAFETY) {
+        return true;
+    }
+    for (let x = xMin; x <= xMax; x++) {
+        for (let y = yMin; y <= yMax; y++) {
+            loadElevationTile(ELEVATION_DATA_ZOOM, x, y);
+        }
+    }
+    return true;
+}
 
 function loadElevationTile(zoom: number, x: number, y: number): Promise<ImageData | null> {
     // Key the cache by the resolved URL so switching sources doesn't return stale tiles.
@@ -108,7 +175,9 @@ function loadElevationTile(zoom: number, x: number, y: number): Promise<ImageDat
     const key = url;
 
     if (elevationTileCache.has(key)) {
-        return Promise.resolve(elevationTileCache.get(key)!);
+        const cached = elevationTileCache.get(key)!;
+        cacheElevationTile(key, cached); // bump LRU recency
+        return Promise.resolve(cached);
     }
     const inflight = elevationTileInflight.get(key);
     if (inflight) {
@@ -146,7 +215,7 @@ function loadElevationTile(zoom: number, x: number, y: number): Promise<ImageDat
         )
         .catch(() => null)
         .then((imageData) => {
-            elevationTileCache.set(key, imageData);
+            cacheElevationTile(key, imageData);
             elevationTileInflight.delete(key);
             return imageData;
         });
