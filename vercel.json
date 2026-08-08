@@ -1,0 +1,20 @@
+{
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "framework": null,
+    "installCommand": "npm install --prefix gpx && npm run build --prefix gpx && npm install --prefix website",
+    "buildCommand": "BASE_PATH= npm run build --prefix website",
+    "outputDirectory": "website/build",
+    "cleanUrls": true,
+    "trailingSlash": false,
+    "headers": [
+        {
+            "source": "/_app/immutable/(.*)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=31536000, immutable"
+                }
+            ]
+        }
+    ]
+}
