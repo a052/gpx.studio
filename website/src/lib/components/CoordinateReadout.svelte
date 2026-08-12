@@ -31,10 +31,7 @@
         }
         // Gate elevation on the map's own zoom (not a tile count) and warm the shared tile cache
         // for the visible viewport. Returns false only when zoomed out past MIN_ELEVATION_MAP_ZOOM.
-        elevationAvailable = prefetchElevationTiles(
-            mapInstance.getBounds(),
-            mapInstance.getZoom()
-        );
+        elevationAvailable = prefetchElevationTiles(mapInstance.getBounds(), mapInstance.getZoom());
         if (!elevationAvailable) {
             elevation = null;
         }
@@ -123,7 +120,8 @@
                             >
                         {/if}
                     {:else if !elevationAvailable}
-                        <span class="text-muted-foreground">{i18n._('menu.zoom_in_for_elevation')}</span
+                        <span class="text-muted-foreground"
+                            >{i18n._('menu.zoom_in_for_elevation')}</span
                         >
                     {:else}
                         <span class="text-muted-foreground">&mdash;</span>

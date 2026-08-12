@@ -121,7 +121,9 @@
             <GPXLayers />
             <CoordinatesPopup />
             <Toaster richColors />
-            <div class="h-10 -translate-y-10 w-full pointer-events-none absolute z-30 flex flex-row">
+            <div
+                class="h-10 -translate-y-10 w-full pointer-events-none absolute z-30 flex flex-row"
+            >
                 {#if !$treeFileView}
                     <div class="grow min-w-0">
                         <FileList orientation="horizontal" />
