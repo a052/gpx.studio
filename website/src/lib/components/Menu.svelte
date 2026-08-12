@@ -50,7 +50,6 @@
         Mountain,
         MountainSnow,
     } from '@lucide/svelte';
-    import { map } from '$lib/components/map/map';
     import { editMetadata } from '$lib/components/file-list/metadata/utils.svelte';
     import { editStyle } from '$lib/components/file-list/style/utils.svelte';
     import { exportState, ExportState } from '$lib/components/export/utils.svelte';
@@ -95,6 +94,7 @@
         previousOverlays,
         distanceMarkers,
         directionMarkers,
+        threeD,
         streetViewSource,
         routing,
     } = settings;
@@ -404,11 +404,10 @@
                         />
                     </Menubar.CheckboxItem>
                     <Menubar.Separator />
-                    <Menubar.Item inset onclick={() => map.toggle3D()}>
+                    <Menubar.CheckboxItem bind:checked={$threeD}>
                         <Box size="16" />
                         {i18n._('menu.toggle_3d')}
-                        <Shortcut key={i18n._('menu.right_click_drag')} />
-                    </Menubar.Item>
+                    </Menubar.CheckboxItem>
                     <Menubar.Separator />
                     <Menubar.CheckboxItem checked={fullscreen} onCheckedChange={toggleFullscreen}>
                         {#if fullscreen}

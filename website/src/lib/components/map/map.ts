@@ -10,7 +10,8 @@ import { tick } from 'svelte';
 import { ANCHOR_LAYER_KEY, StyleManager } from '$lib/components/map/style';
 import { MapLayerEventManager } from '$lib/components/map/map-layer-event-manager';
 
-const { treeFileView, elevationProfile, bottomPanelSize, rightPanelSize, distanceUnits } = settings;
+const { treeFileView, elevationProfile, bottomPanelSize, rightPanelSize, distanceUnits, threeD } =
+    settings;
 
 let fitBoundsOptions: maplibregl.MapOptions['fitBoundsOptions'] = {
     maxZoom: 15,
@@ -119,6 +120,22 @@ export class MapLibreGLMap {
             window._map = map; // entry point for extensions
             this.resize();
             scaleControl.setUnit(get(distanceUnits));
+            // A pitched camera restored from the URL hash (shared/embed links) implies 3D,
+            // even if the stored setting says otherwise. Persist it so the menu checkbox agrees.
+            const enable3D = map.getPitch() !== 0 || get(threeD);
+            if (enable3D !== get(threeD)) {
+                threeD.set(enable3D);
+            }
+            // Gate all tilt/rotation handlers on the setting. threeD.set() persists through the
+            // DB asynchronously, so the subscription's first (synchronous) emission can still
+            // carry the pre-reconcile value — apply the reconciled state to it.
+            let initial = true;
+            this._unsubscribes.push(
+                threeD.subscribe((enabled) => {
+                    this.applyThreeD(initial ? enable3D : enabled);
+                    initial = false;
+                })
+            );
         });
         map.on('style.load', this.callOnLoadBinded);
 
@@ -151,11 +168,37 @@ export class MapLibreGLMap {
     }
 
     toggle3D() {
-        if (this._map) {
-            if (this._map.getPitch() === 0) {
-                this._map.easeTo({ pitch: 70 });
+        threeD.set(!get(threeD));
+    }
+
+    private applyThreeD(enabled: boolean) {
+        const map = this._map;
+        if (!map) return;
+        if (enabled) {
+            map.setMaxPitch(90);
+            map.dragRotate.enable();
+            map.touchPitch.enable();
+            map.touchZoomRotate.enableRotation();
+            map.keyboard.enableRotation();
+            if (map.getPitch() === 0) {
+                map.easeTo({ pitch: 70 });
+            }
+        } else {
+            map.dragRotate.disable();
+            map.touchPitch.disable();
+            map.touchZoomRotate.disableRotation();
+            map.keyboard.disableRotation();
+            if (map.getPitch() !== 0 || map.getBearing() !== 0) {
+                map.easeTo({ pitch: 0, bearing: 0 });
+                // Clamp once flat so the nav-control pitch drag can't tilt either. Guard
+                // against a rapid re-enable landing this stale callback while 3D is on again.
+                map.once('moveend', () => {
+                    if (!get(threeD)) {
+                        map.setMaxPitch(0);
+                    }
+                });
             } else {
-                this._map.easeTo({ pitch: 0 });
+                map.setMaxPitch(0);
             }
         }
     }

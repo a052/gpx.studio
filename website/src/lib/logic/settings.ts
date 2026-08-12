@@ -347,6 +347,7 @@ export const settings = {
     ),
     directionMarkers: new Setting('directionMarkers', false),
     distanceMarkers: new Setting('distanceMarkers', false),
+    threeD: new Setting<boolean>('threeD', false),
     coordinateReadout: new Setting<boolean>('coordinateReadout', false),
     streetViewSource: new Setting<StreetViewSource>(
         'streetViewSource',
