@@ -349,6 +349,7 @@ export const settings = {
     distanceMarkers: new Setting('distanceMarkers', false),
     threeD: new Setting<boolean>('threeD', false),
     coordinateReadout: new Setting<boolean>('coordinateReadout', false),
+    showWaypoints: new Setting<boolean>('showWaypoints', false),
     streetViewSource: new Setting<StreetViewSource>(
         'streetViewSource',
         'mapillary',

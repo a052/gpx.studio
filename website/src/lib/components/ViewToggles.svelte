@@ -1,13 +1,24 @@
 <script lang="ts">
     import ButtonWithTooltip from '$lib/components/ButtonWithTooltip.svelte';
-    import { ChartArea, Coins, Milestone } from '@lucide/svelte';
+    import { ChartArea, Coins, MapPinned, Milestone } from '@lucide/svelte';
     import { i18n } from '$lib/i18n.svelte';
     import { settings } from '$lib/logic/settings';
 
-    const { distanceMarkers, directionMarkers, elevationProfile } = settings;
+    const { distanceMarkers, directionMarkers, elevationProfile, showWaypoints } = settings;
 </script>
 
 <div class="shrink-0 h-full flex flex-row items-center gap-1 px-1 pointer-events-auto">
+    <ButtonWithTooltip
+        variant="outline"
+        side="top"
+        label={i18n._('menu.points_of_interest')}
+        class="w-7 h-7 p-0 flex justify-center opacity-70 hover:opacity-100 transition-opacity duration-300 bg-background"
+        onclick={() => {
+            $showWaypoints = !$showWaypoints;
+        }}
+    >
+        <MapPinned size="16" color={$showWaypoints ? '#33b5e5' : 'currentColor'} />
+    </ButtonWithTooltip>
     <ButtonWithTooltip
         variant="outline"
         side="top"

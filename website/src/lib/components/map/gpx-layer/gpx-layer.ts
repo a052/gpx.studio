@@ -111,7 +111,7 @@ export function getSvgForSymbol(symbol?: string | undefined, layerColor?: string
     </svg>`;
 }
 
-const { directionMarkers, treeFileView, defaultOpacity, defaultWidth } = settings;
+const { directionMarkers, treeFileView, defaultOpacity, defaultWidth, showWaypoints } = settings;
 
 export class GPXLayer {
     fileId: string;
@@ -170,6 +170,7 @@ export class GPXLayer {
             })
         );
         this.unsubscribe.push(directionMarkers.subscribe(this.updateBinded));
+        this.unsubscribe.push(showWaypoints.subscribe(this.updateBinded));
     }
 
     update() {
@@ -335,11 +336,13 @@ export class GPXLayer {
             }
 
             let visibleWaypoints: number[] = [];
-            file.wpt.forEach((waypoint, waypointIndex) => {
-                if (!waypoint._data.hidden) {
-                    visibleWaypoints.push(waypointIndex);
-                }
-            });
+            if (get(showWaypoints)) {
+                file.wpt.forEach((waypoint, waypointIndex) => {
+                    if (!waypoint._data.hidden) {
+                        visibleWaypoints.push(waypointIndex);
+                    }
+                });
+            }
 
             _map.setFilter(
                 this.fileId + '-waypoints',

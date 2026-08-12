@@ -82,6 +82,7 @@
         },
         "distance_markers": "Distance markers",
         "direction_markers": "Direction arrows",
+        "points_of_interest": "Points of interest",
         "coordinate_readout": "Cursor coordinates and elevation",
         "zoom_in_for_elevation": "Zoom in for elevation",
         "help": "Help",
