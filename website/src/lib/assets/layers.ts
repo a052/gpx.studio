@@ -1489,7 +1489,7 @@ export const overpassQueryData: Record<string, OverpassQueryData> = {
 export const terrainSources: { [key: string]: RasterDEMSourceSpecification } = {
     mapterhorn: {
         type: 'raster-dem',
-        url: 'https://tiles.gpx.studio/mapterhorn.json',
+        url: 'https://tiles.mapterhorn.com/tilejson.json',
         encoding: 'terrarium',
     },
 };

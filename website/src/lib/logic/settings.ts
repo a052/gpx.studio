@@ -220,7 +220,7 @@ type RoutingProfile =
     | 'water'
     | 'railway';
 type RoutingProvider = 'default' | 'official' | 'custom';
-type ElevationSource = 'default' | 'mapterhorn' | 'aws' | 'custom';
+type ElevationSource = 'mapterhorn' | 'aws' | 'custom';
 type TerrainSource = 'mapterhorn';
 type StreetViewSource = 'mapillary' | 'google';
 
@@ -291,8 +291,8 @@ export const settings = {
     graphhopperCustomUrl: new Setting<string>('graphhopperCustomUrl', ''),
     elevationSource: new Setting<ElevationSource>(
         'elevationSource',
-        'default',
-        getValueValidator<ElevationSource>(['default', 'mapterhorn', 'aws', 'custom'], 'default')
+        'mapterhorn',
+        getValueValidator<ElevationSource>(['mapterhorn', 'aws', 'custom'], 'mapterhorn')
     ),
     elevationSourceCustomUrl: new Setting<string>('elevationSourceCustomUrl', ''),
     corsProxyUrl: new Setting<string>('corsProxyUrl', ''),

@@ -56,7 +56,6 @@
             "help": "Choose where trackpoint elevations are sampled from — used for elevation gain/loss, routing, drawing and the \"Request elevation data\" action. All sources use Terrarium-encoded tiles.",
             "source": "Source",
             "sources": {
-                "default": "Default (gpx.studio)",
                 "mapterhorn": "Mapterhorn",
                 "aws": "AWS Terrain Tiles",
                 "custom": "Custom URL"
