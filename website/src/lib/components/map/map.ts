@@ -1,5 +1,12 @@
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+// maplibre-gl 6 loads its worker from a sibling file resolved against `import.meta.url` at runtime,
+// which no bundler can see. After bundling that URL points at an app chunk, so the worker 404s and
+// every worker-side job (vector tile parsing, raster-DEM decoding) hangs forever with no error —
+// 3D terrain silently stays flat. Hand the bundled worker URL over before any map is constructed.
+// `?worker&url` (not plain `?url`) is required: the dist worker imports `maplibre-gl-shared.mjs`,
+// which only Vite's worker pipeline emits alongside it in production builds.
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import MaplibreGeocoder, {
     type MaplibreGeocoderFeatureResults,
 } from '@maplibre/maplibre-gl-geocoder';
@@ -7,17 +14,31 @@ import '@maplibre/maplibre-gl-geocoder/dist/maplibre-gl-geocoder.css';
 import { get, writable, type Writable } from 'svelte/store';
 import { settings } from '$lib/logic/settings';
 import { tick } from 'svelte';
-import { ANCHOR_LAYER_KEY, StyleManager } from '$lib/components/map/style';
+import { ANCHOR_LAYER_KEY, StyleManager, SKY } from '$lib/components/map/style';
 import { MapLayerEventManager } from '$lib/components/map/map-layer-event-manager';
 
-const { treeFileView, elevationProfile, bottomPanelSize, rightPanelSize, distanceUnits, threeD } =
-    settings;
+const {
+    treeFileView,
+    elevationProfile,
+    bottomPanelSize,
+    rightPanelSize,
+    distanceUnits,
+    threeD,
+    projection,
+} = settings;
+
+maplibregl.setWorkerUrl(maplibreWorkerUrl);
 
 let fitBoundsOptions: maplibregl.MapOptions['fitBoundsOptions'] = {
     maxZoom: 15,
     linear: true,
     easing: () => 1,
 };
+
+// Same cap as the MapLibre 3D terrain example. Beyond it the camera looks past the horizon, which
+// multiplies the tiles to load and makes rotate-around-centre degenerate (the centre ray misses the
+// ground), which is what made right-drag jump.
+const MAX_PITCH = 85;
 
 export class MapLibreGLMap {
     private _maptilerKey: string = '';
@@ -47,15 +68,20 @@ export class MapLibreGLMap {
             style: {
                 version: 8,
                 projection: {
-                    type: 'globe',
+                    type: get(projection),
                 },
+                // Seed the Sky at construction (blue defaults + lighter fog, see SKY in style.ts).
+                // Without a sky here `new Sky(undefined)` seeds every color to transparent, and the
+                // later `setStyle`/`setSky` from buildStyle only overwrites the keys it is given —
+                // so the sky rendered white. Keep this in sync with buildStyle's `sky`.
+                sky: SKY,
                 sources: {},
                 layers: [],
             },
             zoom: 0,
             hash: hash,
             boxZoom: false,
-            maxPitch: 90,
+            maxPitch: MAX_PITCH,
         });
         this.layerEventManager = new MapLayerEventManager(map);
         map.addControl(
@@ -63,6 +89,17 @@ export class MapLibreGLMap {
                 visualizePitch: true,
             })
         );
+        // Globe/flat switch. The control only calls map.setProjection(), so mirror its result into the
+        // setting to survive style rebuilds and reloads.
+        map.addControl(new maplibregl.GlobeControl());
+        map.on('projectiontransition', () => {
+            // getProjection() reports the *configured* projection, so the automatic globe → mercator
+            // blend at high zoom (which also fires this event) cannot corrupt the stored value.
+            const type = map.getProjection()?.type;
+            if (type === 'globe' || type === 'mercator') {
+                projection.set(type);
+            }
+        });
         if (geocoder) {
             let geocoder = new MaplibreGeocoder(
                 {
@@ -175,7 +212,7 @@ export class MapLibreGLMap {
         const map = this._map;
         if (!map) return;
         if (enabled) {
-            map.setMaxPitch(90);
+            map.setMaxPitch(MAX_PITCH);
             map.dragRotate.enable();
             map.touchPitch.enable();
             map.touchZoomRotate.enableRotation();

@@ -8,6 +8,7 @@
     import { settings } from '$lib/logic/settings';
     import { i18n } from '$lib/i18n.svelte';
     import { onMount } from 'svelte';
+    import type * as maplibregl from 'maplibre-gl';
     import ButtonWithTooltip from '$lib/components/ButtonWithTooltip.svelte';
 
     const { streetViewSource } = settings;

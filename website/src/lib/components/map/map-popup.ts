@@ -1,5 +1,5 @@
 import { TrackPoint, Waypoint } from 'gpx';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import { mount, tick, unmount } from 'svelte';
 import { get, writable, type Writable } from 'svelte/store';
 import MapPopupComponent from '$lib/components/map/MapPopup.svelte';

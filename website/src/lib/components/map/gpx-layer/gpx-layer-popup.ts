@@ -1,4 +1,5 @@
 import { MapPopup } from '$lib/components/map/map-popup';
+import type * as maplibregl from 'maplibre-gl';
 
 export let waypointPopup: MapPopup | null = null;
 export let trackpointPopup: MapPopup | null = null;

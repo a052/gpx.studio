@@ -1,5 +1,6 @@
 import { get, type Readable } from 'svelte/store';
-import maplibregl, {
+import * as maplibregl from 'maplibre-gl';
+import {
     type GeoJSONSource,
     type FilterSpecification,
     type MapLayerMouseEvent,

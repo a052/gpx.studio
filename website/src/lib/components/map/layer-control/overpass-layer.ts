@@ -7,6 +7,7 @@ import { MapPopup } from '$lib/components/map/map-popup';
 import { settings } from '$lib/logic/settings';
 import { db } from '$lib/db';
 import type { GeoJSONSource } from 'maplibre-gl';
+import type * as maplibregl from 'maplibre-gl';
 import { ANCHOR_LAYER_KEY } from '$lib/components/map/style';
 import type { MapLayerEventManager } from '$lib/components/map/map-layer-event-manager';
 import { loadSVGIcon } from '$lib/utils';

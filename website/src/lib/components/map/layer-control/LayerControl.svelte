@@ -7,6 +7,7 @@
     import { Layers } from '@lucide/svelte';
     import { settings } from '$lib/logic/settings';
     import { map } from '$lib/components/map/map';
+    import type * as maplibregl from 'maplibre-gl';
 
     let container: HTMLDivElement;
     let overpassLayer: OverpassLayer;

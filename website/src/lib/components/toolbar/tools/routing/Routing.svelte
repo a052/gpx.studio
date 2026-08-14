@@ -23,6 +23,7 @@
         Undo2,
     } from '@lucide/svelte';
     import { routingProfiles } from '$lib/components/toolbar/tools/routing/routing';
+    import type * as maplibregl from 'maplibre-gl';
     import { i18n } from '$lib/i18n.svelte';
     import { slide } from 'svelte/transition';
     import {

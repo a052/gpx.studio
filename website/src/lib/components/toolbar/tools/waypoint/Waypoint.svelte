@@ -16,7 +16,7 @@
     import { fileActions } from '$lib/logic/file-actions';
     import { map } from '$lib/components/map/map';
     import { mapCursor, MapCursorState } from '$lib/logic/map-cursor';
-    import maplibregl from 'maplibre-gl';
+    import * as maplibregl from 'maplibre-gl';
     import { getSvgForSymbol } from '$lib/components/map/gpx-layer/gpx-layer';
 
     let props: {

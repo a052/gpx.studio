@@ -1,6 +1,6 @@
 import { ListItem, ListLevel } from '$lib/components/file-list/file-list';
 import { GPXFile, GPXStatistics, GPXStatisticsGroup, type Track } from 'gpx';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 
 export class GPXStatisticsTree {
     level: ListLevel;

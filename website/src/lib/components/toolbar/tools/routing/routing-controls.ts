@@ -1,6 +1,7 @@
 import { distance, type Coordinates, TrackPoint, TrackSegment, Track, projectedPoint } from 'gpx';
 import { get, writable, type Readable } from 'svelte/store';
-import maplibregl, {
+import * as maplibregl from 'maplibre-gl';
+import {
     type MapMouseEvent,
     type GeoJSONSource,
     type MapLayerMouseEvent,

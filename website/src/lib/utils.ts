@@ -3,7 +3,7 @@ import { twMerge } from 'tailwind-merge';
 import { base } from '$app/paths';
 import { languages } from '$lib/languages';
 import { TrackPoint, Waypoint, type Coordinates, crossarcDistance, distance, GPXFile } from 'gpx';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import { pointToTile, pointToTileFraction } from '@mapbox/tilebelt';
 import type { GPXStatisticsTree } from '$lib/logic/statistics-tree';
 import { ListTrackSegmentItem } from '$lib/components/file-list/file-list';

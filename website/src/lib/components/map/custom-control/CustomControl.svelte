@@ -2,6 +2,7 @@
     import CustomControl from './custom-control';
     import { map } from '$lib/components/map/map';
     import { onMount, type Snippet } from 'svelte';
+    import type * as maplibregl from 'maplibre-gl';
 
     let {
         position = 'top-right',

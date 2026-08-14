@@ -1,4 +1,5 @@
-import maplibregl, { type LayerSpecification, type VectorSourceSpecification } from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import { type LayerSpecification, type VectorSourceSpecification } from 'maplibre-gl';
 import { Viewer, type ViewerBearingEvent } from 'mapillary-js/dist/mapillary.module';
 import 'mapillary-js/dist/mapillary.css';
 import { mapCursor, MapCursorState } from '$lib/logic/map-cursor';

@@ -1,5 +1,6 @@
 <script lang="ts">
     import { map } from '$lib/components/map/map';
+    import type * as maplibregl from 'maplibre-gl';
     import { settings } from '$lib/logic/settings';
     import { i18n } from '$lib/i18n.svelte';
     import { getElevation, prefetchElevationTiles } from '$lib/utils';

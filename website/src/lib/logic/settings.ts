@@ -62,10 +62,9 @@ export class Setting<V> {
 
     set(value: V) {
         if (typeof value === 'object' || value !== get(this._value)) {
+            this._value.set(value);
             if (this._db) {
                 this._db.settings.put(value, this._key);
-            } else {
-                this._value.set(value);
             }
         }
     }
@@ -222,6 +221,7 @@ type RoutingProfile =
 type RoutingProvider = 'default' | 'official' | 'custom';
 type ElevationSource = 'mapterhorn' | 'aws' | 'custom';
 type TerrainSource = 'mapterhorn';
+type Projection = 'globe' | 'mercator';
 type StreetViewSource = 'mapillary' | 'google';
 
 export const settings = {
@@ -344,6 +344,13 @@ export const settings = {
         'terrainSource',
         defaultTerrainSource,
         getValueValidator(['mapterhorn'], defaultTerrainSource)
+    ),
+    // Map projection, toggled by the MapLibre GlobeControl. Persisted so the choice survives a style
+    // rebuild (basemap switch) — the control itself only calls map.setProjection().
+    projection: new Setting<Projection>(
+        'projection',
+        'mercator',
+        getValueValidator<Projection>(['globe', 'mercator'], 'mercator')
     ),
     directionMarkers: new Setting('directionMarkers', false),
     distanceMarkers: new Setting('distanceMarkers', false),

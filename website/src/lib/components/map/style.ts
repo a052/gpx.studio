@@ -1,4 +1,5 @@
 import { settings } from '$lib/logic/settings';
+import type * as maplibregl from 'maplibre-gl';
 import { get, type Writable } from 'svelte/store';
 import {
     basemaps,
@@ -10,8 +11,16 @@ import {
 import { getLayers } from '$lib/components/map/layer-control/utils';
 import { i18n } from '$lib/i18n.svelte';
 
-const { currentBasemap, currentOverlays, customLayers, opacities, terrainSource, distanceUnits } =
-    settings;
+const {
+    currentBasemap,
+    currentOverlays,
+    customLayers,
+    opacities,
+    terrainSource,
+    distanceUnits,
+    threeD,
+    projection,
+} = settings;
 
 const emptySource: maplibregl.GeoJSONSourceSpecification = {
     type: 'geojson',
@@ -20,6 +29,17 @@ const emptySource: maplibregl.GeoJSONSourceSpecification = {
         features: [],
     },
 };
+
+// Sky config. Everything keeps MapLibre's spec defaults (blue `sky-color: #88C6FC`, white
+// horizon/fog) EXCEPT `fog-ground-blend`, raised from the default 0.5 to 0.8 so the terrain fog only
+// builds up near the horizon and distant terrain stays clearer. Must be present at map construction
+// (see map.ts): a sky-less constructor seeds the Sky transparent and a later `setSky` only overwrites
+// the keys it is given. Terrain fog is rendered only in mercator (globe disables it and uses the
+// atmosphere pass instead), so this affects the flat/3D view only.
+export const SKY: maplibregl.SkySpecification = {
+    'fog-ground-blend': 1,
+};
+
 export const ANCHOR_LAYER_KEY = {
     overlays: 'overlays-end',
     mapillary: 'mapillary-end',
@@ -50,14 +70,19 @@ export class StyleManager {
         this._map.subscribe((map_) => {
             if (map_) {
                 this.updateBasemap();
-                map_.on('style.load', () => this.updateOverlays());
-                map_.on('pitch', () => this.updateTerrain());
+                map_.on('style.load', () => {
+                    this.updateOverlays();
+                    this.updateTerrain();
+                    this.updateProjection();
+                });
             }
         });
         currentBasemap.subscribe(() => this.updateBasemap());
         currentOverlays.subscribe(() => this.updateOverlays());
         opacities.subscribe(() => this.updateOverlays());
         terrainSource.subscribe(() => this.updateTerrain());
+        threeD.subscribe(() => this.updateTerrain());
+        projection.subscribe(() => this.updateProjection());
         customLayers.subscribe(() => this.updateBasemap());
         distanceUnits.subscribe(() => {
             const map = get(this._map);
@@ -86,8 +111,9 @@ export class StyleManager {
         const style: maplibregl.StyleSpecification = {
             version: 8,
             projection: {
-                type: 'globe',
+                type: get(projection),
             },
+            sky: SKY,
             sources: {
                 'empty-source': emptySource,
             },
@@ -192,17 +218,41 @@ export class StyleManager {
     updateTerrain() {
         const map_ = get(this._map);
         if (!map_) return;
-
         const mapTerrain = map_.getTerrain();
         const terrain = this.getCurrentTerrain();
         if (JSON.stringify(mapTerrain) !== JSON.stringify(terrain)) {
-            if (terrain.exaggeration > 0) {
-                if (!map_.getSource(terrain.source)) {
-                    map_.addSource(terrain.source, terrainSources[terrain.source]);
+            try {
+                if (terrain.exaggeration > 0) {
+                    if (!map_.getSource(terrain.source)) {
+                        map_.addSource(terrain.source, terrainSources[terrain.source]);
+                    }
+                    map_.setTerrain(terrain);
+                } else {
+                    map_.setTerrain(null);
                 }
-                map_.setTerrain(terrain);
-            } else {
-                map_.setTerrain(null);
+            } catch (e) {
+                // Only expected while a style swap is in flight ("Style is not done loading"); the
+                // style.load handler re-applies. Do NOT gate this on map.isStyleLoaded(): that also
+                // reports false whenever any source still has tiles loading, which would drop the
+                // toggle for good.
+                console.error('updateTerrain failed', e);
+            }
+        }
+    }
+
+    // The stored projection hydrates from the database after the map is built, so apply it to a live
+    // map too — not just through buildStyle. No loop with GlobeControl: it sets the projection first,
+    // and the equality check makes the resulting store update a no-op.
+    updateProjection() {
+        const map_ = get(this._map);
+        if (!map_) return;
+        const type = get(projection);
+        if (map_.getProjection()?.type !== type) {
+            try {
+                map_.setProjection({ type });
+            } catch (e) {
+                // Style swap in flight; the style.load handler re-applies.
+                console.error('updateProjection failed', e);
             }
         }
     }
@@ -279,10 +329,11 @@ export class StyleManager {
 
     getCurrentTerrain() {
         const terrain = get(terrainSource);
-        const map_ = get(this._map);
         return {
             source: terrain,
-            exaggeration: !map_ || map_.getPitch() === 0 ? 0 : 1,
+            // Terrain follows the 3D mode, not the pitch: toggling it whenever pitch crossed 0 moved
+            // the camera's ground elevation and rebuilt the terrain mid-gesture.
+            exaggeration: get(threeD) ? 1 : 0,
         };
     }
 }

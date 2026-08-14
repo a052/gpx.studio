@@ -11,7 +11,7 @@
     import Clean from '$lib/components/toolbar/tools/Clean.svelte';
     import Reduce from '$lib/components/toolbar/tools/reduce/Reduce.svelte';
     import RoutingControlPopup from '$lib/components/toolbar/tools/routing/RoutingControlPopup.svelte';
-    import maplibregl from 'maplibre-gl';
+    import * as maplibregl from 'maplibre-gl';
     import { settings } from '$lib/logic/settings';
 
     let {

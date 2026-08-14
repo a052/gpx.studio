@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 import { selection } from '$lib/logic/selection';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import { ListFileItem, ListWaypointItem } from '$lib/components/file-list/file-list';
 import { fileStateCollection, GPXFileStateCollectionObserver } from '$lib/logic/file-state';
 import { gpxStatistics } from '$lib/logic/statistics';
