@@ -36,7 +36,7 @@ export class ListRootItem extends ListItem {
         return 'root';
     }
 
-    getIdAtLevel(level: ListLevel): string | number | undefined {
+    getIdAtLevel(): string | number | undefined {
         return undefined;
     }
 

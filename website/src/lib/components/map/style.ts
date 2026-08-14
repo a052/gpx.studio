@@ -87,7 +87,7 @@ export class StyleManager {
     updateBasemap() {
         const map_ = get(this._map);
         if (!map_) return;
-        let basemap = get(currentBasemap);
+        const basemap = get(currentBasemap);
         const updateId = ++this._basemapUpdateId;
         this.buildStyle(basemap).then((style) => {
             // Only the most recent update may apply its style. This prevents a stale build
@@ -140,18 +140,18 @@ export class StyleManager {
         const overlayOpacities = get(opacities);
         try {
             const layers = getLayers(get(currentOverlays) ?? {});
-            for (let overlay in layers) {
+            for (const overlay in layers) {
                 if (!layers[overlay]) {
                     if (this._pastOverlays.has(overlay)) {
                         const overlayInfo = custom[overlay]?.value ?? overlays[overlay];
                         try {
                             const overlayStyle = await this.get(overlayInfo);
-                            for (let layer of overlayStyle.layers ?? []) {
+                            for (const layer of overlayStyle.layers ?? []) {
                                 if (map_.getLayer(layer.id)) {
                                     map_.removeLayer(layer.id);
                                 }
                             }
-                        } catch (e) {
+                        } catch {
                             // Should not happen
                         }
                         this._pastOverlays.delete(overlay);
@@ -162,13 +162,13 @@ export class StyleManager {
                         const overlayStyle = await this.get(overlayInfo);
                         const opacity = overlayOpacities[overlay];
 
-                        for (let sourceId in overlayStyle.sources) {
+                        for (const sourceId in overlayStyle.sources) {
                             if (!map_.getSource(sourceId)) {
                                 map_.addSource(sourceId, overlayStyle.sources[sourceId]);
                             }
                         }
 
-                        for (let layer of overlayStyle.layers ?? []) {
+                        for (const layer of overlayStyle.layers ?? []) {
                             if (!map_.getLayer(layer.id)) {
                                 if (opacity !== undefined) {
                                     if (layer.type === 'raster') {
@@ -192,7 +192,9 @@ export class StyleManager {
                     }
                 }
             }
-        } catch (e) {}
+        } catch {
+            /* ignore */
+        }
     }
 
     updateTerrain() {
@@ -241,7 +243,7 @@ export class StyleManager {
         styleInfo: maplibregl.StyleSpecification | string
     ): Promise<maplibregl.StyleSpecification> {
         if (typeof styleInfo === 'string') {
-            let styleUrl = styleInfo as string;
+            const styleUrl = styleInfo as string;
             const response = await fetch(styleUrl, { cache: 'force-cache' });
             if (!response.ok) {
                 throw new Error(`HTTP error fetching style "${styleInfo}": ${response.status}`);
@@ -256,7 +258,7 @@ export class StyleManager {
     merge(style: maplibregl.StyleSpecification, other: maplibregl.StyleSpecification) {
         style.sources = { ...style.sources, ...other.sources };
         const units = get(distanceUnits);
-        for (let layer of other.layers ?? []) {
+        for (const layer of other.layers ?? []) {
             if ('source' in layer) {
                 if (layer.source == 'contours_m' && units === 'imperial') continue;
                 if (layer.source == 'contours_ft' && units !== 'imperial') continue;

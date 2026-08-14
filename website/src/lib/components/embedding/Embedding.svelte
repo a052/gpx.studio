@@ -94,7 +94,7 @@
     }
 
     $effect(() => {
-        options;
+        void options;
         untrack(applyOptions);
     });
 </script>

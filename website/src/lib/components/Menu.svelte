@@ -497,7 +497,7 @@
                         </Menubar.SubTrigger>
                         <Menubar.SubContent>
                             <Menubar.RadioGroup value={i18n.lang}>
-                                {#each Object.entries(languages) as [lang, label]}
+                                {#each Object.entries(languages) as [lang, label] (lang)}
                                     <a href={getURLForLanguage(lang, '/app')}>
                                         <Menubar.RadioItem value={lang}>{label}</Menubar.RadioItem>
                                     </a>

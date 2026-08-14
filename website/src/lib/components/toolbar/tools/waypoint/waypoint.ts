@@ -37,16 +37,16 @@ export class WaypointSelection {
         }
         this._selection.update(() => {
             if (get(settings.treeFileView) && get(selection).size === 1) {
-                let item = get(selection).getSelected()[0];
+                const item = get(selection).getSelected()[0];
                 if (item instanceof ListWaypointItem) {
-                    let fileState = fileStateCollection.getFileState(item.getFileId());
+                    const fileState = fileStateCollection.getFileState(item.getFileId());
                     if (fileState) {
                         let first = true;
                         this._fileUnsubscribe = fileState.subscribe(() => {
                             if (first) first = false;
                             else this.update();
                         });
-                        let waypoint = fileState.file?.wpt[item.getWaypointIndex()];
+                        const waypoint = fileState.file?.wpt[item.getWaypointIndex()];
                         if (waypoint) {
                             return [waypoint, item.getFileId()];
                         }

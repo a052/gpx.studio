@@ -98,15 +98,6 @@
                 <Button
                     variant="link"
                     class="h-6 px-0 has-[>svg]:px-0 text-muted-foreground"
-                    href="https://crowdin.com/project/gpxstudio"
-                    target="_blank"
-                >
-                    <Logo company="crowdin" class="h-4 fill-muted-foreground" />
-                    {i18n._('homepage.crowdin')}
-                </Button>
-                <Button
-                    variant="link"
-                    class="h-6 px-0 has-[>svg]:px-0 text-muted-foreground"
                     href="https://github.com/gpxstudio/gpx.studio"
                     target="_blank"
                 >

@@ -33,7 +33,7 @@ export class ReducedGPXLayer {
             return;
         }
         file.forEachSegment((segment, trackIndex, segmentIndex) => {
-            let segmentItem = new ListTrackSegmentItem(file._data.id, trackIndex, segmentIndex);
+            const segmentItem = new ListTrackSegmentItem(file._data.id, trackIndex, segmentIndex);
             this._updateSimplified(segmentItem.getFullId(), [
                 segmentItem,
                 segment.trkpt.length,
@@ -100,19 +100,19 @@ export class ReducedGPXLayerCollection {
         this._currentPoints = 0;
         this._maxPoints = 0;
 
-        let data: GeoJSON.FeatureCollection = {
+        const data: GeoJSON.FeatureCollection = {
             type: 'FeatureCollection',
             features: [],
         };
 
-        this._simplified.forEach(([item, maxPts, points], itemFullId) => {
+        this._simplified.forEach(([item, maxPts, points]) => {
             if (!get(selection).hasAnyParent(item)) {
                 return;
             }
 
             this._maxPoints += maxPts;
 
-            let current = points.filter(
+            const current = points.filter(
                 (point) => point.distance === undefined || point.distance >= get(tolerance)
             );
             this._currentPoints += current.length;
@@ -135,7 +135,7 @@ export class ReducedGPXLayerCollection {
             return;
         }
 
-        let source: GeoJSONSource | undefined = map_.getSource('simplified');
+        const source: GeoJSONSource | undefined = map_.getSource('simplified');
         if (source) {
             source.setData(data);
         } else {
@@ -161,8 +161,8 @@ export class ReducedGPXLayerCollection {
     }
 
     reduce() {
-        let itemsAndPoints = new Map<ListItem, TrackPoint[]>();
-        this._simplified.forEach(([item, maxPts, points], itemFullId) => {
+        const itemsAndPoints = new Map<ListItem, TrackPoint[]>();
+        this._simplified.forEach(([item, , points]) => {
             if (!get(selection).hasAnyParent(item)) {
                 return;
             }

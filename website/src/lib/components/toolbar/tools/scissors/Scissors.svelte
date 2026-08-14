@@ -109,7 +109,7 @@
                 {i18n._('gpx.' + $splitAs)}
             </Select.Trigger>
             <Select.Content>
-                {#each Object.values(SplitType) as splitType}
+                {#each Object.values(SplitType) as splitType (splitType)}
                     <Select.Item value={splitType}>{i18n._('gpx.' + splitType)}</Select.Item>
                 {/each}
             </Select.Content>

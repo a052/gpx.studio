@@ -32,7 +32,7 @@
                                 {i18n._(`toolbar.routing.provider.providers.${$routingProvider}`)}
                             </Select.Trigger>
                             <Select.Content>
-                                {#each providers as provider}
+                                {#each providers as provider (provider)}
                                     <Select.Item value={provider}>
                                         {i18n._(`toolbar.routing.provider.providers.${provider}`)}
                                     </Select.Item>

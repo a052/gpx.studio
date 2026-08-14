@@ -13,7 +13,6 @@
         Route,
         Scale,
         HatGlasses,
-        Languages,
         ExternalLink,
     } from '@lucide/svelte';
     import { i18n } from '$lib/i18n.svelte';
@@ -145,11 +144,7 @@
                             {elevationFill}
                         />
                     </div>
-                    <GPXStatistics
-                        {gpxStatistics}
-                        {slicedGPXStatistics}
-                        orientation={'horizontal'}
-                    />
+                    <GPXStatistics {gpxStatistics} {slicedGPXStatistics} orientation="horizontal" />
                 </div>
             </div>
             <div class="grid md:grid-rows-subgrid md:row-start-3 md:row-end-5 gap-4">
@@ -222,15 +217,6 @@
                 >
                     <span>{i18n._('homepage.support_button')}</span>
                     <Heart size="16" fill="var(--support)" color="var(--support)" />
-                </Button>
-                <Button
-                    variant="outline"
-                    href="https://crowdin.com/project/gpxstudio"
-                    target="_blank"
-                    class="text-base py-1.5 max-w-full h-auto whitespace-normal"
-                >
-                    <Languages size="16" />
-                    <span>{i18n._('homepage.translate_button')}</span>
                 </Button>
             </div>
         </div>

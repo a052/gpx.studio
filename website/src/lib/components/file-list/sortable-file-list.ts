@@ -32,7 +32,6 @@ export const allowedPastes: Record<ListLevel, ListLevel[]> = {
 export const dragging = writable<ListLevel | null>(null);
 
 type SortableWithItem = Sortable & { _item: ListItem; _waypointRoot: boolean };
-type SortableSelectEvent = Sortable.SortableEvent & { originalEvent?: MouseEvent };
 
 export class SortableFileList {
     private _node:
@@ -109,7 +108,7 @@ export class SortableFileList {
             return;
         }
 
-        let fromItem = from._item;
+        const fromItem = from._item;
         let toItem = to._item;
 
         if (this._item === toItem && !(fromItem instanceof ListRootItem)) {
@@ -120,9 +119,9 @@ export class SortableFileList {
             if (from._waypointRoot) {
                 fromItems = [fromItem.extend('waypoints')];
             } else {
-                let oldIndices: (number | undefined)[] =
+                const oldIndices: (number | undefined)[] =
                     e.oldIndicies.length > 0 ? e.oldIndicies.map((i) => i.index) : [e.oldIndex];
-                let filteredOldIndices = oldIndices.filter(
+                const filteredOldIndices = oldIndices.filter(
                     (i): i is number => i !== undefined && i >= 0
                 );
                 filteredOldIndices.sort((a, b) => a - b);
@@ -137,15 +136,15 @@ export class SortableFileList {
                     toItem = toItem.extend('waypoints');
                 }
 
-                let newIndices: (number | undefined)[] =
+                const newIndices: (number | undefined)[] =
                     e.newIndicies.length > 0 ? e.newIndicies.map((i) => i.index) : [e.newIndex];
-                let filteredNewIndices = newIndices.filter(
+                const filteredNewIndices = newIndices.filter(
                     (i): i is number => i !== undefined && i >= 0
                 );
                 filteredNewIndices.sort((a, b) => a - b);
 
                 if (toItem instanceof ListRootItem) {
-                    let newFileIds = getFileIds(filteredNewIndices.length);
+                    const newFileIds = getFileIds(filteredNewIndices.length);
                     toItems = filteredNewIndices.map((i, index) => {
                         get(fileOrder).splice(i, 0, newFileIds[index]);
                         return this._item.extend(newFileIds[index]);
@@ -165,8 +164,8 @@ export class SortableFileList {
             return;
         }
         const selection_ = get(selection);
-        for (let id of changed) {
-            let element = this._elements[id];
+        for (const id of changed) {
+            const element = this._elements[id];
             if (element) {
                 if (selection_.has(this._item.extend(id))) {
                     Sortable.utils.select(element);
@@ -252,7 +251,7 @@ export class SortableFileList {
         this._elements = {};
         this._container.childNodes.forEach((element) => {
             if (element instanceof HTMLElement) {
-                let attr = element.getAttribute('data-id');
+                const attr = element.getAttribute('data-id');
                 if (attr) {
                     if (this._node instanceof Map && !this._node.has(attr)) {
                         element.remove();
@@ -271,13 +270,13 @@ export class SortableFileList {
     }
 
     getChangedIds() {
-        let changed: (string | number)[] = [];
+        const changed: (string | number)[] = [];
         const selection_ = get(selection);
         Object.entries(this._elements).forEach(([id, element]) => {
-            let realId = this.getRealId(id);
-            let realItem = this._item.extend(realId);
-            let inSelection = selection_.has(realItem);
-            let isSelected = element.classList.contains('sortable-selected');
+            const realId = this.getRealId(id);
+            const realItem = this._item.extend(realId);
+            const inSelection = selection_.has(realItem);
+            const isSelected = element.classList.contains('sortable-selected');
             if (inSelection !== isSelected) {
                 changed.push(realId);
             }

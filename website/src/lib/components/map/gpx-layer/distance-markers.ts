@@ -35,7 +35,8 @@ export class DistanceMarkers {
 
         try {
             if (get(distanceMarkers) && !get(allHidden)) {
-                let distanceSource: GeoJSONSource | undefined = map_.getSource('distance-markers');
+                const distanceSource: GeoJSONSource | undefined =
+                    map_.getSource('distance-markers');
                 if (distanceSource) {
                     distanceSource.setData(this.getDistanceMarkersGeoJSON());
                 } else {
@@ -90,7 +91,7 @@ export class DistanceMarkers {
                     map_.removeLayer('distance-markers');
                 }
             }
-        } catch (e) {
+        } catch {
             // No reliable way to check if the map is ready to add sources and layers
             return;
         }
@@ -101,14 +102,14 @@ export class DistanceMarkers {
     }
 
     getDistanceMarkersGeoJSON(): GeoJSON.FeatureCollection {
-        let statistics = get(gpxStatistics);
+        const statistics = get(gpxStatistics);
 
-        let features: GeoJSON.Feature[] = [];
+        const features: GeoJSON.Feature[] = [];
         let currentTargetDistance = 1;
         statistics.forEachTrackPoint((trkpt, dist) => {
             if (dist >= getConvertedDistanceToKilometers(currentTargetDistance)) {
-                let distance = currentTargetDistance.toFixed(0);
-                let level = levels.find((level) => currentTargetDistance % level === 0) || 1;
+                const distance = currentTargetDistance.toFixed(0);
+                const level = levels.find((level) => currentTargetDistance % level === 0) || 1;
                 features.push({
                     type: 'Feature',
                     geometry: {

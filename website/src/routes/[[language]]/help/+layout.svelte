@@ -24,7 +24,7 @@
             <div class="mb-2">
                 <AlgoliaDocSearch />
             </div>
-            {#each Object.keys(guides) as guide}
+            {#each Object.keys(guides) as guide (guide)}
                 <Button
                     variant="link"
                     href={getURLForLanguage(i18n.lang, `/help/${guide}`)}
@@ -35,7 +35,7 @@
                 >
                     {data.guideTitles[guide]}
                 </Button>
-                {#each guides[guide] as subGuide}
+                {#each guides[guide] as subGuide (subGuide)}
                     <Button
                         variant="link"
                         href={getURLForLanguage(i18n.lang, `/help/${guide}/${subGuide}`)}

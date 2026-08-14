@@ -29,7 +29,7 @@ const {
 
 maplibregl.setWorkerUrl(maplibreWorkerUrl);
 
-let fitBoundsOptions: maplibregl.MapOptions['fitBoundsOptions'] = {
+const fitBoundsOptions: maplibregl.MapOptions['fitBoundsOptions'] = {
     maxZoom: 15,
     linear: true,
     easing: () => 1,
@@ -93,7 +93,7 @@ export class MapLibreGLMap {
             }
         });
         if (geocoder) {
-            let geocoder = new MaplibreGeocoder(
+            const geocoder = new MaplibreGeocoder(
                 {
                     forwardGeocode: async (config) => {
                         const results: MaplibreGeocoderFeatureResults = {
@@ -114,7 +114,9 @@ export class MapLibreGLMap {
                                     place_name: result.display_name,
                                 };
                             });
-                        } catch (e) {}
+                        } catch {
+                            /* ignore */
+                        }
                         return results;
                     },
                 },

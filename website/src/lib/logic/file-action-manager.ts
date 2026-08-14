@@ -44,7 +44,7 @@ export class FileActionManager {
                 });
             },
             (fileId) => {
-                let unsubscribe = this._fileSubscriptions.get(fileId);
+                const unsubscribe = this._fileSubscriptions.get(fileId);
                 if (unsubscribe) {
                     unsubscribe();
                     this._fileSubscriptions.delete(fileId);
@@ -127,14 +127,14 @@ export class FileActionManager {
     }
 
     apply(patch: Patch[]) {
-        let newFiles = applyPatches(this._files, patch);
+        const newFiles = applyPatches(this._files, patch);
         return this.commitFileStateChange(newFiles, patch);
     }
 
     commitFileStateChange(newFiles: ReadonlyMap<string, GPXFile>, patch: Patch[]) {
-        let changedFileIds = getChangedFileIds(patch);
-        let updatedFileIds: string[] = [],
-            deletedFileIds: string[] = [];
+        const changedFileIds = getChangedFileIds(patch);
+        let updatedFileIds: string[] = [];
+        const deletedFileIds: string[] = [];
 
         changedFileIds.forEach((id) => {
             if (newFiles.has(id)) {
@@ -144,14 +144,14 @@ export class FileActionManager {
             }
         });
 
-        let updatedFiles = updatedFileIds
+        const updatedFiles = updatedFileIds
             .map((id) => newFiles.get(id))
             .filter((file) => file !== undefined) as GPXFile[];
         updatedFileIds = updatedFiles.map((file) => file._data.id);
 
         selection.updateFiles(updatedFiles, deletedFileIds);
 
-        // @ts-ignore
+        // @ts-expect-error Dexie transaction overload does not accept the variadic tables + async scope signature
         return this._db.transaction('rw', this._db.fileids, this._db.files, async () => {
             if (updatedFileIds.length > 0) {
                 await this._db.fileids.bulkPut(updatedFileIds, updatedFileIds);
@@ -171,7 +171,7 @@ export class FileActionManager {
     applyToFiles(fileIds: string[], callback: (file: WritableDraft<GPXFile>) => void) {
         return this._applyWithPatches((draft) => {
             fileIds.forEach((fileId) => {
-                let file = draft.get(fileId);
+                const file = draft.get(fileId);
                 if (file) {
                     callback(file);
                 }
@@ -191,7 +191,7 @@ export class FileActionManager {
     ) {
         return this._applyWithPatches((draft) => {
             fileIds.forEach((fileId, index) => {
-                let file = draft.get(fileId);
+                const file = draft.get(fileId);
                 if (file) {
                     callbacks[index](file, context);
                 }
@@ -232,7 +232,7 @@ export class FileActionManager {
                 .delete();
         }
         this._db.transaction('rw', this._db.patches, this._db.settings, async () => {
-            let index = get(this._patchIndex) + 1;
+            const index = get(this._patchIndex) + 1;
             await this._db.patches.put(
                 {
                     patch,
@@ -248,8 +248,8 @@ export class FileActionManager {
 
 // Get the file ids of the files that have changed in the patch
 function getChangedFileIds(patch: Patch[]): string[] {
-    let changedFileIds = new Set<string>();
-    for (let p of patch) {
+    const changedFileIds = new Set<string>();
+    for (const p of patch) {
         changedFileIds.add(p.path[0] as string);
     }
     return Array.from(changedFileIds);

@@ -174,7 +174,7 @@ async function getGraphHopperRoute(
         body.custom_model = customModel;
     }
 
-    let response = await fetch(url, {
+    const response = await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -212,11 +212,11 @@ async function getGraphHopperRoute(
         }
     }
 
-    let json = await response.json();
+    const json = await response.json();
 
-    let route: TrackPoint[] = [];
-    let coordinates = json.paths[0].points.coordinates;
-    let details = json.paths[0].details;
+    const route: TrackPoint[] = [];
+    const coordinates = json.paths[0].points.coordinates;
+    const details = json.paths[0].details;
 
     for (let i = 0; i < coordinates.length; i++) {
         route.push(
@@ -231,8 +231,8 @@ async function getGraphHopperRoute(
         );
     }
 
-    for (let key of requestedDetails) {
-        let detail = details[key];
+    for (const key of requestedDetails) {
+        const detail = details[key];
         for (let i = 0; i < detail.length; i++) {
             for (let j = detail[i][0]; j < detail[i][1] + (i == detail.length - 1); j++) {
                 if (detail[i][2] !== undefined && detail[i][2] !== 'missing') {
@@ -263,9 +263,9 @@ async function getBRouterRoute(
     points: Coordinates[],
     brouterProfile: string
 ): Promise<TrackPoint[]> {
-    let url = `https://brouter.de/brouter?lonlats=${points.map((point) => `${point.lon.toFixed(8)},${point.lat.toFixed(8)}`).join('|')}&profile=${brouterProfile}&format=geojson&alternativeidx=0`;
+    const url = `https://brouter.de/brouter?lonlats=${points.map((point) => `${point.lon.toFixed(8)},${point.lat.toFixed(8)}`).join('|')}&profile=${brouterProfile}&format=geojson&alternativeidx=0`;
 
-    let response = await fetch(url);
+    const response = await fetch(url);
 
     if (!response.ok) {
         const error = await response.text();
@@ -282,11 +282,11 @@ async function getBRouterRoute(
         }
     }
 
-    let geojson = await response.json();
+    const geojson = await response.json();
 
-    let route: TrackPoint[] = [];
-    let coordinates = geojson.features[0].geometry.coordinates;
-    let messages = geojson.features[0].properties.messages;
+    const route: TrackPoint[] = [];
+    const coordinates = geojson.features[0].geometry.coordinates;
+    const messages = geojson.features[0].properties.messages;
 
     const lngIdx = messages[0].indexOf('Longitude');
     const latIdx = messages[0].indexOf('Latitude');
@@ -324,25 +324,24 @@ async function getBRouterRoute(
 
 function getTags(message: string): { [key: string]: string } {
     const fields = message.split(' ');
-    let tags: { [key: string]: string } = {};
+    const tags: { [key: string]: string } = {};
     for (let i = 0; i < fields.length; i++) {
-        let [key, value] = fields[i].split('=');
-        key = key.replace(/:/g, '_');
-        tags[key] = value;
+        const [key, value] = fields[i].split('=');
+        tags[key.replace(/:/g, '_')] = value;
     }
     return tags;
 }
 
 function getIntermediatePoints(points: Coordinates[]): Promise<TrackPoint[]> {
-    let route: TrackPoint[] = [];
-    let step = 0.05;
+    const route: TrackPoint[] = [];
+    const step = 0.05;
 
     for (let i = 0; i < points.length - 1; i++) {
         // Add intermediate points between each pair of points
-        let dist = distance(points[i], points[i + 1]) / 1000;
+        const dist = distance(points[i], points[i + 1]) / 1000;
         for (let d = 0; d < dist; d += step) {
-            let lat = points[i].lat + (d / dist) * (points[i + 1].lat - points[i].lat);
-            let lon = points[i].lon + (d / dist) * (points[i + 1].lon - points[i].lon);
+            const lat = points[i].lat + (d / dist) * (points[i + 1].lat - points[i].lat);
+            const lon = points[i].lon + (d / dist) * (points[i + 1].lon - points[i].lon);
             route.push(
                 new TrackPoint({
                     attributes: {

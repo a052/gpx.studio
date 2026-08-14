@@ -28,7 +28,7 @@ export function getClosestLinePoint(
     let closest = points[0];
     let closestDist = Number.MAX_VALUE;
     for (let i = 0; i < points.length - 1; i++) {
-        let dist = crossarcDistance(points[i], points[i + 1], point);
+        const dist = crossarcDistance(points[i], points[i + 1], point);
         if (dist < closestDist) {
             closestDist = dist;
             if (distance(points[i], point) <= distance(points[i + 1], point)) {
@@ -51,21 +51,21 @@ export function getClosestTrackSegments(
     statistics: GPXStatisticsTree,
     point: Coordinates
 ): [number, number][] {
-    let segmentBoundsDistances: [number, number, number][] = [];
+    const segmentBoundsDistances: [number, number, number][] = [];
     file.forEachSegment((segment, trackIndex, segmentIndex) => {
-        let segmentStatistics = statistics.getStatisticsFor(
+        const segmentStatistics = statistics.getStatisticsFor(
             new ListTrackSegmentItem(file._data.id, trackIndex, segmentIndex)
         );
-        let segmentBounds = segmentStatistics.global.bounds;
-        let northEast = segmentBounds.northEast;
-        let southWest = segmentBounds.southWest;
-        let bounds = new maplibregl.LngLatBounds(southWest, northEast);
+        const segmentBounds = segmentStatistics.global.bounds;
+        const northEast = segmentBounds.northEast;
+        const southWest = segmentBounds.southWest;
+        const bounds = new maplibregl.LngLatBounds(southWest, northEast);
         if (bounds.contains(point)) {
             segmentBoundsDistances.push([0, trackIndex, segmentIndex]);
         } else {
-            let northWest: Coordinates = { lat: northEast.lat, lon: southWest.lon };
-            let southEast: Coordinates = { lat: southWest.lat, lon: northEast.lon };
-            let distanceToBounds = Math.min(
+            const northWest: Coordinates = { lat: northEast.lat, lon: southWest.lon };
+            const southEast: Coordinates = { lat: southWest.lat, lon: northEast.lon };
+            const distanceToBounds = Math.min(
                 crossarcDistance(northWest, northEast, point),
                 crossarcDistance(northEast, southEast, point),
                 crossarcDistance(southEast, southWest, point),
@@ -76,7 +76,7 @@ export function getClosestTrackSegments(
     });
     segmentBoundsDistances.sort((a, b) => a[0] - b[0]);
 
-    let closest: { distance: number; indices: [number, number][] } = {
+    const closest: { distance: number; indices: [number, number][] } = {
         distance: Number.MAX_VALUE,
         indices: [],
     };
@@ -86,7 +86,7 @@ export function getClosestTrackSegments(
         }
         const segment = file.getSegment(segmentBoundsDistances[s][1], segmentBoundsDistances[s][2]);
         segment.trkpt.forEach((pt) => {
-            let dist = distance(pt.getCoordinates(), point);
+            const dist = distance(pt.getCoordinates(), point);
             if (dist < closest.distance) {
                 closest.distance = dist;
                 closest.indices = [[segmentBoundsDistances[s][1], segmentBoundsDistances[s][2]]];
@@ -228,24 +228,24 @@ export function getElevation(
     points: (TrackPoint | Waypoint | Coordinates)[],
     ELEVATION_ZOOM: number = 12
 ): Promise<number[]> {
-    let coordinates = points.map((point) =>
+    const coordinates = points.map((point) =>
         point instanceof TrackPoint || point instanceof Waypoint ? point.getCoordinates() : point
     );
-    let bbox = new maplibregl.LngLatBounds();
+    const bbox = new maplibregl.LngLatBounds();
     coordinates.forEach((coord) => bbox.extend(coord));
 
-    let tiles = coordinates.map((coord) => pointToTile(coord.lon, coord.lat, ELEVATION_ZOOM));
-    let uniqueTiles = Array.from(new Set(tiles.map((tile) => tile.join(',')))).map((tile) =>
+    const tiles = coordinates.map((coord) => pointToTile(coord.lon, coord.lat, ELEVATION_ZOOM));
+    const uniqueTiles = Array.from(new Set(tiles.map((tile) => tile.join(',')))).map((tile) =>
         tile.split(',').map((x) => parseInt(x))
     );
-    let images = new Map<string, ImageData>();
+    const images = new Map<string, ImageData>();
 
     const getPixelFromImageData = (imageData: ImageData, x: number, y: number): number[] => {
         const index = (y * imageData.width + x) * 4;
         return [imageData.data[index], imageData.data[index + 1], imageData.data[index + 2]];
     };
 
-    let promises = uniqueTiles.map((tile) =>
+    const promises = uniqueTiles.map((tile) =>
         loadElevationTile(ELEVATION_ZOOM, tile[0], tile[1]).then((imageData) => {
             if (imageData) {
                 images.set(tile.join(','), imageData);
@@ -255,24 +255,24 @@ export function getElevation(
 
     return Promise.all(promises).then(() =>
         coordinates.map((coord, index) => {
-            let tile = tiles[index];
-            let imageData = images.get(tile.join(','));
+            const tile = tiles[index];
+            const imageData = images.get(tile.join(','));
 
             if (!imageData) {
                 return 0;
             }
 
-            let tf = pointToTileFraction(coord.lon, coord.lat, ELEVATION_ZOOM);
+            const tf = pointToTileFraction(coord.lon, coord.lat, ELEVATION_ZOOM);
             // Derive the tile pixel size from the decoded image so sources with
             // different tile sizes (e.g. 256px AWS vs 512px Mapterhorn) both sample correctly.
-            let tileWidth = imageData.width;
-            let tileHeight = imageData.height;
-            let x = tileWidth * (tf[0] - tile[0]);
-            let y = tileHeight * (tf[1] - tile[1]);
-            let _x = Math.floor(x);
-            let _y = Math.floor(y);
-            let dx = x - _x;
-            let dy = y - _y;
+            const tileWidth = imageData.width;
+            const tileHeight = imageData.height;
+            const x = tileWidth * (tf[0] - tile[0]);
+            const y = tileHeight * (tf[1] - tile[1]);
+            const _x = Math.floor(x);
+            const _y = Math.floor(y);
+            const dx = x - _x;
+            const dy = y - _y;
 
             const p00 = getPixelFromImageData(imageData, _x, _y);
             const p01 = getPixelFromImageData(imageData, _x, _y + (_y + 1 == tileHeight ? 0 : 1));
@@ -283,10 +283,10 @@ export function getElevation(
                 _y + (_y + 1 == tileHeight ? 0 : 1)
             );
 
-            let ele00 = -32768 + p00[0] * 256 + p00[1] + p00[2] / 256;
-            let ele01 = -32768 + p01[0] * 256 + p01[1] + p01[2] / 256;
-            let ele10 = -32768 + p10[0] * 256 + p10[1] + p10[2] / 256;
-            let ele11 = -32768 + p11[0] * 256 + p11[1] + p11[2] / 256;
+            const ele00 = -32768 + p00[0] * 256 + p00[1] + p00[2] / 256;
+            const ele01 = -32768 + p01[0] * 256 + p01[1] + p01[2] / 256;
+            const ele10 = -32768 + p10[0] * 256 + p10[1] + p10[2] / 256;
+            const ele11 = -32768 + p11[0] * 256 + p11[1] + p11[2] / 256;
 
             return (
                 ele00 * (1 - dx) * (1 - dy) +
@@ -300,7 +300,7 @@ export function getElevation(
 
 export function loadSVGIcon(map: maplibregl.Map, id: string, svg: string, size: number = 100) {
     if (!map.hasImage(id)) {
-        let icon = new Image(size, size);
+        const icon = new Image(size, size);
         icon.onload = () => {
             if (!map.hasImage(id)) {
                 map.addImage(id, icon);
@@ -322,7 +322,7 @@ export function getURLForLanguage(lang: string, path: string): string {
     let newPath = path.replace(base, '');
 
     let languageInPath = newPath.split('/')[1];
-    if (!languages.hasOwnProperty(languageInPath)) {
+    if (!Object.hasOwn(languages, languageInPath)) {
         languageInPath = 'en';
     }
 

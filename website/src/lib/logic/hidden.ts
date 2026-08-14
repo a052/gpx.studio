@@ -24,9 +24,9 @@ export class AllHidden {
     update() {
         let hidden = true;
         selection.applyToSelectedItemsFromFile((fileId, level, items) => {
-            let file = fileStateCollection.getFile(fileId);
+            const file = fileStateCollection.getFile(fileId);
             if (file) {
-                for (let item of items) {
+                for (const item of items) {
                     if (!hidden) {
                         return;
                     }

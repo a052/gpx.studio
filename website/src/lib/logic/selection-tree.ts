@@ -16,7 +16,7 @@ export class SelectionTreeType {
 
     clear() {
         this.selected = false;
-        for (let key in this.children) {
+        for (const key in this.children) {
             this.children[key].clear();
         }
         this.size = 0;
@@ -24,15 +24,15 @@ export class SelectionTreeType {
 
     _setOrToggle(item: ListItem, value?: boolean) {
         if (item.level === this.item.level) {
-            let newSelected = value === undefined ? !this.selected : value;
+            const newSelected = value === undefined ? !this.selected : value;
             if (this.selected !== newSelected) {
                 this.selected = newSelected;
                 this.size += this.selected ? 1 : -1;
             }
         } else {
-            let id = item.getIdAtLevel(this.item.level);
+            const id = item.getIdAtLevel(this.item.level);
             if (id !== undefined) {
-                if (!this.children.hasOwnProperty(id)) {
+                if (!Object.hasOwn(this.children, id)) {
                     this.children[id] = new SelectionTreeType(this.item.extend(id));
                 }
                 this.size -= this.children[id].size;
@@ -54,9 +54,9 @@ export class SelectionTreeType {
         if (item.level === this.item.level) {
             return this.selected;
         } else {
-            let id = item.getIdAtLevel(this.item.level);
+            const id = item.getIdAtLevel(this.item.level);
             if (id !== undefined) {
-                if (this.children.hasOwnProperty(id)) {
+                if (Object.hasOwn(this.children, id)) {
                     return this.children[id].has(item);
                 }
             }
@@ -72,9 +72,9 @@ export class SelectionTreeType {
         ) {
             return this.selected;
         }
-        let id = item.getIdAtLevel(this.item.level);
+        const id = item.getIdAtLevel(this.item.level);
         if (id !== undefined) {
-            if (this.children.hasOwnProperty(id)) {
+            if (Object.hasOwn(this.children, id)) {
                 return this.children[id].hasAnyParent(item, self);
             }
         }
@@ -89,15 +89,15 @@ export class SelectionTreeType {
         ) {
             return this.selected;
         }
-        let id = item.getIdAtLevel(this.item.level);
+        const id = item.getIdAtLevel(this.item.level);
         if (id !== undefined) {
             if (ignoreIds === undefined || ignoreIds.indexOf(id) === -1) {
-                if (this.children.hasOwnProperty(id)) {
+                if (Object.hasOwn(this.children, id)) {
                     return this.children[id].hasAnyChildren(item, self, ignoreIds);
                 }
             }
         } else {
-            for (let key in this.children) {
+            for (const key in this.children) {
                 if (ignoreIds === undefined || ignoreIds.indexOf(key) === -1) {
                     if (this.children[key].hasAnyChildren(item, self, ignoreIds)) {
                         return true;
@@ -112,7 +112,7 @@ export class SelectionTreeType {
         if (this.selected) {
             selection.push(this.item);
         }
-        for (let key in this.children) {
+        for (const key in this.children) {
             this.children[key].getSelected(selection);
         }
         return selection;
@@ -122,7 +122,7 @@ export class SelectionTreeType {
         if (this.selected) {
             callback(this.item);
         }
-        for (let key in this.children) {
+        for (const key in this.children) {
             this.children[key].forEach(callback);
         }
     }
@@ -132,7 +132,7 @@ export class SelectionTreeType {
     }
 
     deleteChild(id: string | number) {
-        if (this.children.hasOwnProperty(id)) {
+        if (Object.hasOwn(this.children, id)) {
             this.size -= this.children[id].size;
             delete this.children[id];
         }

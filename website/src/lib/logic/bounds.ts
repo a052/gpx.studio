@@ -22,7 +22,7 @@ export class BoundsManager {
                     this.fitBoundsOnLoad(Array.from(newFiles.keys()));
                 }
             },
-            (fileId) => {},
+            () => {},
             () => {}
         );
     }
@@ -43,7 +43,7 @@ export class BoundsManager {
                     }
                 });
             },
-            (fileId) => {},
+            () => {},
             () => {}
         );
     }
@@ -91,16 +91,16 @@ export class BoundsManager {
     }
 
     centerMapOnSelection() {
-        let selected = get(selection).getSelected();
-        let bounds = new maplibregl.LngLatBounds();
+        const selected = get(selection).getSelected();
+        const bounds = new maplibregl.LngLatBounds();
 
         if (selected.find((item) => item instanceof ListWaypointItem)) {
             selection.applyToOrderedSelectedItemsFromFile((fileId, level, items) => {
-                let file = fileStateCollection.getFile(fileId);
+                const file = fileStateCollection.getFile(fileId);
                 if (file) {
                     items.forEach((item) => {
                         if (item instanceof ListWaypointItem) {
-                            let waypoint = file.wpt[item.getWaypointIndex()];
+                            const waypoint = file.wpt[item.getWaypointIndex()];
                             if (waypoint) {
                                 bounds.extend([waypoint.getLongitude(), waypoint.getLatitude()]);
                             }
@@ -109,7 +109,7 @@ export class BoundsManager {
                 }
             });
         } else {
-            let selectionBounds = get(gpxStatistics).global.bounds;
+            const selectionBounds = get(gpxStatistics).global.bounds;
             bounds.setNorthEast(selectionBounds.northEast);
             bounds.setSouthWest(selectionBounds.southWest);
         }

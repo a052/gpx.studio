@@ -7,7 +7,6 @@
         variant = 'default',
         label,
         side = 'top',
-        disabled = false,
         class: className = '',
         children,
         onclick,

@@ -102,6 +102,7 @@
                     hours = parseInt(hours);
                 }
                 if (hours >= 0) {
+                    // no-op: value is already valid
                 } else if (hours < 0) {
                     hours = 0;
                 } else {
@@ -125,6 +126,7 @@
                 minutes = parseInt(minutes);
             }
             if (minutes >= 0 && (minutes <= 59 || !showHours)) {
+                // no-op: value is already valid
             } else if (minutes < 0) {
                 minutes = 0;
             } else if (showHours && minutes > 59) {
@@ -150,6 +152,7 @@
                 seconds = parseInt(seconds);
             }
             if (seconds >= 0 && seconds <= 59) {
+                // no-op: value is already valid
             } else if (seconds < 0) {
                 seconds = 0;
             } else if (seconds > 59) {

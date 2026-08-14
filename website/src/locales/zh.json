@@ -46,6 +46,23 @@
         "temperature_units": "温度单位",
         "celsius": "摄氏度",
         "fahrenheit": "华氏度",
+        "elevation_computation": "累计爬升/下降",
+        "elevation_threshold": "阈值",
+        "elevation_threshold_help": "计入的最小海拔变化，用于过滤噪声。数值越大，越能减少虚高的爬升/下降。",
+        "elevation_smoothing": "平滑",
+        "elevation_smoothing_help": "在计算爬升/下降前，对海拔进行平均的距离。",
+        "elevation_source": {
+            "title": "海拔数据源",
+            "help": "选择从何处采样轨迹点的海拔——用于累计爬升/下降、路线规划、绘制以及\"请求海拔数据\"操作。所有数据源均使用 Terrarium 编码的瓦片。",
+            "source": "数据源",
+            "sources": {
+                "mapterhorn": "Mapterhorn",
+                "aws": "AWS Terrain Tiles",
+                "custom": "自定义 URL"
+            },
+            "custom_url": "瓦片 URL 模板",
+            "custom_url_help": "完整的 XYZ 瓦片 URL，包含 {z}/{x}/{y} 占位符，采用 Terrarium 编码。示例：https://tiles.mapterhorn.com/{z}/{x}/{y}.webp"
+        },
         "language": "语言",
         "mode": "主题",
         "system": "系统",
@@ -56,8 +73,17 @@
         "google": "Google",
         "toggle_street_view": "街景",
         "layers": "地图图层...",
+        "cors_proxy": {
+            "title": "CORS 代理...",
+            "help": "当您自行托管 gpx.studio 时，某些请求可能因缺少 CORS 头而失败。设置一个 CORS 代理后，失败的请求将自动通过它重试。",
+            "url": "代理 URL",
+            "url_help": "目标 URL 会直接附加到此地址后。留空则禁用。示例：https://your-proxy/ 会将对 https://example.com/x 的请求转换为 https://your-proxy/https://example.com/x。"
+        },
         "distance_markers": "距离标记",
         "direction_markers": "方向箭头",
+        "points_of_interest": "兴趣点",
+        "coordinate_readout": "光标坐标与海拔",
+        "zoom_in_for_elevation": "放大以获取海拔",
         "help": "帮助",
         "more": "更多...",
         "donate": "捐赠",
@@ -194,7 +220,26 @@
                 "to": "终点离最近的道路太远",
                 "distance": "起点到终点的距离太远",
                 "connection": "找不到经过途径点的路线",
-                "timeout": "轨迹计算耗时太长，请尝试添加更靠近路网的点"
+                "timeout": "轨迹计算耗时太长，请尝试添加更靠近路网的点",
+                "api_key": "GraphHopper API 密钥无效或缺失。请在路线规划 API 设置中检查您的密钥。",
+                "quota": "已达到 GraphHopper API 请求上限。请稍后重试或使用其他服务商。",
+                "profile": "官方 GraphHopper API 不支持此活动（免费套餐仅支持自行车、步行和汽车）。请切换到自行车或跑步/徒步，或使用默认服务器或自定义服务器。",
+                "unsupported_feature": "官方 GraphHopper 免费套餐不支持屏蔽私有道路。请开启\"使用私有道路\"，或使用默认服务器或自定义服务器。"
+            },
+            "provider": {
+                "title": "路线规划 API",
+                "help": "选择要使用的 GraphHopper 路线规划服务器。默认服务器由 gpx.studio 提供，无需任何配置。",
+                "provider": "服务商",
+                "providers": {
+                    "default": "默认 (gpx.studio)",
+                    "official": "官方 GraphHopper",
+                    "custom": "自定义 URL"
+                },
+                "api_key": "API 密钥",
+                "api_key_placeholder": "您的 GraphHopper API 密钥",
+                "official_warning": "在免费套餐下，仅支持自行车、跑步/徒步和汽车。公路自行车、砾石自行车、山地自行车和摩托车，以及屏蔽私有道路，可能无法使用。",
+                "custom_url": "API URL",
+                "custom_url_help": "GraphHopper 路线端点的完整 URL（例如 https://your-server/route）。"
             }
         },
         "scissors": {
@@ -213,7 +258,8 @@
             "artificial": "创建实际时间数据",
             "update": "更新时间数据",
             "help": "使用表单设置新的时间数据。",
-            "help_invalid_selection": "选择一个单一的轨迹来管理其时间数据。"
+            "help_invalid_selection": "选择一个单一的轨迹来管理其时间数据。",
+            "error": "无法更新此选区的时间数据。"
         },
         "merge": {
             "merge_traces": "合并为一条连续轨迹",
@@ -304,10 +350,6 @@
             "switzerland": "瑞士",
             "united_kingdom": "英国",
             "united_states": "美国",
-            "libertyTopo": "Liberty Topo",
-            "libertySatellite": "Liberty Satellite",
-            "osm": "OpenMapTiles OSM",
-            "osmTopo": "OpenMapTiles OSM Topo",
             "esriSatellite": "Esri Satellite",
             "openStreetMap": "OpenStreetMap",
             "openTopoMap": "OpenTopoMap",
@@ -490,7 +532,6 @@
         "reddit": "Reddit",
         "facebook": "Facebook",
         "github": "GitHub",
-        "crowdin": "Crowdin",
         "email": "电子邮箱",
         "contribute": "参与贡献",
         "supported_by": "技术支持",
@@ -510,11 +551,9 @@
         "privacy_description": "你的 GPX 文件永远不会离开你的浏览器。我们不会跟踪用户的使用行为，也不会收集用户产生的数据。",
         "community": "该项目由社区驱动",
         "community_description": "gpx.studio 有一个绝赞的社区，它通过社区成员的捐助持续运营。它通过社区的力量，不断增加新的功能、修复 bug, 并支持多种语言。",
-        "support_button": "在 Open Collective 上支持 gpx.studio",
-        "translate_button": "在 Crowdin 上协助翻译"
+        "support_button": "在 Open Collective 上支持 gpx.studio"
     },
     "docs": {
-        "translate": "在 Crowdin 上改进此翻译",
         "answer_not_found": "找不到想要的内容？",
         "ask_on_reddit": "在 Reddit 上询问社区",
         "search": {
@@ -536,7 +575,6 @@
     },
     "embedding": {
         "title": "创建您自己的地图",
-        "maptiler_key": "MapTiler key (可选，仅在使用 MapTiler 地图时需要提供)",
         "file_urls": "文件链接（英文逗号分隔）",
         "drive_ids": "谷歌云盘文件 IDs（英文逗号分隔）",
         "basemap": "底图",

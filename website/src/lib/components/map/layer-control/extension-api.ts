@@ -19,7 +19,7 @@ export class ExtensionAPI {
     private _overlays: Writable<Map<string, CustomOverlay>> = writable(new Map());
 
     init() {
-        if (browser && !window.hasOwnProperty('gpxstudio')) {
+        if (browser && !Object.hasOwn(window, 'gpxstudio')) {
             Object.defineProperty(window, 'gpxstudio', {
                 value: this,
             });
@@ -84,7 +84,7 @@ export class ExtensionAPI {
             ],
         };
 
-        if (!overlayTree.overlays.hasOwnProperty(overlay.extensionName)) {
+        if (!Object.hasOwn(overlayTree.overlays as LayerTreeType, overlay.extensionName)) {
             (overlayTree.overlays as LayerTreeType)[overlay.extensionName] = {};
         }
 
@@ -93,7 +93,7 @@ export class ExtensionAPI {
         ] = true;
 
         selectedOverlayTree.update((selected) => {
-            if (!selected.overlays.hasOwnProperty(overlay.extensionName)) {
+            if (!Object.hasOwn(selected.overlays, overlay.extensionName)) {
                 selected.overlays[overlay.extensionName] = {};
             }
             selected.overlays[overlay.extensionName][overlay.id] = true;
@@ -106,13 +106,13 @@ export class ExtensionAPI {
             show = true;
             try {
                 get(map)?.removeLayer(overlay.id);
-            } catch (e) {
+            } catch {
                 // No reliable way to check if the map is ready to remove sources and layers
             }
         }
 
         currentOverlays.update((current) => {
-            if (!current.overlays.hasOwnProperty(overlay.extensionName)) {
+            if (!Object.hasOwn(current.overlays, overlay.extensionName)) {
                 current.overlays[overlay.extensionName] = {};
             }
             current.overlays[overlay.extensionName][overlay.id] = show;
@@ -157,13 +157,13 @@ export class ExtensionAPI {
     updateOverlaysOrder(ids: string[]) {
         ids = ids.map((id) => this.getOverlayId(id));
         selectedOverlayTree.update((selected) => {
-            let isSelected: Record<string, boolean> = {};
+            const isSelected: Record<string, boolean> = {};
             ids.forEach((id) => {
                 const overlay = get(this._overlays).get(id);
                 if (
                     overlay &&
-                    selected.overlays.hasOwnProperty(overlay.extensionName) &&
-                    selected.overlays[overlay.extensionName].hasOwnProperty(id)
+                    Object.hasOwn(selected.overlays, overlay.extensionName) &&
+                    Object.hasOwn(selected.overlays[overlay.extensionName], id)
                 ) {
                     isSelected[id] = selected.overlays[overlay.extensionName][id];
                     delete selected.overlays[overlay.extensionName][id];

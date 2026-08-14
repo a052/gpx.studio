@@ -36,9 +36,9 @@ export class SelectedGPXStatistics {
     }
 
     update() {
-        let statistics = new GPXStatisticsGroup();
+        const statistics = new GPXStatisticsGroup();
         selection.applyToOrderedSelectedItemsFromFile((fileId, level, items) => {
-            let stats = fileStateCollection.getStatistics(fileId);
+            const stats = fileStateCollection.getStatistics(fileId);
             if (stats) {
                 let first = true;
                 items.forEach((item) => {
@@ -53,10 +53,10 @@ export class SelectedGPXStatistics {
             }
 
             if (!this._files.has(fileId)) {
-                let file = fileStateCollection.getFileState(fileId);
+                const file = fileStateCollection.getFileState(fileId);
                 if (file) {
                     let first = true;
-                    let unsubscribe = file.subscribe(() => {
+                    const unsubscribe = file.subscribe(() => {
                         if (first) first = false;
                         else this.update();
                     });
@@ -65,7 +65,7 @@ export class SelectedGPXStatistics {
             }
         }, false);
         this._statistics.set(statistics);
-        for (let [fileId, entry] of this._files) {
+        for (const [fileId, entry] of this._files) {
             if (
                 !get(fileStateCollection).has(fileId) ||
                 !get(selection).hasAnyChildren(new ListFileItem(fileId))

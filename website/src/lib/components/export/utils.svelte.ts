@@ -31,7 +31,7 @@ async function exportFiles(fileIds: string[], exclude: string[]) {
 
 export async function exportSelectedFiles(exclude: string[]) {
     const fileIds: string[] = [];
-    selection.applyToOrderedSelectedItemsFromFile(async (fileId, level, items) => {
+    selection.applyToOrderedSelectedItemsFromFile(async (fileId) => {
         fileIds.push(fileId);
     });
     await exportFiles(fileIds, exclude);

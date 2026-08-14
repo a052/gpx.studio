@@ -46,6 +46,23 @@
         "temperature_units": "Unités de température",
         "celsius": "Celsius",
         "fahrenheit": "Fahrenheit",
+        "elevation_computation": "Dénivelé positif et négatif",
+        "elevation_threshold": "Seuil",
+        "elevation_threshold_help": "Variation d'altitude minimale prise en compte, afin de filtrer le bruit. Des valeurs plus élevées réduisent le dénivelé surestimé.",
+        "elevation_smoothing": "Lissage",
+        "elevation_smoothing_help": "Distance sur laquelle l'altitude est moyennée avant de calculer le dénivelé.",
+        "elevation_source": {
+            "title": "Source des données d'altitude",
+            "help": "Choisissez la provenance des altitudes des points GPS — utilisées pour le dénivelé, le routage, le dessin et l'action \"Ajouter des données d'altitude\". Toutes les sources utilisent des tuiles encodées en Terrarium.",
+            "source": "Source",
+            "sources": {
+                "mapterhorn": "Mapterhorn",
+                "aws": "AWS Terrain Tiles",
+                "custom": "URL personnalisée"
+            },
+            "custom_url": "Modèle d'URL de tuile",
+            "custom_url_help": "URL de tuile XYZ complète avec les paramètres {z}/{x}/{y}, encodée en Terrarium. Exemple : https://tiles.mapterhorn.com/{z}/{x}/{y}.webp"
+        },
         "language": "Langue",
         "mode": "Thème",
         "system": "Système",
@@ -56,8 +73,17 @@
         "google": "Google",
         "toggle_street_view": "Imagerie de rue",
         "layers": "Couches de la carte...",
+        "cors_proxy": {
+            "title": "Proxy CORS...",
+            "help": "Lorsque vous hébergez gpx.studio vous-même, certaines requêtes peuvent échouer à cause d'en-têtes CORS manquants. Définissez un proxy CORS et les requêtes échouées seront automatiquement relancées à travers celui-ci.",
+            "url": "URL du proxy",
+            "url_help": "L'URL cible est ajoutée directement à cette adresse. Laissez vide pour désactiver. Exemple : https://your-proxy/ transforme une requête vers https://example.com/x en https://your-proxy/https://example.com/x."
+        },
         "distance_markers": "Marqueurs de distance",
         "direction_markers": "Flèches de direction",
+        "points_of_interest": "Points d'intérêt",
+        "coordinate_readout": "Coordonnées du curseur et altitude",
+        "zoom_in_for_elevation": "Zoomez pour afficher l'altitude",
         "help": "Aide",
         "more": "Plus...",
         "donate": "Faire un don",
@@ -194,7 +220,26 @@
                 "to": "Le point d'arrivée est trop éloigné de la route la plus proche",
                 "distance": "Le point d'arrivée est trop loin du point de départ",
                 "connection": "Aucune connexion trouvée entre les points",
-                "timeout": "Le calcul de l'itinéraire a pris trop de temps, essayez d'ajouter des points plus rapprochés"
+                "timeout": "Le calcul de l'itinéraire a pris trop de temps, essayez d'ajouter des points plus rapprochés",
+                "api_key": "Clé API GraphHopper invalide ou manquante. Vérifiez votre clé dans les réglages de l'API de routage.",
+                "quota": "Limite de requêtes de l'API GraphHopper atteinte. Réessayez plus tard ou utilisez un autre fournisseur.",
+                "profile": "Cette activité n'est pas prise en charge par l'API officielle GraphHopper (seuls le vélo, la marche et la voiture sont disponibles dans l'offre gratuite). Passez à Vélo ou Course à pied/randonnée, ou utilisez le serveur par défaut ou un serveur personnalisé.",
+                "unsupported_feature": "Le blocage des routes privées n'est pas pris en charge par l'offre gratuite officielle de GraphHopper. Activez \"Autoriser les routes privées\", ou utilisez le serveur par défaut ou un serveur personnalisé."
+            },
+            "provider": {
+                "title": "API de routage",
+                "help": "Choisissez quel serveur de routage GraphHopper utiliser. Le serveur par défaut est fourni par gpx.studio et ne nécessite aucune configuration.",
+                "provider": "Fournisseur",
+                "providers": {
+                    "default": "Par défaut (gpx.studio)",
+                    "official": "GraphHopper officiel",
+                    "custom": "URL personnalisée"
+                },
+                "api_key": "Clé API",
+                "api_key_placeholder": "Votre clé API GraphHopper",
+                "official_warning": "Dans l'offre gratuite, seuls Vélo, Course à pied/randonnée et voiture sont pris en charge. Vélo de route, vélo gravel, VTT et moto, ainsi que le blocage des routes privées, peuvent ne pas fonctionner.",
+                "custom_url": "URL de l'API",
+                "custom_url_help": "URL complète du point de terminaison route de GraphHopper (par ex. https://your-server/route)."
             }
         },
         "scissors": {
@@ -213,7 +258,8 @@
             "artificial": "Créer des données de temps réalistes",
             "update": "Mettre à jour les données temporelles",
             "help": "Utilisez le formulaire pour définir de nouvelles données temporelles.",
-            "help_invalid_selection": "Sélectionnez une seule trace pour gérer ses données temporelles."
+            "help_invalid_selection": "Sélectionnez une seule trace pour gérer ses données temporelles.",
+            "error": "Impossible de mettre à jour les données temporelles pour cette sélection."
         },
         "merge": {
             "merge_traces": "Connecter les traces",
@@ -304,10 +350,6 @@
             "switzerland": "Suisse",
             "united_kingdom": "Royaume-Uni",
             "united_states": "États-Unis",
-            "libertyTopo": "Liberty Topo",
-            "libertySatellite": "Liberty Satellite",
-            "osm": "OpenMapTiles OSM",
-            "osmTopo": "OpenMapTiles OSM Topo",
             "esriSatellite": "Esri Satellite",
             "openStreetMap": "OpenStreetMap",
             "openTopoMap": "OpenTopoMap",
@@ -490,7 +532,6 @@
         "reddit": "Reddit",
         "facebook": "Facebook",
         "github": "GitHub",
-        "crowdin": "Crowdin",
         "email": "Email",
         "contribute": "Contribuer",
         "supported_by": "soutenu par",
@@ -510,11 +551,9 @@
         "privacy_description": "Vos fichiers GPX ne quittent jamais votre navigateur. Aucun suivi, aucune collecte de données.",
         "community": "Rendu possible par la communauté",
         "community_description": "gpx.studio a une communauté incroyable dont les dons financent les coûts du projet depuis plusieurs années, tout en contribuant à l'améliorer à travers des suggestions de nouvelles fonctionnalités, des signalements de bugs et la traduction du site dans de nombreuses langues.",
-        "support_button": "Soutenir gpx.studio sur Open Collective",
-        "translate_button": "Aidez à traduire le site sur Crowdin"
+        "support_button": "Soutenir gpx.studio sur Open Collective"
     },
     "docs": {
-        "translate": "Améliorer la traduction sur Crowdin",
         "answer_not_found": "Vous n'avez pas trouvé ce que vous cherchiez ?",
         "ask_on_reddit": "Posez votre question à la communauté sur Reddit",
         "search": {
@@ -536,7 +575,6 @@
     },
     "embedding": {
         "title": "Créez votre propre carte",
-        "maptiler_key": "Clé MapTiler (optionnelle, uniquement nécessaire pour les cartes MapTiler)",
         "file_urls": "URLs des fichiers (séparées par des virgules)",
         "drive_ids": "IDs des fichiers Google Drive (séparés par des virgules)",
         "basemap": "Fond de carte",

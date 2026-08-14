@@ -532,7 +532,6 @@
         "reddit": "Reddit",
         "facebook": "Facebook",
         "github": "GitHub",
-        "crowdin": "Crowdin",
         "email": "Email",
         "contribute": "Contribute",
         "supported_by": "supported by",
@@ -552,11 +551,9 @@
         "privacy_description": "Your GPX files never leave your browser. No tracking, no data collection.",
         "community": "Made possible by the community",
         "community_description": "gpx.studio has an amazing community that has covered its costs through donations for years, while shaping the project through feature suggestions, bug reports, and translations into many languages.",
-        "support_button": "Support gpx.studio on Open Collective",
-        "translate_button": "Help translate the website on Crowdin"
+        "support_button": "Support gpx.studio on Open Collective"
     },
     "docs": {
-        "translate": "Improve the translation on Crowdin",
         "answer_not_found": "Did not find what you were looking for?",
         "ask_on_reddit": "Ask the community on Reddit",
         "search": {

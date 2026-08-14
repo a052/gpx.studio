@@ -43,7 +43,7 @@ export class SplitControls {
     }
 
     addIfNeeded() {
-        let scissors = get(currentTool) === Tool.SCISSORS;
+        const scissors = get(currentTool) === Tool.SCISSORS;
         if (!scissors) {
             this.remove();
             return;
@@ -53,12 +53,12 @@ export class SplitControls {
     }
 
     updateControls() {
-        let data: GeoJSON.FeatureCollection = {
+        const data: GeoJSON.FeatureCollection = {
             type: 'FeatureCollection',
             features: [],
         };
-        selection.applyToOrderedSelectedItemsFromFile((fileId, level, items) => {
-            let file = fileStateCollection.getFile(fileId);
+        selection.applyToOrderedSelectedItemsFromFile((fileId) => {
+            const file = fileStateCollection.getFile(fileId);
 
             if (file) {
                 file.forEachSegment((segment, trackIndex, segmentIndex) => {
@@ -68,7 +68,7 @@ export class SplitControls {
                         )
                     ) {
                         for (let i = 1; i < segment.trkpt.length - 1; i++) {
-                            let point = segment.trkpt[i];
+                            const point = segment.trkpt[i];
                             if (point._data.anchor) {
                                 data.features.push({
                                     type: 'Feature',
@@ -92,7 +92,7 @@ export class SplitControls {
         }, false);
 
         try {
-            let source = this.map.getSource('split-controls') as GeoJSONSource | undefined;
+            const source = this.map.getSource('split-controls') as GeoJSONSource | undefined;
             if (source) {
                 source.setData(data);
             } else {
@@ -130,7 +130,7 @@ export class SplitControls {
                 );
                 this.layerEventManager.on('click', 'split-controls', this.layerOnClickBinded);
             }
-        } catch (e) {
+        } catch {
             // No reliable way to check if the map is ready to add sources and layers
         }
     }
@@ -148,12 +148,12 @@ export class SplitControls {
             if (this.map.getSource('split-controls')) {
                 this.map.removeSource('split-controls');
             }
-        } catch (e) {
+        } catch {
             // No reliable way to check if the map is ready to remove sources and layers
         }
     }
 
-    layerOnMouseEnter(e: any) {
+    layerOnMouseEnter() {
         mapCursor.notify(MapCursorState.SPLIT_CONTROL, true);
     }
 
@@ -162,7 +162,7 @@ export class SplitControls {
     }
 
     layerOnClick(e: maplibregl.MapLayerMouseEvent) {
-        let coordinates = (e.features![0].geometry as GeoJSON.Point).coordinates;
+        const coordinates = (e.features![0].geometry as GeoJSON.Point).coordinates;
         fileActions.split(
             get(splitAs),
             e.features![0].properties!.fileId,

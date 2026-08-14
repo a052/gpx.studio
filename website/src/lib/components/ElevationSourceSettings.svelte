@@ -30,7 +30,7 @@
                                 {i18n._(`menu.elevation_source.sources.${$elevationSource}`)}
                             </Select.Trigger>
                             <Select.Content>
-                                {#each elevationSourcePresets as source}
+                                {#each elevationSourcePresets as source (source)}
                                     <Select.Item value={source}>
                                         {i18n._(`menu.elevation_source.sources.${source}`)}
                                     </Select.Item>

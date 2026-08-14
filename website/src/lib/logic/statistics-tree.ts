@@ -28,8 +28,8 @@ export class GPXStatisticsTree {
     }
 
     getStatisticsFor(item: ListItem): GPXStatisticsGroup {
-        let statistics = new GPXStatisticsGroup();
-        let id = item.getIdAtLevel(this.level);
+        const statistics = new GPXStatisticsGroup();
+        const id = item.getIdAtLevel(this.level);
         if (id === undefined || id === 'waypoints') {
             Object.keys(this.statistics).forEach((key) => {
                 if (this.statistics[key] instanceof GPXStatistics) {
@@ -39,7 +39,7 @@ export class GPXStatisticsTree {
                 }
             });
         } else {
-            let child = this.statistics[id];
+            const child = this.statistics[id];
             if (child instanceof GPXStatistics) {
                 statistics.add(child);
             } else if (child !== undefined) {
@@ -50,7 +50,7 @@ export class GPXStatisticsTree {
     }
 
     intersectsBBox(bounds: maplibregl.LngLatBounds): boolean {
-        for (let key in this.statistics) {
+        for (const key in this.statistics) {
             const stats = this.statistics[key];
             if (stats instanceof GPXStatistics) {
                 const bbox = new maplibregl.LngLatBounds(

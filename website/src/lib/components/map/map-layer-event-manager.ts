@@ -246,7 +246,7 @@ export class MapLayerEventManager {
         layerIds: string[],
         bounds: maplibregl.LngLatBounds
     ): string[] {
-        let result = layerIds.filter((layerId) => {
+        const result = layerIds.filter((layerId) => {
             if (!this._map.getLayer(layerId)) return false;
             const fileId = layerId.replace('-waypoints', '');
             if (fileId === layerId) {

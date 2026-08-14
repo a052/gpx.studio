@@ -18,6 +18,7 @@
     import { map } from '$lib/components/map/map';
     import type { GeoJSONSource } from 'maplibre-gl';
     import type * as maplibregl from 'maplibre-gl';
+    import type * as GeoJSON from 'geojson';
     import { selection } from '$lib/logic/selection';
     import { fileActions } from '$lib/logic/file-actions';
     import { mapCursor, MapCursorState } from '$lib/logic/map-cursor';
@@ -94,7 +95,7 @@
         }
     }
 
-    function onMouseUp(e: any) {
+    function onMouseUp() {
         mousedown = false;
     }
 

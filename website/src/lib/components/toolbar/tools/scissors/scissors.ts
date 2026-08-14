@@ -6,4 +6,4 @@ export enum SplitType {
     SEGMENTS = 'segments',
 }
 
-export let splitAs: Writable<SplitType> = writable(SplitType.FILES);
+export const splitAs: Writable<SplitType> = writable(SplitType.FILES);

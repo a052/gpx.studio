@@ -22,9 +22,9 @@ export class GPXFileState {
         this._subscription = liveQuery(() => db.files.get(this._fileId)).subscribe((value) => {
             try {
                 if (value !== undefined) {
-                    let file = new GPXFile(value);
+                    const file = new GPXFile(value);
                     updateAnchorPoints(file);
-                    let statistics = new GPXStatisticsTree(file);
+                    const statistics = new GPXStatisticsTree(file);
                     this._file.set({ file, statistics });
                 }
             } catch (error) {
@@ -90,11 +90,11 @@ export class GPXFileStateCollection {
             this._subscription = liveQuery(() => db.fileids.toArray()).subscribe((dbFileIds) => {
                 const currentFiles = get(this._files);
                 // Find new files to observe
-                let newFiles = dbFileIds
+                const newFiles = dbFileIds
                     .filter((id) => !currentFiles.has(id))
                     .sort((a, b) => parseInt(a.split('-')[1]) - parseInt(b.split('-')[1]));
                 // Find deleted files to stop observing
-                let deletedFiles = Array.from(currentFiles.keys()).filter(
+                const deletedFiles = Array.from(currentFiles.keys()).filter(
                     (id) => !dbFileIds.find((fileId) => fileId === id)
                 );
 
@@ -114,7 +114,7 @@ export class GPXFileStateCollection {
                     });
 
                     // Update the file order
-                    let fileOrder = get(settings.fileOrder).filter(
+                    const fileOrder = get(settings.fileOrder).filter(
                         (id) => !deletedFiles.includes(id)
                     );
                     newFiles.forEach((id) => {
@@ -167,12 +167,12 @@ export class GPXFileStateCollection {
     }
 
     getFile(fileId: string): GPXFile | undefined {
-        let fileState = get(this._files).get(fileId);
+        const fileState = get(this._files).get(fileId);
         return fileState?.file;
     }
 
     getStatistics(fileId: string): GPXStatisticsTree | undefined {
-        let fileState = get(this._files).get(fileId);
+        const fileState = get(this._files).get(fileId);
         return fileState?.statistics;
     }
 
@@ -242,7 +242,7 @@ export class GPXFileStateCollectionObserver {
                     this._fileIds.delete(fileId);
                 }
             });
-            let newFiles = new Map<string, GPXFileState>();
+            const newFiles = new Map<string, GPXFileState>();
             files.forEach((file: GPXFileState, fileId: string) => {
                 if (!this._fileIds.has(fileId)) {
                     newFiles.set(fileId, file);

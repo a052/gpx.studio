@@ -31,7 +31,6 @@
         ListRootItem,
         ListTrackItem,
         ListTrackSegmentItem,
-        type ListItem,
     } from '$lib/components/file-list/file-list';
     import { getURLForLanguage } from '$lib/utils';
     import { onDestroy, onMount } from 'svelte';
@@ -172,7 +171,7 @@
                                 {i18n._(`toolbar.routing.activities.${$routingProfile}`)}
                             </Select.Trigger>
                             <Select.Content>
-                                {#each Object.keys(routingProfiles) as profile}
+                                {#each Object.keys(routingProfiles) as profile (profile)}
                                     <Select.Item value={profile}
                                         >{i18n._(
                                             `toolbar.routing.activities.${profile}`

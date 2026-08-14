@@ -18,7 +18,7 @@ const mercator = new SphericalMercator({
     size: 256,
 });
 
-let data = writable<GeoJSON.FeatureCollection>({ type: 'FeatureCollection', features: [] });
+const data = writable<GeoJSON.FeatureCollection>({ type: 'FeatureCollection', features: [] });
 
 liveQuery(() => db.overpassdata.toArray()).subscribe((pois) => {
     data.set({ type: 'FeatureCollection', features: pois.map((poi) => poi.poi) });
@@ -88,7 +88,7 @@ export class OverpassLayer {
         };
 
         try {
-            let source = this.map.getSource('overpass') as GeoJSONSource | undefined;
+            const source = this.map.getSource('overpass') as GeoJSONSource | undefined;
             if (source) {
                 source.setData(d);
             } else {
@@ -117,7 +117,7 @@ export class OverpassLayer {
                 this.layerEventManager.on('mouseenter', 'overpass', this.onHoverBinded);
                 this.layerEventManager.on('click', 'overpass', this.onHoverBinded);
             }
-        } catch (e) {
+        } catch {
             // No reliable way to check if the map is ready to add sources and layers
         }
     }
@@ -137,7 +137,7 @@ export class OverpassLayer {
             if (this.map.getSource('overpass')) {
                 this.map.removeSource('overpass');
             }
-        } catch (e) {
+        } catch {
             // No reliable way to check if the map is ready to remove sources and layers
         }
     }
@@ -152,13 +152,13 @@ export class OverpassLayer {
     }
 
     query(bbox: [number, number, number, number]) {
-        let queries = getCurrentQueries();
+        const queries = getCurrentQueries();
         if (queries.length === 0) {
             return;
         }
 
-        let tileLimits = mercator.xyz(bbox, this.queryZoom);
-        let time = Date.now();
+        const tileLimits = mercator.xyz(bbox, this.queryZoom);
+        const time = Date.now();
 
         for (let x = tileLimits.minX; x <= tileLimits.maxX; x++) {
             for (let y = tileLimits.minY; y <= tileLimits.maxY; y++) {
@@ -171,7 +171,7 @@ export class OverpassLayer {
                     .equals([x, y])
                     .toArray()
                     .then((querytiles) => {
-                        let missingQueries = queries.filter(
+                        const missingQueries = queries.filter(
                             (query) =>
                                 !querytiles.some(
                                     (querytile) =>
@@ -211,16 +211,16 @@ export class OverpassLayer {
     }
 
     storeOverpassData(x: number, y: number, queries: string[], data: any) {
-        let time = Date.now();
-        let queryTiles = queries.map((query) => ({ x, y, query, time }));
-        let pois: { query: string; id: number; poi: GeoJSON.Feature }[] = [];
+        const time = Date.now();
+        const queryTiles = queries.map((query) => ({ x, y, query, time }));
+        const pois: { query: string; id: number; poi: GeoJSON.Feature }[] = [];
 
         if (data.elements === undefined) {
             return;
         }
 
-        for (let element of data.elements) {
-            for (let query of queries) {
+        for (const element of data.elements) {
+            for (const query of queries) {
                 if (belongsToQuery(element, query)) {
                     pois.push({
                         query,
@@ -257,7 +257,7 @@ export class OverpassLayer {
     }
 
     loadIcons() {
-        let currentQueries = getCurrentQueries();
+        const currentQueries = getCurrentQueries();
         currentQueries.forEach((query) => {
             loadSVGIcon(
                 this.map,
@@ -290,7 +290,7 @@ function getQuery(query: string) {
 }
 
 function getQueryItem(tags: Record<string, string | string[]>) {
-    let arrayEntry = Object.entries(tags).find((entry): entry is [string, string[]] =>
+    const arrayEntry = Object.entries(tags).find((entry): entry is [string, string[]] =>
         Array.isArray(entry[1])
     );
     if (arrayEntry !== undefined) {
@@ -324,12 +324,12 @@ function belongsToQueryItem(element: any, tags: Record<string, string | string[]
 }
 
 function getCurrentQueries() {
-    let currentQueries = get(currentOverpassQueries);
+    const currentQueries = get(currentOverpassQueries);
     if (currentQueries === undefined) {
         return [];
     }
 
     return Object.entries(getLayers(currentQueries))
-        .filter(([_, selected]) => selected)
-        .map(([query, _]) => query);
+        .filter(([, selected]) => selected)
+        .map(([query]) => query);
 }

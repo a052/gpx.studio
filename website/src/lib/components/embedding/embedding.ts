@@ -103,12 +103,12 @@ export function getURLForGoogleDriveFile(fileId: string): string {
 }
 
 export function convertOldEmbeddingOptions(options: URLSearchParams): any {
-    let newOptions: any = {
+    const newOptions: any = {
         files: [],
         ids: [],
     };
     if (options.has('state')) {
-        let state = JSON.parse(options.get('state')!);
+        const state = JSON.parse(options.get('state')!);
         if (state.ids) {
             newOptions.ids.push(...state.ids);
         }
@@ -117,7 +117,7 @@ export function convertOldEmbeddingOptions(options: URLSearchParams): any {
         }
     }
     if (options.has('source')) {
-        let basemap = options.get('source')!;
+        const basemap = options.get('source')!;
         if (basemap === 'satellite') {
             newOptions.basemap = 'esriSatellite';
         } else if (basemap === 'otm') {

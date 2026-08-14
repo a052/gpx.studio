@@ -64,15 +64,5 @@
             <PenLine size="16" />
             Edit this page on GitHub
         </Button>
-    {:else}
-        <Button
-            variant="link"
-            href="https://crowdin.com/project/gpxstudio/{i18n.lang}"
-            target="_blank"
-            class="p-0 h-6 ml-auto text-link"
-        >
-            <PenLine size="16" />
-            {i18n._('docs.translate')}
-        </Button>
     {/if}
 </div>

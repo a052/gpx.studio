@@ -46,13 +46,13 @@ const colors = [
 ];
 
 const colorCount: { [key: string]: number } = {};
-for (let color of colors) {
+for (const color of colors) {
     colorCount[color] = 0;
 }
 
 // Get the color with the least amount of uses
 function getColor(fileId: string) {
-    let color = colors.reduce((a, b) => (colorCount[a] <= colorCount[b] ? a : b));
+    const color = colors.reduce((a, b) => (colorCount[a] <= colorCount[b] ? a : b));
     colorCount[color]++;
     gpxColors.update((colors) => {
         colors.set(fileId, color);
@@ -62,7 +62,7 @@ function getColor(fileId: string) {
 }
 
 function replaceColor(fileId: string, oldColor: string, newColor: string) {
-    if (colorCount.hasOwnProperty(oldColor)) {
+    if (Object.hasOwn(colorCount, oldColor)) {
         colorCount[oldColor]--;
     }
     colorCount[newColor]++;
@@ -73,7 +73,7 @@ function replaceColor(fileId: string, oldColor: string, newColor: string) {
 }
 
 function removeColor(fileId: string, color: string) {
-    if (colorCount.hasOwnProperty(color)) {
+    if (Object.hasOwn(colorCount, color)) {
         colorCount[color]--;
     }
     gpxColors.update((colors) => {
@@ -83,7 +83,7 @@ function removeColor(fileId: string, color: string) {
 }
 
 export function getSvgForSymbol(symbol?: string | undefined, layerColor?: string | undefined) {
-    let symbolSvg = symbol ? symbols[symbol]?.iconSvg : undefined;
+    const symbolSvg = symbol ? symbols[symbol]?.iconSvg : undefined;
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     ${
         layerColor
@@ -160,7 +160,7 @@ export class GPXLayer {
         this.unsubscribe.push(file.subscribe(this.updateBinded));
         this.unsubscribe.push(
             selection.subscribe(($selection) => {
-                let newSelected = $selection.hasAnyChildren(new ListFileItem(this.fileId));
+                const newSelected = $selection.hasAnyChildren(new ListFileItem(this.fileId));
                 if (this.selected || newSelected) {
                     this.selected = newSelected;
                     this.update();
@@ -177,7 +177,7 @@ export class GPXLayer {
     update() {
         const _map = get(map);
         const layerEventManager = map.layerEventManager;
-        let file = get(this.file)?.file;
+        const file = get(this.file)?.file;
         if (!_map || !layerEventManager || !file) {
             return;
         }
@@ -194,7 +194,7 @@ export class GPXLayer {
         this.loadIcons();
 
         try {
-            let source = _map.getSource(this.fileId) as GeoJSONSource | undefined;
+            const source = _map.getSource(this.fileId) as GeoJSONSource | undefined;
             if (source) {
                 source.setData(this.getGeoJSON());
             } else {
@@ -230,7 +230,7 @@ export class GPXLayer {
                 layerEventManager.on('mousemove', this.fileId, this.layerOnMouseMoveBinded);
             }
 
-            let visibleTrackSegmentIds: string[] = [];
+            const visibleTrackSegmentIds: string[] = [];
             file.forEachSegment((segment, trackIndex, segmentIndex) => {
                 if (!segment._data.hidden) {
                     visibleTrackSegmentIds.push(`${trackIndex}-${segmentIndex}`);
@@ -278,7 +278,7 @@ export class GPXLayer {
                 }
             }
 
-            let waypointSource = _map.getSource(this.fileId + '-waypoints') as
+            const waypointSource = _map.getSource(this.fileId + '-waypoints') as
                 | GeoJSONSource
                 | undefined;
             this.currentWaypointData = this.getWaypointsGeoJSON();
@@ -336,7 +336,7 @@ export class GPXLayer {
                 );
             }
 
-            let visibleWaypoints: number[] = [];
+            const visibleWaypoints: number[] = [];
             if (get(showWaypoints)) {
                 file.wpt.forEach((waypoint, waypointIndex) => {
                     if (!waypoint._data.hidden) {
@@ -350,7 +350,7 @@ export class GPXLayer {
                 ['in', ['get', 'waypointIndex'], ['literal', visibleWaypoints]],
                 { validate: false }
             );
-        } catch (e) {
+        } catch {
             // No reliable way to check if the map is ready to add sources and layers
             return;
         }
@@ -438,8 +438,8 @@ export class GPXLayer {
     }
 
     layerOnMouseEnter(e: any) {
-        let trackIndex = e.features[0].properties.trackIndex;
-        let segmentIndex = e.features[0].properties.segmentIndex;
+        const trackIndex = e.features[0].properties.trackIndex;
+        const segmentIndex = e.features[0].properties.segmentIndex;
 
         if (
             get(currentTool) === Tool.SCISSORS &&
@@ -460,8 +460,8 @@ export class GPXLayer {
 
     layerOnMouseMove(e: any) {
         if (e.originalEvent.shiftKey) {
-            let trackIndex = e.features[0].properties.trackIndex;
-            let segmentIndex = e.features[0].properties.segmentIndex;
+            const trackIndex = e.features[0].properties.trackIndex;
+            const segmentIndex = e.features[0].properties.segmentIndex;
 
             const file = get(this.file)?.file;
             if (file) {
@@ -482,8 +482,8 @@ export class GPXLayer {
             return;
         }
 
-        let trackIndex = e.features![0].properties!.trackIndex;
-        let segmentIndex = e.features![0].properties!.segmentIndex;
+        const trackIndex = e.features![0].properties!.trackIndex;
+        const segmentIndex = e.features![0].properties!.segmentIndex;
 
         if (
             get(currentTool) === Tool.SCISSORS &&
@@ -503,7 +503,7 @@ export class GPXLayer {
             return;
         }
 
-        let file = get(this.file)?.file;
+        const file = get(this.file)?.file;
         if (!file) {
             return;
         }
@@ -536,13 +536,13 @@ export class GPXLayer {
         if (this.draggedWaypointIndex !== null) {
             return;
         }
-        let file = get(this.file)?.file;
+        const file = get(this.file)?.file;
         if (!file) {
             return;
         }
 
-        let waypointIndex = e.features![0].properties!.waypointIndex;
-        let waypoint = file.wpt[waypointIndex];
+        const waypointIndex = e.features![0].properties!.waypointIndex;
+        const waypoint = file.wpt[waypointIndex];
         waypointPopup?.setItem({ item: waypoint, fileId: this.fileId });
 
         mapCursor.notify(MapCursorState.WAYPOINT_HOVER, true);
@@ -555,13 +555,13 @@ export class GPXLayer {
     waypointLayerOnClick(e: MapLayerMouseEvent) {
         e.preventDefault();
 
-        let waypointIndex = e.features![0].properties!.waypointIndex;
-        let file = get(this.file)?.file;
+        const waypointIndex = e.features![0].properties!.waypointIndex;
+        const file = get(this.file)?.file;
         if (!file) {
             return;
         }
 
-        let waypoint = file.wpt[waypointIndex];
+        const waypoint = file.wpt[waypointIndex];
         if (get(currentTool) === Tool.WAYPOINT) {
             if (this.selected) {
                 if (e.originalEvent.shiftKey) {
@@ -645,7 +645,7 @@ export class GPXLayer {
             this.currentWaypointData!.features[this.draggedWaypointIndex].geometry as GeoJSON.Point
         ).coordinates = [e.lngLat.lng, e.lngLat.lat];
 
-        let waypointSource = get(map)?.getSource(this.fileId + '-waypoints') as
+        const waypointSource = get(map)?.getSource(this.fileId + '-waypoints') as
             | GeoJSONSource
             | undefined;
         if (waypointSource) {
@@ -694,7 +694,7 @@ export class GPXLayer {
                 return;
             }
             fileActionManager.applyToFile(this.fileId, (file) => {
-                let wpt = file.wpt[this.draggedWaypointIndex!];
+                const wpt = file.wpt[this.draggedWaypointIndex!];
                 wpt.setCoordinates({
                     lat: e.lngLat.lat,
                     lon: e.lngLat.lng,
@@ -706,7 +706,7 @@ export class GPXLayer {
     }
 
     getGeoJSON(): GeoJSON.FeatureCollection {
-        let file = get(this.file)?.file;
+        const file = get(this.file)?.file;
         if (!file) {
             return {
                 type: 'FeatureCollection',
@@ -714,11 +714,11 @@ export class GPXLayer {
             };
         }
 
-        let data = file.toGeoJSON();
+        const data = file.toGeoJSON();
 
         let trackIndex = 0,
             segmentIndex = 0;
-        for (let feature of data.features) {
+        for (const feature of data.features) {
             if (!feature.properties) {
                 feature.properties = {};
             }
@@ -754,9 +754,9 @@ export class GPXLayer {
     }
 
     getWaypointsGeoJSON(): GeoJSON.FeatureCollection {
-        let file = get(this.file)?.file;
+        const file = get(this.file)?.file;
 
-        let data: GeoJSON.FeatureCollection = {
+        const data: GeoJSON.FeatureCollection = {
             type: 'FeatureCollection',
             features: [],
         };
@@ -785,12 +785,12 @@ export class GPXLayer {
 
     loadIcons() {
         const _map = get(map);
-        let file = get(this.file)?.file;
+        const file = get(this.file)?.file;
         if (!_map || !file) {
             return;
         }
 
-        let symbols = new Set<string | undefined>();
+        const symbols = new Set<string | undefined>();
         file.wpt.forEach((waypoint) => {
             symbols.add(getSymbolKey(waypoint.sym));
         });
