@@ -28,12 +28,6 @@ jobs:
             - name: Install dependencies for website
               run: npm install --prefix website
 
-            - name: Create env file
-              run: |
-                  touch website/.env
-                  echo PUBLIC_MAPTILER_KEY=${{ secrets.PUBLIC_MAPTILER_KEY }} >> website/.env
-                  cat website/.env
-
             - name: Build website
               env:
                   BASE_PATH: ''

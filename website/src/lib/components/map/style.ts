@@ -1,13 +1,7 @@
 import { settings } from '$lib/logic/settings';
 import type * as maplibregl from 'maplibre-gl';
 import { get, type Writable } from 'svelte/store';
-import {
-    basemaps,
-    defaultBasemap,
-    maptilerKeyPlaceHolder,
-    overlays,
-    terrainSources,
-} from '$lib/assets/layers';
+import { basemaps, defaultBasemap, overlays, terrainSources } from '$lib/assets/layers';
 import { getLayers } from '$lib/components/map/layer-control/utils';
 import { i18n } from '$lib/i18n.svelte';
 
@@ -60,13 +54,11 @@ const anchorLayers: maplibregl.LayerSpecification[] = Object.values(ANCHOR_LAYER
 
 export class StyleManager {
     private _map: Writable<maplibregl.Map | null>;
-    private _maptilerKey: string;
     private _pastOverlays: Set<string> = new Set();
     private _basemapUpdateId = 0;
 
-    constructor(map: Writable<maplibregl.Map | null>, maptilerKey: string) {
+    constructor(map: Writable<maplibregl.Map | null>) {
         this._map = map;
-        this._maptilerKey = maptilerKey;
         this._map.subscribe((map_) => {
             if (map_) {
                 this.updateBasemap();
@@ -125,18 +117,6 @@ export class StyleManager {
         let basemapStyle = basemaps.openStreetMap as maplibregl.StyleSpecification;
         try {
             basemapStyle = await this.get(basemapInfo);
-            for (const source in basemapStyle.sources) {
-                const src = basemapStyle.sources[source];
-                if (
-                    src &&
-                    typeof src === 'object' &&
-                    'url' in src &&
-                    typeof src.url === 'string' &&
-                    src.url.includes(maptilerKeyPlaceHolder)
-                ) {
-                    src.url = src.url.replace(maptilerKeyPlaceHolder, this._maptilerKey);
-                }
-            }
         } catch (e) {
             console.error(e instanceof Error ? e.message : e);
         }

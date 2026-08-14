@@ -103,7 +103,6 @@
     <div class="grow relative">
         <Map
             class="h-full {$fileStateCollection.size > 1 ? 'horizontal' : ''}"
-            maptilerKey={options.key}
             geocoder={false}
             geolocate={true}
             hash={useHash}

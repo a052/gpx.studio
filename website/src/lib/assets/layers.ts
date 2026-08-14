@@ -28,13 +28,7 @@ import ignFrPlan from './custom/ign-fr-plan.json';
 import ignFrSatellite from './custom/ign-fr-satellite.json';
 import bikerouterGravel from './custom/bikerouter-gravel.json';
 
-export const maptilerKeyPlaceHolder = 'MAPTILER_KEY';
-
 export const basemaps: { [key: string]: string | StyleSpecification } = {
-    libertyTopo: 'https://styles.gpx.studio/liberty-topo.json',
-    libertySatellite: 'https://styles.gpx.studio/liberty-satellite.json',
-    osm: 'https://styles.gpx.studio/osm.json',
-    osmTopo: 'https://styles.gpx.studio/osm-topo.json',
     esriSatellite: {
         version: 8,
         sources: {
@@ -799,10 +793,6 @@ export type LayerTreeType = { [key: string]: LayerTreeType | boolean };
 export const basemapTree: LayerTreeType = {
     basemaps: {
         world: {
-            libertyTopo: true,
-            libertySatellite: true,
-            osm: true,
-            osmTopo: true,
             esriSatellite: true,
             openStreetMap: true,
             openTopoMap: true,
@@ -936,7 +926,7 @@ export const overpassTree: LayerTreeType = {
 };
 
 // Default basemap used
-export const defaultBasemap = 'libertyTopo';
+export const defaultBasemap = 'openStreetMap';
 
 // Default overlays used (none)
 export const defaultOverlays: LayerTreeType = {
@@ -1025,11 +1015,7 @@ export const defaultOverpassQueries: LayerTreeType = {
 export const defaultBasemapTree: LayerTreeType = {
     basemaps: {
         world: {
-            libertyTopo: true,
-            libertySatellite: true,
-            osm: true,
-            osmTopo: true,
-            esriSatellite: false,
+            esriSatellite: true,
             openStreetMap: true,
             openTopoMap: true,
             openHikingMap: true,

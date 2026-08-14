@@ -350,10 +350,6 @@
             "switzerland": "Switzerland",
             "united_kingdom": "United Kingdom",
             "united_states": "United States",
-            "libertyTopo": "Liberty Topo",
-            "libertySatellite": "Liberty Satellite",
-            "osm": "OpenMapTiles OSM",
-            "osmTopo": "OpenMapTiles OSM Topo",
             "esriSatellite": "Esri Satellite",
             "openStreetMap": "OpenStreetMap",
             "openTopoMap": "OpenTopoMap",
@@ -582,7 +578,6 @@
     },
     "embedding": {
         "title": "Create your own map",
-        "maptiler_key": "MapTiler key (optional, only required for MapTiler maps)",
         "file_urls": "File URLs (separated by commas)",
         "drive_ids": "Google Drive file IDs (separated by commas)",
         "basemap": "Basemap",

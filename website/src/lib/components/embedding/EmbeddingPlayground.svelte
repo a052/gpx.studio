@@ -22,7 +22,6 @@
         getCleanedEmbeddingOptions,
         getMergedEmbeddingOptions,
     } from './embedding';
-    import { PUBLIC_MAPTILER_KEY } from '$env/static/public';
     import Embedding from './Embedding.svelte';
     import { onDestroy } from 'svelte';
     import { base } from '$app/paths';
@@ -32,7 +31,6 @@
     let options = $state(
         getMergedEmbeddingOptions(
             {
-                key: 'YOUR_MAPTILER_KEY',
                 theme: mode.current,
             },
             defaultEmbeddingOptions
@@ -46,10 +44,6 @@
     let iframeOptions = $derived(
         getMergedEmbeddingOptions(
             {
-                key:
-                    options.key.length === 0 || options.key === 'YOUR_MAPTILER_KEY'
-                        ? PUBLIC_MAPTILER_KEY
-                        : options.key,
                 files: files.split(',').filter((url) => url.length > 0),
                 ids: driveIds.split(',').filter((id) => id.length > 0),
                 elevation: {
@@ -102,8 +96,6 @@
     </Card.Header>
     <Card.Content>
         <fieldset class="flex flex-col gap-3">
-            <Label for="key">{i18n._('embedding.maptiler_key')}</Label>
-            <Input id="key" type="text" class="h-8" bind:value={options.key} />
             <Label for="file_urls">{i18n._('embedding.file_urls')}</Label>
             <Input id="file_urls" type="text" class="h-8" bind:value={files} />
             <Label for="drive_ids">{i18n._('embedding.drive_ids')}</Label>

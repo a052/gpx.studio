@@ -19,9 +19,6 @@
             return;
         }
         embeddingOptions = getMergedEmbeddingOptions(options);
-        if (embeddingOptions.key === '' && embeddingOptions.basemap === 'satellite') {
-            embeddingOptions.basemap = 'libertyTopo';
-        }
     });
 </script>
 

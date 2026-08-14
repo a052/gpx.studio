@@ -41,7 +41,6 @@ let fitBoundsOptions: maplibregl.MapOptions['fitBoundsOptions'] = {
 const MAX_PITCH = 85;
 
 export class MapLibreGLMap {
-    private _maptilerKey: string = '';
     private _map: maplibregl.Map | null = null;
     private _mapStore: Writable<maplibregl.Map | null> = writable(null);
     private _styleManager: StyleManager | null = null;
@@ -54,15 +53,8 @@ export class MapLibreGLMap {
         return this._mapStore.subscribe(run, invalidate);
     }
 
-    init(
-        maptilerKey: string,
-        language: string,
-        hash: boolean,
-        geocoder: boolean,
-        geolocate: boolean
-    ) {
-        this._maptilerKey = maptilerKey;
-        this._styleManager = new StyleManager(this._mapStore, this._maptilerKey);
+    init(language: string, hash: boolean, geocoder: boolean, geolocate: boolean) {
+        this._styleManager = new StyleManager(this._mapStore);
         const map = new maplibregl.Map({
             container: 'map',
             style: {

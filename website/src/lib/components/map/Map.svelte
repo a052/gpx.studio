@@ -4,16 +4,13 @@
     import { i18n } from '$lib/i18n.svelte';
     import { page } from '$app/state';
     import { map } from '$lib/components/map/map';
-    import { PUBLIC_MAPTILER_KEY } from '$env/static/public';
 
     let {
-        maptilerKey = PUBLIC_MAPTILER_KEY,
         geolocate = true,
         geocoder = true,
         hash = true,
         class: className = '',
     }: {
-        maptilerKey?: string;
         geolocate?: boolean;
         geocoder?: boolean;
         hash?: boolean;
@@ -43,7 +40,7 @@
             language = 'en';
         }
 
-        map.init(maptilerKey, language, hash, geocoder, geolocate);
+        map.init(language, hash, geocoder, geolocate);
     });
 
     onDestroy(() => {

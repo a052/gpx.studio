@@ -1,8 +1,6 @@
-import { PUBLIC_MAPTILER_KEY } from '$env/static/public';
 import { basemaps } from '$lib/assets/layers';
 
 export type EmbeddingOptions = {
-    key: string;
     files: string[];
     ids: string[];
     basemap: string;
@@ -26,10 +24,9 @@ export type EmbeddingOptions = {
 };
 
 export const defaultEmbeddingOptions = {
-    key: '',
     files: [],
     ids: [],
-    basemap: 'libertyTopo',
+    basemap: 'openStreetMap',
     elevation: {
         show: true,
         height: 170,
@@ -90,9 +87,6 @@ export function getCleanedEmbeddingOptions(
             delete cleanedOptions[key];
         }
     }
-    if (cleanedOptions['key'] && cleanedOptions['key'] === PUBLIC_MAPTILER_KEY) {
-        delete cleanedOptions['key'];
-    }
     return cleanedOptions;
 }
 
@@ -110,7 +104,6 @@ export function getURLForGoogleDriveFile(fileId: string): string {
 
 export function convertOldEmbeddingOptions(options: URLSearchParams): any {
     let newOptions: any = {
-        key: PUBLIC_MAPTILER_KEY,
         files: [],
         ids: [],
     };
@@ -126,7 +119,7 @@ export function convertOldEmbeddingOptions(options: URLSearchParams): any {
     if (options.has('source')) {
         let basemap = options.get('source')!;
         if (basemap === 'satellite') {
-            newOptions.basemap = 'libertySatellite';
+            newOptions.basemap = 'esriSatellite';
         } else if (basemap === 'otm') {
             newOptions.basemap = 'openTopoMap';
         } else if (basemap === 'ohm') {

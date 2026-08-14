@@ -42,11 +42,8 @@ npm run build
 
 ### Running the website
 
-To be able to load the map, you will need to create your own <a href="https://cloud.maptiler.com/auth/widget?next=https://cloud.maptiler.com/maps/" target="_blank">MapTiler key</a> and store it in a `.env` file in the `website` directory.
-
 ```bash
 cd website
-echo PUBLIC_MAPTILER_KEY={YOUR_MAPTILER_KEY} >> .env
 npm install
 npm run dev
 ```
