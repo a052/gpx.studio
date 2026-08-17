@@ -325,6 +325,7 @@
             "urls": "URL(s)",
             "url_placeholder": "WMTS, WMS oder MapTiler Stil JSON",
             "max_zoom": "Max. Zoom",
+            "tile_size": "Kachelgröße",
             "layer_type": "Ebenenart",
             "basemap": "Basiskarte",
             "overlay": "Einblendung",

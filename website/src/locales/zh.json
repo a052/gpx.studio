@@ -325,6 +325,7 @@
             "urls": "URL(s)",
             "url_placeholder": "WMTS、WMS 或 MapLibre style JSON",
             "max_zoom": "最大缩放等级",
+            "tile_size": "瓦片大小",
             "layer_type": "图层类型",
             "basemap": "底图",
             "overlay": "叠加层",

@@ -37,8 +37,8 @@ export const basemaps: { [key: string]: string | StyleSpecification } = {
                 tiles: [
                     'https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/WMTS/tile/1.0.0/World_Imagery/default/default028mm/{z}/{y}/{x}.jpg',
                 ],
-                tileSize: 256,
-                maxzoom: 19,
+                tileSize: 128,
+                maxzoom: 18,
                 attribution:
                     '© <a href="https://www.esri.com/" target="_blank">Esri</a>, Vantor, Earthstar Geographics, and the GIS User Community',
             },
@@ -1152,6 +1152,7 @@ export type CustomLayer = {
     name: string;
     tileUrls: string[];
     maxZoom: number;
+    tileSize?: number;
     layerType: 'basemap' | 'overlay';
     resourceType: 'raster' | 'vector';
     value: string | StyleSpecification;

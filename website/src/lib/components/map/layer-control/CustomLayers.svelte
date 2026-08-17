@@ -5,6 +5,7 @@
     import { Button } from '$lib/components/ui/button';
     import { Separator } from '$lib/components/ui/separator';
     import * as RadioGroup from '$lib/components/ui/radio-group';
+    import * as Select from '$lib/components/ui/select';
     import {
         CirclePlus,
         CircleX,
@@ -39,6 +40,7 @@
     let name: string = $state('');
     let tileUrls: string[] = $state(['']);
     let maxZoom: number = $state(20);
+    let tileSize: number = $state(256);
     let layerType: 'basemap' | 'overlay' = $state('basemap');
     let resourceType: 'raster' | 'vector' = $derived.by(() => {
         if (tileUrls[0].length > 0 && tileUrls[0].includes('.json')) {
@@ -93,7 +95,6 @@
         if (typeof maxZoom === 'string') {
             maxZoom = parseInt(maxZoom);
         }
-        let is512 = tileUrls.some((url) => url.includes('512'));
 
         let layerId = selectedLayerId ?? getLayerId();
         let layer: CustomLayer = {
@@ -101,6 +102,7 @@
             name: name,
             tileUrls: tileUrls.map((url) => decodeURI(url.trim())),
             maxZoom: maxZoom,
+            tileSize: tileSize,
             layerType: layerType,
             resourceType: resourceType,
             value: '',
@@ -115,7 +117,7 @@
                     [layerId]: {
                         type: 'raster',
                         tiles: layer.tileUrls,
-                        tileSize: is512 ? 512 : 256,
+                        tileSize: tileSize,
                         maxzoom: maxZoom,
                     },
                 },
@@ -220,10 +222,19 @@
             maxZoom = layer.maxZoom;
             layerType = layer.layerType;
             resourceType = layer.resourceType;
+            if (layer.tileSize !== undefined) {
+                tileSize = layer.tileSize;
+            } else if (typeof layer.value === 'object' && layer.value.sources[layer.id]) {
+                const src = layer.value.sources[layer.id];
+                tileSize = src.type === 'raster' && src.tileSize ? src.tileSize : 256;
+            } else {
+                tileSize = 256;
+            }
         } else {
             name = '';
             tileUrls = [''];
             maxZoom = 20;
+            tileSize = 256;
             layerType = 'basemap';
             resourceType = 'raster';
         }
@@ -397,18 +408,39 @@
                     </div>
                 {/each}
                 {#if resourceType === 'raster'}
-                    <Label for="maxZoom">{i18n._('layers.custom_layers.max_zoom')}</Label>
-                    <Input
-                        type="number"
-                        bind:value={maxZoom}
-                        id="maxZoom"
-                        min={0}
-                        max={22}
-                        class="h-8"
-                    />
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="flex flex-col gap-2">
+                            <Label for="maxZoom">{i18n._('layers.custom_layers.max_zoom')}</Label>
+                            <Input
+                                type="number"
+                                bind:value={maxZoom}
+                                id="maxZoom"
+                                min={0}
+                                max={22}
+                                class="h-8 w-20"
+                            />
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <Label for="tileSize">{i18n._('layers.custom_layers.tile_size')}</Label>
+                            <Select.Root
+                                value={tileSize.toString()}
+                                onValueChange={(v) => (tileSize = parseInt(v))}
+                                type="single"
+                            >
+                                <Select.Trigger id="tileSize" class="h-8 w-20">
+                                    {tileSize}
+                                </Select.Trigger>
+                                <Select.Content>
+                                    {#each [128, 256, 512, 1024] as size (size)}
+                                        <Select.Item value={size.toString()}>{size}</Select.Item>
+                                    {/each}
+                                </Select.Content>
+                            </Select.Root>
+                        </div>
+                    </div>
                 {/if}
                 <Label>{i18n._('layers.custom_layers.layer_type')}</Label>
-                <RadioGroup.Root bind:value={layerType} class="flex flex-row">
+                <RadioGroup.Root bind:value={layerType} class="grid grid-cols-2">
                     <div class="flex items-center space-x-2">
                         <RadioGroup.Item value="basemap" id="basemap" />
                         <Label for="basemap">{i18n._('layers.custom_layers.basemap')}</Label>

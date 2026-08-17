@@ -325,6 +325,7 @@
             "urls": "URL(s)",
             "url_placeholder": "WMTS, WMS ou MapLibre style JSON",
             "max_zoom": "Zoom max",
+            "tile_size": "Taille des tuiles",
             "layer_type": "Type de couche",
             "basemap": "Fond de carte",
             "overlay": "Surcouche",
