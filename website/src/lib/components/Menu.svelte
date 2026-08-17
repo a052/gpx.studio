@@ -625,17 +625,17 @@
             fileActions.duplicateSelection();
             e.preventDefault();
         } else if (e.key === 'c' && (e.metaKey || e.ctrlKey)) {
-            if (!targetInput) {
+            if (!targetInput && $treeFileView) {
                 selection.copySelection();
                 e.preventDefault();
             }
         } else if (e.key === 'x' && (e.metaKey || e.ctrlKey)) {
-            if (!targetInput) {
+            if (!targetInput && $treeFileView) {
                 selection.cutSelection();
                 e.preventDefault();
             }
         } else if (e.key === 'v' && (e.metaKey || e.ctrlKey)) {
-            if (!targetInput) {
+            if (!targetInput && $treeFileView) {
                 pasteSelection();
                 e.preventDefault();
             }

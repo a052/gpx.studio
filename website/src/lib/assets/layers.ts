@@ -57,12 +57,12 @@ export const basemaps: { [key: string]: string | StyleSpecification } = {
             googleSatellite: {
                 type: 'raster',
                 tiles: [
-                    'https://mt0.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&scale=2',
-                    'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&scale=2',
-                    'https://mt2.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&scale=2',
-                    'https://mt3.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&scale=2',
+                    'https://mt0.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&scale=4',
+                    'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&scale=4',
+                    'https://mt2.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&scale=4',
+                    'https://mt3.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&scale=4',
                 ],
-                tileSize: 512,
+                tileSize: 256,
                 maxzoom: 21,
                 attribution:
                     '&copy; <a href="https://www.google.com/maps" target="_blank">Google</a>',
