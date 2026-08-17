@@ -115,7 +115,7 @@
             >
                 <Toolbar />
             </div>
-            <Map class="h-full {$treeFileView ? '' : 'horizontal'}" />
+            <Map class="h-full bottom-bar {$treeFileView ? '' : 'horizontal'}" />
             <StreetViewControl />
             <LayerControl />
             <GPXLayers />

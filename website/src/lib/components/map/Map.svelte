@@ -172,6 +172,10 @@
         @apply bottom-[42px];
     }
 
+    .bottom-bar :global(.maplibregl-ctrl-bottom-right) {
+        @apply bottom-[42px];
+    }
+
     div :global(.maplibregl-ctrl-attrib) {
         @apply dark:bg-transparent;
     }
