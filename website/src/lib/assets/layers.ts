@@ -51,6 +51,56 @@ export const basemaps: { [key: string]: string | StyleSpecification } = {
             },
         ],
     },
+    googleSatellite: {
+        version: 8,
+        sources: {
+            googleSatellite: {
+                type: 'raster',
+                tiles: [
+                    'https://mt0.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&scale=2',
+                    'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&scale=2',
+                    'https://mt2.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&scale=2',
+                    'https://mt3.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&scale=2',
+                ],
+                tileSize: 512,
+                maxzoom: 21,
+                attribution:
+                    '&copy; <a href="https://www.google.com/maps" target="_blank">Google</a>',
+            },
+        },
+        layers: [
+            {
+                id: 'googleSatellite',
+                type: 'raster',
+                source: 'googleSatellite',
+            },
+        ],
+    },
+    bingSatellite: {
+        version: 8,
+        sources: {
+            bingSatellite: {
+                type: 'raster',
+                tiles: [
+                    'https://ecn.t0.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=1',
+                    'https://ecn.t1.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=1',
+                    'https://ecn.t2.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=1',
+                    'https://ecn.t3.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=1',
+                ],
+                tileSize: 256,
+                maxzoom: 18,
+                attribution:
+                    '&copy; <a href="https://www.bing.com/maps" target="_blank">Microsoft</a>',
+            },
+        },
+        layers: [
+            {
+                id: 'bingSatellite',
+                type: 'raster',
+                source: 'bingSatellite',
+            },
+        ],
+    },
     openStreetMap: {
         version: 8,
         sources: {
@@ -405,6 +455,31 @@ export const overlays: { [key: string]: string | StyleSpecification } = {
                 id: 'openRailwayMap',
                 type: 'raster',
                 source: 'openRailwayMap',
+            },
+        ],
+    },
+    osmGpsTraces: {
+        version: 8,
+        sources: {
+            osmGpsTraces: {
+                type: 'raster',
+                tiles: [
+                    'https://gps-a.tile.openstreetmap.org/lines/{z}/{x}/{y}.png',
+                    'https://gps-b.tile.openstreetmap.org/lines/{z}/{x}/{y}.png',
+                    'https://gps-c.tile.openstreetmap.org/lines/{z}/{x}/{y}.png',
+                    'https://gps.tile.openstreetmap.org/lines/{z}/{x}/{y}.png',
+                ],
+                tileSize: 256,
+                maxzoom: 18,
+                attribution:
+                    '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
+            },
+        },
+        layers: [
+            {
+                id: 'osmGpsTraces',
+                type: 'raster',
+                source: 'osmGpsTraces',
             },
         ],
     },
@@ -794,6 +869,8 @@ export const basemapTree: LayerTreeType = {
     basemaps: {
         world: {
             esriSatellite: true,
+            googleSatellite: true,
+            bingSatellite: true,
             openStreetMap: true,
             openTopoMap: true,
             openHikingMap: true,
@@ -858,6 +935,7 @@ export const overlayTree: LayerTreeType = {
             cyclOSMlite: true,
             mapterhornHillshade: true,
             openRailwayMap: true,
+            osmGpsTraces: true,
         },
         countries: {
             france: {
@@ -944,6 +1022,7 @@ export const defaultOverlays: LayerTreeType = {
             cyclOSMlite: false,
             mapterhornHillshade: false,
             openRailwayMap: false,
+            osmGpsTraces: false,
         },
         countries: {
             france: {
@@ -1016,6 +1095,8 @@ export const defaultBasemapTree: LayerTreeType = {
     basemaps: {
         world: {
             esriSatellite: true,
+            googleSatellite: true,
+            bingSatellite: true,
             openStreetMap: true,
             openTopoMap: true,
             openHikingMap: true,
@@ -1078,8 +1159,9 @@ export const defaultOverlayTree: LayerTreeType = {
             },
             bikerouterGravel: false,
             cyclOSMlite: false,
-            mapterhornHillshade: false,
+            mapterhornHillshade: true,
             openRailwayMap: false,
+            osmGpsTraces: true,
         },
         countries: {
             france: {
