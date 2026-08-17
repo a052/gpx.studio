@@ -240,7 +240,7 @@ export const settings = {
         'celsius',
         getValueValidator<TemperatureUnits>(['celsius', 'fahrenheit'], 'celsius')
     ),
-    elevationProfile: new Setting<boolean>('elevationProfile', true),
+    elevationProfile: new Setting<boolean>('elevationProfile', false),
     elevationGainThreshold: new Setting<number>(
         'elevationGainThreshold',
         3,

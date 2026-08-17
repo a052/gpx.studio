@@ -142,20 +142,18 @@
                 minAfter={100}
                 maxAfter={300}
             />
-        {/if}
-        <div
-            bind:offsetWidth={bottomPanelWidth}
-            class="flex {bottomPanelOrientation == 'vertical'
-                ? 'flex-col'
-                : 'flex-row py-2'} gap-1 px-4"
-            style={$elevationProfile ? `height: ${$bottomPanelSize}px` : ''}
-        >
-            <GPXStatistics
-                {gpxStatistics}
-                {slicedGPXStatistics}
-                orientation={bottomPanelOrientation == 'horizontal' ? 'vertical' : 'horizontal'}
-            />
-            {#if $elevationProfile}
+            <div
+                bind:offsetWidth={bottomPanelWidth}
+                class="flex {bottomPanelOrientation == 'vertical'
+                    ? 'flex-col'
+                    : 'flex-row py-2'} gap-1 px-4"
+                style="height: {$bottomPanelSize}px"
+            >
+                <GPXStatistics
+                    {gpxStatistics}
+                    {slicedGPXStatistics}
+                    orientation={bottomPanelOrientation == 'horizontal' ? 'vertical' : 'horizontal'}
+                />
                 <ElevationProfile
                     {gpxStatistics}
                     {slicedGPXStatistics}
@@ -163,8 +161,8 @@
                     {additionalDatasets}
                     {elevationFill}
                 />
-            {/if}
-        </div>
+            </div>
+        {/if}
     </div>
     {#if $treeFileView}
         <Resizer orientation="col" bind:after={$rightPanelSize} minAfter={100} maxAfter={400} />
