@@ -282,7 +282,11 @@
         "elevation": {
             "button": "Solicitar datos de desnivel",
             "help": "La solicitud de datos de elevación borrará los datos de elevación existentes, si los hay, y los reemplazará con datos de Mapterhorn.",
-            "help_no_selection": "Seleccione un elemento del archivo para solicitar datos de desnivel."
+            "help_no_selection": "Seleccione un elemento del archivo para solicitar datos de desnivel.",
+            "loading": "Solicitando datos de desnivel…",
+            "updated": "Datos de desnivel actualizados.",
+            "no_change": "Los datos de desnivel ya coinciden con la fuente seleccionada.",
+            "error": "No se pudieron solicitar los datos de desnivel."
         },
         "waypoint": {
             "tooltip": "Crear y editar puntos de interés",

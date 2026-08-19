@@ -282,7 +282,11 @@
         "elevation": {
             "button": "Request elevation data",
             "help": "Requesting elevation data will erase the existing elevation data, if any, and replace it with data from Mapterhorn.",
-            "help_no_selection": "Select a file item to request elevation data."
+            "help_no_selection": "Select a file item to request elevation data.",
+            "loading": "Requesting elevation data…",
+            "updated": "Elevation data updated.",
+            "no_change": "Elevation data already matches the selected source.",
+            "error": "Could not request elevation data."
         },
         "waypoint": {
             "tooltip": "Create and edit points of interest",

@@ -813,9 +813,9 @@ export const fileActions = {
             });
         });
     },
-    addElevationToSelection: async () => {
+    addElevationToSelection: async (): Promise<boolean> => {
         if (get(selection).size === 0) {
-            return;
+            return false;
         }
         const points: (TrackPoint | Waypoint)[] = [];
         selection.applyToOrderedSelectedItemsFromFile((fileId, level, items) => {
@@ -850,38 +850,35 @@ export const fileActions = {
             }
         });
         if (points.length === 0) {
-            return;
+            return false;
         }
-        getElevation(points).then((elevations) => {
-            fileActionManager.applyGlobal((draft) => {
-                selection.applyToOrderedSelectedItemsFromFile((fileId, level, items) => {
-                    const file = draft.get(fileId);
-                    if (file) {
-                        if (level === ListLevel.FILE) {
-                            file.addElevation(elevations);
-                        } else if (level === ListLevel.TRACK) {
-                            const trackIndices = items.map((item) =>
-                                (item as ListTrackItem).getTrackIndex()
-                            );
-                            file.addElevation(elevations, trackIndices, undefined, []);
-                        } else if (level === ListLevel.SEGMENT) {
-                            const trackIndices = [
-                                (items[0] as ListTrackSegmentItem).getTrackIndex(),
-                            ];
-                            const segmentIndices = items.map((item) =>
-                                (item as ListTrackSegmentItem).getSegmentIndex()
-                            );
-                            file.addElevation(elevations, trackIndices, segmentIndices, []);
-                        } else if (level === ListLevel.WAYPOINTS) {
-                            file.addElevation(elevations, [], [], undefined);
-                        } else if (level === ListLevel.WAYPOINT) {
-                            const waypointIndices = items.map((item) =>
-                                (item as ListWaypointItem).getWaypointIndex()
-                            );
-                            file.addElevation(elevations, [], [], waypointIndices);
-                        }
+        const elevations = await getElevation(points);
+        return fileActionManager.applyGlobal((draft) => {
+            selection.applyToOrderedSelectedItemsFromFile((fileId, level, items) => {
+                const file = draft.get(fileId);
+                if (file) {
+                    if (level === ListLevel.FILE) {
+                        file.addElevation(elevations);
+                    } else if (level === ListLevel.TRACK) {
+                        const trackIndices = items.map((item) =>
+                            (item as ListTrackItem).getTrackIndex()
+                        );
+                        file.addElevation(elevations, trackIndices, undefined, []);
+                    } else if (level === ListLevel.SEGMENT) {
+                        const trackIndices = [(items[0] as ListTrackSegmentItem).getTrackIndex()];
+                        const segmentIndices = items.map((item) =>
+                            (item as ListTrackSegmentItem).getSegmentIndex()
+                        );
+                        file.addElevation(elevations, trackIndices, segmentIndices, []);
+                    } else if (level === ListLevel.WAYPOINTS) {
+                        file.addElevation(elevations, [], [], undefined);
+                    } else if (level === ListLevel.WAYPOINT) {
+                        const waypointIndices = items.map((item) =>
+                            (item as ListWaypointItem).getWaypointIndex()
+                        );
+                        file.addElevation(elevations, [], [], waypointIndices);
                     }
-                });
+                }
             });
         });
     },

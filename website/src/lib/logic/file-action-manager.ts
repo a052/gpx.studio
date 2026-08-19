@@ -205,18 +205,26 @@ export class FileActionManager {
     // an exception thrown by any operation (e.g. timestamp math on a malformed track) cannot escape
     // into the caller — it is logged and re-thrown so button handlers can show user feedback without
     // the error aborting a reactive store update or leaving the app half-mutated.
-    private _applyWithPatches(
+    // Resolves to whether anything actually changed: a producer that leaves the state untouched yields
+    // an empty patch, which we skip entirely (no phantom undo entry, no no-op commit) and report as
+    // `false` so callers can surface an accurate "nothing changed" message.
+    private async _applyWithPatches(
         producer: (draft: Map<string, WritableDraft<GPXFile>>) => void
-    ): Promise<void> {
+    ): Promise<boolean> {
         try {
             const [newFileCollection, patch, inversePatch] = produceWithPatches(
                 this._files,
                 producer
             );
 
+            if (patch.length === 0) {
+                return false;
+            }
+
             this.storePatches(patch, inversePatch);
 
-            return this.commitFileStateChange(newFileCollection, patch);
+            await this.commitFileStateChange(newFileCollection, patch);
+            return true;
         } catch (error) {
             console.error('File mutation failed:', error);
             throw error;

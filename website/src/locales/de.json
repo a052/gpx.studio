@@ -282,7 +282,11 @@
         "elevation": {
             "button": "Höhendaten anfragen",
             "help": "Requesting elevation data will erase the existing elevation data, if any, and replace it with data from Mapterhorn.",
-            "help_no_selection": "Wählen Sie ein Datei-Element, um Höhendaten anzufordern."
+            "help_no_selection": "Wählen Sie ein Datei-Element, um Höhendaten anzufordern.",
+            "loading": "Höhendaten werden angefragt…",
+            "updated": "Höhendaten aktualisiert.",
+            "no_change": "Die Höhendaten stimmen bereits mit der ausgewählten Quelle überein.",
+            "error": "Höhendaten konnten nicht angefragt werden."
         },
         "waypoint": {
             "tooltip": "Punkte von Interesse erstellen und bearbeiten",

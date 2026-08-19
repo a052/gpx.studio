@@ -282,7 +282,11 @@
         "elevation": {
             "button": "请求海拔数据",
             "help": "请求成功后将移除原有的海拔数据，并使用 Mapterhorn 的海拔数据替换原有数据。",
-            "help_no_selection": "选择要请求海拔数据的文件。"
+            "help_no_selection": "选择要请求海拔数据的文件。",
+            "loading": "正在请求海拔数据…",
+            "updated": "海拔数据已更新。",
+            "no_change": "海拔数据已与所选数据源一致。",
+            "error": "无法请求海拔数据。"
         },
         "waypoint": {
             "tooltip": "创建或编辑兴趣点",

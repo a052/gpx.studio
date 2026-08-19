@@ -282,7 +282,11 @@
         "elevation": {
             "button": "Ajouter des données d'altitude",
             "help": "Ajouter des données d'altitude effacera les données d'altitude existantes, le cas échéant, et les remplacera par des données fournies par Mapterhorn.",
-            "help_no_selection": "Sélectionnez un élément de fichier pour ajouter des données d'altitude."
+            "help_no_selection": "Sélectionnez un élément de fichier pour ajouter des données d'altitude.",
+            "loading": "Demande de données d'altitude…",
+            "updated": "Données d'altitude mises à jour.",
+            "no_change": "Les données d'altitude correspondent déjà à la source sélectionnée.",
+            "error": "Impossible de récupérer les données d'altitude."
         },
         "waypoint": {
             "tooltip": "Créer et modifier des points d'intérêt",
