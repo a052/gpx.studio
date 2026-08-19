@@ -12,7 +12,7 @@
         variant="outline"
         side="top"
         label={i18n._('menu.points_of_interest')}
-        class="w-7 h-7 p-0 flex justify-center opacity-70 hover:opacity-100 transition-opacity duration-300 bg-background"
+        class="w-[29px] h-[29px] p-0 flex justify-center bg-background dark:bg-background hover:bg-background dark:hover:bg-background border-0 shadow-md"
         onclick={() => {
             $showWaypoints = !$showWaypoints;
         }}
@@ -23,7 +23,7 @@
         variant="outline"
         side="top"
         label={i18n._('menu.distance_markers')}
-        class="w-7 h-7 p-0 flex justify-center opacity-70 hover:opacity-100 transition-opacity duration-300 bg-background"
+        class="w-[29px] h-[29px] p-0 flex justify-center bg-background dark:bg-background hover:bg-background dark:hover:bg-background border-0 shadow-md"
         onclick={() => {
             $distanceMarkers = !$distanceMarkers;
         }}
@@ -34,7 +34,7 @@
         variant="outline"
         side="top"
         label={i18n._('menu.direction_markers')}
-        class="w-7 h-7 p-0 flex justify-center opacity-70 hover:opacity-100 transition-opacity duration-300 bg-background"
+        class="w-[29px] h-[29px] p-0 flex justify-center bg-background dark:bg-background hover:bg-background dark:hover:bg-background border-0 shadow-md"
         onclick={() => {
             $directionMarkers = !$directionMarkers;
         }}
@@ -45,7 +45,7 @@
         variant="outline"
         side="top"
         label={i18n._('menu.elevation_profile')}
-        class="w-7 h-7 p-0 flex justify-center opacity-70 hover:opacity-100 transition-opacity duration-300 bg-background"
+        class="w-[29px] h-[29px] p-0 flex justify-center bg-background dark:bg-background hover:bg-background dark:hover:bg-background border-0 shadow-md"
         onclick={() => {
             $elevationProfile = !$elevationProfile;
         }}

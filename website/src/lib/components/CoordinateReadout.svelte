@@ -96,9 +96,7 @@
      from the canvas (which would collapse the pill and flicker); only the toggle button is interactive. -->
 <div class="shrink-0 h-full flex flex-row items-center px-1 pointer-events-none">
     <div
-        class="h-7 flex flex-row items-center overflow-hidden rounded-lg border border-border bg-background dark:bg-input/30 dark:border-input transition-opacity duration-300 {$coordinateReadout
-            ? 'opacity-100'
-            : 'opacity-70 has-[button:hover]:opacity-100'}"
+        class="h-[29px] flex flex-row items-center overflow-hidden rounded-lg bg-background shadow-md"
     >
         <!-- Expanding readout: grows from 0 to content width when enabled (same idiom as LayerControl). -->
         <div
@@ -138,7 +136,7 @@
                         <button
                             {...props}
                             aria-label={i18n._('menu.coordinate_readout')}
-                            class="w-7 h-7 shrink-0 flex items-center justify-center pointer-events-auto"
+                            class="w-[29px] h-[29px] shrink-0 flex items-center justify-center pointer-events-auto"
                             onclick={() => {
                                 $coordinateReadout = !$coordinateReadout;
                             }}
