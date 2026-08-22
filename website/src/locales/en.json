@@ -30,6 +30,7 @@
         "delete": "Delete",
         "delete_all": "Delete all",
         "select_all": "Select all",
+        "unselect_all": "Unselect all",
         "view": "View",
         "elevation_profile": "Elevation profile",
         "tree_file_view": "File tree",

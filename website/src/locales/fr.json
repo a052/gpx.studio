@@ -30,6 +30,7 @@
         "delete": "Supprimer",
         "delete_all": "Supprimer tout",
         "select_all": "Sélectionner tout",
+        "unselect_all": "Tout désélectionner",
         "view": "Affichage",
         "elevation_profile": "Profil altimétrique",
         "tree_file_view": "Arborescence de fichiers",

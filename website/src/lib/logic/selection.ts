@@ -104,6 +104,13 @@ export class Selection {
         });
     }
 
+    deselectAll() {
+        this._selection.update(($selection) => {
+            $selection.clear();
+            return $selection;
+        });
+    }
+
     selectFileWhenLoaded(fileId: string) {
         const unsubscribe = fileStateCollection.subscribe((files) => {
             if (files.has(fileId)) {

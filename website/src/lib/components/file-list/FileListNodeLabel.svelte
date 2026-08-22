@@ -17,6 +17,7 @@
         Maximize,
         Scissors,
         FileStack,
+        SquareDashed,
     } from '@lucide/svelte';
     import {
         ListFileItem,
@@ -272,6 +273,11 @@
                 <FileStack size="16" />
                 {i18n._('menu.select_all')}
                 <Shortcut key="A" ctrl={true} />
+            </ContextMenu.Item>
+            <ContextMenu.Item onclick={() => selection.deselectAll()}>
+                <SquareDashed size="16" />
+                {i18n._('menu.unselect_all')}
+                <Shortcut key="A" ctrl={true} shift={true} />
             </ContextMenu.Item>
         {/if}
         <ContextMenu.Item onclick={() => boundsManager.centerMapOnSelection()}>

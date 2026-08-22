@@ -30,6 +30,7 @@
         "delete": "Eliminar track",
         "delete_all": "Borrar todos",
         "select_all": "Seleccionar todo",
+        "unselect_all": "Deseleccionar todo",
         "view": "Vista",
         "elevation_profile": "Perfil de altura",
         "tree_file_view": "Árbol de archivos",

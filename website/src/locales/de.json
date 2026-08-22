@@ -30,6 +30,7 @@
         "delete": "Löschen",
         "delete_all": "Alle löschen",
         "select_all": "Alle auswählen",
+        "unselect_all": "Alle abwählen",
         "view": "Ansicht",
         "elevation_profile": "Höhenprofil",
         "tree_file_view": "Dateipfad",

@@ -23,6 +23,7 @@
     import { db } from '$lib/db';
     import { fileStateCollection } from '$lib/logic/file-state';
     import { installCorsProxyFetch } from '$lib/logic/cors-proxy';
+    import { selection } from '$lib/logic/selection';
 
     const {
         treeFileView,
@@ -142,25 +143,29 @@
                 minAfter={100}
                 maxAfter={300}
             />
+        {/if}
+        {#if $elevationProfile || $selection.size > 0}
             <div
                 bind:offsetWidth={bottomPanelWidth}
                 class="flex {bottomPanelOrientation == 'vertical'
                     ? 'flex-col'
                     : 'flex-row py-2'} gap-1 px-4"
-                style="height: {$bottomPanelSize}px"
+                style={$elevationProfile ? `height: ${$bottomPanelSize}px` : ''}
             >
                 <GPXStatistics
                     {gpxStatistics}
                     {slicedGPXStatistics}
                     orientation={bottomPanelOrientation == 'horizontal' ? 'vertical' : 'horizontal'}
                 />
-                <ElevationProfile
-                    {gpxStatistics}
-                    {slicedGPXStatistics}
-                    {hoveredPoint}
-                    {additionalDatasets}
-                    {elevationFill}
-                />
+                {#if $elevationProfile}
+                    <ElevationProfile
+                        {gpxStatistics}
+                        {slicedGPXStatistics}
+                        {hoveredPoint}
+                        {additionalDatasets}
+                        {elevationFill}
+                    />
+                {/if}
             </div>
         {/if}
     </div>

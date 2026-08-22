@@ -30,6 +30,7 @@
         "delete": "删除",
         "delete_all": "全部删除",
         "select_all": "全选",
+        "unselect_all": "取消全选",
         "view": "显示",
         "elevation_profile": "海拔剖面图",
         "tree_file_view": "文件树",

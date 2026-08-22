@@ -16,6 +16,7 @@ import { settings } from '$lib/logic/settings';
 import { tick } from 'svelte';
 import { ANCHOR_LAYER_KEY, StyleManager, SKY } from '$lib/components/map/style';
 import { MapLayerEventManager } from '$lib/components/map/map-layer-event-manager';
+import { selection } from '$lib/logic/selection';
 
 const {
     treeFileView,
@@ -175,6 +176,18 @@ export class MapLibreGLMap {
         this._unsubscribes.push(elevationProfile.subscribe(() => this.resize()));
         this._unsubscribes.push(bottomPanelSize.subscribe(() => this.resize()));
         this._unsubscribes.push(rightPanelSize.subscribe(() => this.resize()));
+        // The selection-gated stats bar changes the map container height when it appears or
+        // disappears; resize only when that visibility actually flips, not on every selection change.
+        let lastHasSelection = get(selection).size > 0;
+        this._unsubscribes.push(
+            selection.subscribe(($sel) => {
+                const has = $sel.size > 0;
+                if (has !== lastHasSelection) {
+                    lastHasSelection = has;
+                    this.resize();
+                }
+            })
+        );
         this._unsubscribes.push(
             distanceUnits.subscribe((units) => {
                 scaleControl.setUnit(units);

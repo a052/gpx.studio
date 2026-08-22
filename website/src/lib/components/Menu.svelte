@@ -50,6 +50,7 @@
         Waypoints,
         Mountain,
         MountainSnow,
+        SquareDashed,
     } from '@lucide/svelte';
     import { editMetadata } from '$lib/components/file-list/metadata/utils.svelte';
     import { editStyle } from '$lib/components/file-list/style/utils.svelte';
@@ -319,6 +320,14 @@
                         <Shortcut key="A" ctrl={true} />
                     </Menubar.Item>
                     <Menubar.Item
+                        onclick={() => selection.deselectAll()}
+                        disabled={$selection.size == 0}
+                    >
+                        <SquareDashed size="16" />
+                        {i18n._('menu.unselect_all')}
+                        <Shortcut key="A" ctrl={true} shift={true} />
+                    </Menubar.Item>
+                    <Menubar.Item
                         onclick={() => {
                             if ($selection.size > 0) {
                                 boundsManager.centerMapOnSelection();
@@ -329,6 +338,15 @@
                         <Maximize size="16" />
                         {i18n._('menu.center')}
                         <Shortcut key="⏎" ctrl={true} />
+                    </Menubar.Item>
+                    <Menubar.Separator />
+                    <Menubar.Item
+                        onclick={fileActions.duplicateSelection}
+                        disabled={$selection.size == 0}
+                    >
+                        <Copy size="16" />
+                        {i18n._('menu.duplicate')}
+                        <Shortcut key="D" ctrl={true} />
                     </Menubar.Item>
                     {#if $treeFileView}
                         <Menubar.Separator />
@@ -664,9 +682,13 @@
                 }
                 e.preventDefault();
             }
-        } else if (e.key === 'a' && (e.metaKey || e.ctrlKey)) {
+        } else if ((e.key === 'a' || e.key === 'A') && (e.metaKey || e.ctrlKey)) {
             if (!targetInput) {
-                selection.selectAll();
+                if (e.shiftKey) {
+                    selection.deselectAll();
+                } else {
+                    selection.selectAll();
+                }
                 e.preventDefault();
             }
         } else if (e.key === 'i' && (e.metaKey || e.ctrlKey)) {
