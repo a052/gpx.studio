@@ -22,6 +22,7 @@
     import { defaultBasemap, type CustomLayer, type LayerTreeType } from '$lib/assets/layers';
     import { onMount } from 'svelte';
     import { remove } from './utils';
+    import { detectVectorKind } from './vector-style';
     import { settings } from '$lib/logic/settings';
     import { dndzone } from 'svelte-dnd-action';
 
@@ -41,13 +42,12 @@
     let tileUrls: string[] = $state(['']);
     let maxZoom: number = $state(20);
     let tileSize: number = $state(256);
+    let sourceLayers: string = $state('');
     let layerType: 'basemap' | 'overlay' = $state('basemap');
-    let resourceType: 'raster' | 'vector' = $derived.by(() => {
-        if (tileUrls[0].length > 0 && tileUrls[0].includes('.json')) {
-            return 'vector';
-        }
-        return 'raster';
-    });
+    let vectorKind: 'raster' | 'json' | 'xyz-vector' = $derived(
+        tileUrls[0].length > 0 ? detectVectorKind(tileUrls[0]) : 'raster'
+    );
+    let resourceType: 'raster' | 'vector' = $derived(vectorKind === 'raster' ? 'raster' : 'vector');
 
     let selectedLayerId: string | undefined = $state(undefined);
 
@@ -109,6 +109,17 @@
         };
 
         if (resourceType === 'vector') {
+            if (vectorKind === 'xyz-vector') {
+                // Raw vector tile template (.pbf/.mvt). Persist the source-layer name(s);
+                // style.ts resolves the layer at render time — auto-discovering the
+                // provider's TileJSON (for layer names + geometry) when this is left blank.
+                layer.sourceLayers = sourceLayers
+                    .split(/[,\s]+/)
+                    .map((s) => s.trim())
+                    .filter(Boolean);
+            }
+            // Resolved at render time in style.ts (TileJSON synthesis / style passthrough),
+            // keyed by this layer's id.
             layer.value = layer.tileUrls[0];
         } else {
             layer.value = {
@@ -222,6 +233,7 @@
             maxZoom = layer.maxZoom;
             layerType = layer.layerType;
             resourceType = layer.resourceType;
+            sourceLayers = layer.sourceLayers ? layer.sourceLayers.join(', ') : '';
             if (layer.tileSize !== undefined) {
                 tileSize = layer.tileSize;
             } else if (typeof layer.value === 'object' && layer.value.sources[layer.id]) {
@@ -235,6 +247,7 @@
             tileUrls = [''];
             maxZoom = 20;
             tileSize = 256;
+            sourceLayers = '';
             layerType = 'basemap';
             resourceType = 'raster';
         }
@@ -438,6 +451,27 @@
                             </Select.Root>
                         </div>
                     </div>
+                {:else if vectorKind === 'xyz-vector'}
+                    <div class="flex flex-col gap-2">
+                        <Label for="maxZoom">{i18n._('layers.custom_layers.max_zoom')}</Label>
+                        <Input
+                            type="number"
+                            bind:value={maxZoom}
+                            id="maxZoom"
+                            min={0}
+                            max={22}
+                            class="h-8 w-20"
+                        />
+                    </div>
+                    <Label for="sourceLayers">
+                        {i18n._('layers.custom_layers.source_layer')}
+                    </Label>
+                    <Input
+                        bind:value={sourceLayers}
+                        id="sourceLayers"
+                        class="h-8"
+                        placeholder={i18n._('layers.custom_layers.source_layer_placeholder')}
+                    />
                 {/if}
                 <Label>{i18n._('layers.custom_layers.layer_type')}</Label>
                 <RadioGroup.Root bind:value={layerType} class="grid grid-cols-2">

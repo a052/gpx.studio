@@ -1,8 +1,23 @@
 import { settings } from '$lib/logic/settings';
 import type * as maplibregl from 'maplibre-gl';
 import { get, type Writable } from 'svelte/store';
-import { basemaps, defaultBasemap, overlays, terrainSources } from '$lib/assets/layers';
+import {
+    basemaps,
+    defaultBasemap,
+    overlays,
+    terrainSources,
+    type CustomLayer,
+} from '$lib/assets/layers';
 import { getLayers } from '$lib/components/map/layer-control/utils';
+import {
+    detectVectorKind,
+    deriveTileJSONUrl,
+    isTileJSON,
+    styleFromTileJSON,
+    synthesizeVectorLayers,
+    type MapUnits,
+    type TileJSON,
+} from '$lib/components/map/layer-control/vector-style';
 import { i18n } from '$lib/i18n.svelte';
 
 const {
@@ -78,9 +93,18 @@ export class StyleManager {
         customLayers.subscribe(() => this.updateBasemap());
         distanceUnits.subscribe(() => {
             const map = get(this._map);
-            if (map && (map.getLayer('contours_m') || map.getLayer('contours_ft'))) {
+            if (!map) return;
+            // Built-in contour styles key their layers on contours_m/contours_ft.
+            if (map.getLayer('contours_m') || map.getLayer('contours_ft')) {
                 this.updateBasemap();
             }
+            // Custom vector layers may hold a metric/imperial pair whose selection tracks
+            // the unit setting — rebuild the basemap and re-synthesize active overlays.
+            const custom = get(customLayers);
+            if (custom[get(currentBasemap)]?.resourceType === 'vector') {
+                this.updateBasemap();
+            }
+            this.refreshCustomVectorOverlays();
         });
     }
 
@@ -112,11 +136,17 @@ export class StyleManager {
             layers: [],
         };
 
-        const basemapInfo = basemaps[basemap] ?? custom[basemap]?.value ?? basemaps[defaultBasemap];
+        const customBasemap = custom[basemap];
 
         let basemapStyle = basemaps.openStreetMap as maplibregl.StyleSpecification;
         try {
-            basemapStyle = await this.get(basemapInfo);
+            if (customBasemap && customBasemap.resourceType === 'vector') {
+                basemapStyle = await this.resolveCustomVectorStyle(customBasemap);
+            } else {
+                const basemapInfo =
+                    basemaps[basemap] ?? customBasemap?.value ?? basemaps[defaultBasemap];
+                basemapStyle = await this.get(basemapInfo);
+            }
         } catch (e) {
             console.error(e instanceof Error ? e.message : e);
         }
@@ -143,9 +173,8 @@ export class StyleManager {
             for (const overlay in layers) {
                 if (!layers[overlay]) {
                     if (this._pastOverlays.has(overlay)) {
-                        const overlayInfo = custom[overlay]?.value ?? overlays[overlay];
                         try {
-                            const overlayStyle = await this.get(overlayInfo);
+                            const overlayStyle = await this.getOverlayStyle(overlay, custom);
                             for (const layer of overlayStyle.layers ?? []) {
                                 if (map_.getLayer(layer.id)) {
                                     map_.removeLayer(layer.id);
@@ -157,9 +186,8 @@ export class StyleManager {
                         this._pastOverlays.delete(overlay);
                     }
                 } else {
-                    const overlayInfo = custom[overlay]?.value ?? overlays[overlay];
                     try {
-                        const overlayStyle = await this.get(overlayInfo);
+                        const overlayStyle = await this.getOverlayStyle(overlay, custom);
                         const opacity = overlayOpacities[overlay];
 
                         for (const sourceId in overlayStyle.sources) {
@@ -181,6 +209,21 @@ export class StyleManager {
                                             layer.paint = {};
                                         }
                                         layer.paint['hillshade-exaggeration'] = opacity / 2;
+                                    } else if (layer.type === 'line') {
+                                        if (!layer.paint) {
+                                            layer.paint = {};
+                                        }
+                                        layer.paint['line-opacity'] = opacity;
+                                    } else if (layer.type === 'fill') {
+                                        if (!layer.paint) {
+                                            layer.paint = {};
+                                        }
+                                        layer.paint['fill-opacity'] = opacity;
+                                    } else if (layer.type === 'circle') {
+                                        if (!layer.paint) {
+                                            layer.paint = {};
+                                        }
+                                        layer.paint['circle-opacity'] = opacity;
                                     }
                                 }
                                 map_.addLayer(layer, ANCHOR_LAYER_KEY.overlays);
@@ -194,6 +237,112 @@ export class StyleManager {
             }
         } catch {
             /* ignore */
+        }
+    }
+
+    // Resolve the style for an overlay key: custom vector layers go through the
+    // vector resolver (TileJSON synthesis / pre-synthesized XYZ), everything else
+    // keeps the plain fetch-or-inline path.
+    getOverlayStyle(
+        overlay: string,
+        custom: Record<string, CustomLayer>
+    ): Promise<maplibregl.StyleSpecification> {
+        const c = custom[overlay];
+        if (c && c.resourceType === 'vector') {
+            return this.resolveCustomVectorStyle(c);
+        }
+        return this.get(c?.value ?? overlays[overlay]);
+    }
+
+    // A custom vector layer's stored `value` is either a URL (TileJSON or MapLibre
+    // style) or an already-synthesized style (raw XYZ template). Turn it into a
+    // renderable style, synthesizing layers from a TileJSON when needed.
+    async resolveCustomVectorStyle(layer: CustomLayer): Promise<maplibregl.StyleSpecification> {
+        const url = layer.tileUrls?.[0] ?? (typeof layer.value === 'string' ? layer.value : '');
+        const units = get(distanceUnits);
+        // Detect the kind from the tile URL, not the stored value: this also upgrades layers
+        // saved by an earlier build (whose `value` may be a stale pre-synthesized style).
+        if (url && detectVectorKind(url) === 'xyz-vector') {
+            return this.resolveXyzVectorStyle(layer, url, units);
+        }
+        if (typeof layer.value === 'object') {
+            // Legacy pre-synthesized style. Clone so paint tweaks don't mutate stored state.
+            return structuredClone(layer.value);
+        }
+        const json = await this.get(layer.value);
+        if (Array.isArray((json as { layers?: unknown[] }).layers)) {
+            return json; // already a full MapLibre style
+        }
+        const tilejson = json as unknown as TileJSON;
+        if (isTileJSON(tilejson)) {
+            return styleFromTileJSON(tilejson, layer.id, units);
+        }
+        return json;
+    }
+
+    // Resolve a raw XYZ vector template. Auto-discover the provider's sibling TileJSON to
+    // learn the available source-layers and their geometry — so contours render as clean
+    // lines and a blank "Source layer(s)" field auto-selects the unit-appropriate layer.
+    // Fall back to the user-typed names (line-only, since geometry is unknown) otherwise.
+    async resolveXyzVectorStyle(
+        layer: CustomLayer,
+        url: string,
+        units: MapUnits
+    ): Promise<maplibregl.StyleSpecification> {
+        const only = layer.sourceLayers ?? [];
+        const tjUrl = deriveTileJSONUrl(url);
+        if (tjUrl) {
+            try {
+                const tj = (await this.get(tjUrl)) as unknown as TileJSON;
+                if (isTileJSON(tj)) {
+                    return styleFromTileJSON(tj, layer.id, units, { tiles: layer.tileUrls, only });
+                }
+            } catch {
+                // No reachable sibling TileJSON — fall through to the manual definition.
+            }
+        }
+        const source: maplibregl.VectorSourceSpecification = {
+            type: 'vector',
+            tiles: layer.tileUrls,
+        };
+        if (layer.maxZoom !== undefined) source.maxzoom = layer.maxZoom;
+        return {
+            version: 8,
+            sources: { [layer.id]: source },
+            layers: synthesizeVectorLayers(
+                layer.id,
+                only.map((id) => ({ id })),
+                units
+            ),
+        };
+    }
+
+    // On a unit change, tear down active custom vector overlays (layers + source) so
+    // updateOverlays re-synthesizes them with the new metric/imperial selection. Teardown
+    // is keyed on the source id (== the layer id) so it works regardless of the previous
+    // unit-dependent layer ids.
+    refreshCustomVectorOverlays() {
+        const map_ = get(this._map);
+        if (!map_) return;
+        const custom = get(customLayers);
+        const active = getLayers(get(currentOverlays) ?? {});
+        let changed = false;
+        for (const key in active) {
+            if (!active[key]) continue;
+            if (custom[key]?.resourceType !== 'vector') continue;
+            for (const layer of map_.getStyle().layers ?? []) {
+                if ('source' in layer && layer.source === key && map_.getLayer(layer.id)) {
+                    map_.removeLayer(layer.id);
+                }
+            }
+            if (map_.getSource(key)) {
+                map_.removeSource(key);
+            }
+            this._pastOverlays.delete(key);
+            changed = true;
+        }
+        if (changed) {
+            this.updateOverlays();
         }
     }
 

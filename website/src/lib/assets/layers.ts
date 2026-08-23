@@ -1237,6 +1237,9 @@ export type CustomLayer = {
     tileSize?: number;
     layerType: 'basemap' | 'overlay';
     resourceType: 'raster' | 'vector';
+    // Source-layer names for a raw XYZ vector template (.pbf/.mvt), which carries no
+    // metadata. Unused for TileJSON/style URLs (their layers are auto-discovered).
+    sourceLayers?: string[];
     value: string | StyleSpecification;
 };
 

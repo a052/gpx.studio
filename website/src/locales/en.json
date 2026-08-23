@@ -328,14 +328,16 @@
             "new": "New custom layer",
             "edit": "Edit custom layer",
             "urls": "URL(s)",
-            "url_placeholder": "WMTS, WMS or MapLibre style JSON",
+            "url_placeholder": "WMTS, WMS, TileJSON, or MapLibre style URL",
             "max_zoom": "Max zoom",
             "tile_size": "Tile size",
             "layer_type": "Layer type",
             "basemap": "Basemap",
             "overlay": "Overlay",
             "create": "Create layer",
-            "update": "Update layer"
+            "update": "Update layer",
+            "source_layer": "Source layer(s)",
+            "source_layer_placeholder": "e.g. contour, contour_ft"
         },
         "opacity": "Overlay opacity",
         "terrain": "Terrain source",

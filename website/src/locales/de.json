@@ -328,14 +328,16 @@
             "new": "Neue benutzerdefinierte Ebene",
             "edit": "Eigene Ebene bearbeiten",
             "urls": "URL(s)",
-            "url_placeholder": "WMTS, WMS oder MapTiler Stil JSON",
+            "url_placeholder": "WMTS, WMS, TileJSON oder MapLibre-Stil-URL",
             "max_zoom": "Max. Zoom",
             "tile_size": "Kachelgröße",
             "layer_type": "Ebenenart",
             "basemap": "Basiskarte",
             "overlay": "Einblendung",
             "create": "Ebene erstellen",
-            "update": "Layer aktualisieren"
+            "update": "Layer aktualisieren",
+            "source_layer": "Quell-Layer",
+            "source_layer_placeholder": "z. B. contour, contour_ft"
         },
         "opacity": "Deckkraft der Überlagerung",
         "terrain": "Geländequelle",

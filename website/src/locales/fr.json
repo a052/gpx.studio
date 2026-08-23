@@ -328,14 +328,16 @@
             "new": "Nouvelle couche personnalisée",
             "edit": "Modifier la couche personnalisée",
             "urls": "URL(s)",
-            "url_placeholder": "WMTS, WMS ou MapLibre style JSON",
+            "url_placeholder": "WMTS, WMS, TileJSON ou URL de style MapLibre",
             "max_zoom": "Zoom max",
             "tile_size": "Taille des tuiles",
             "layer_type": "Type de couche",
             "basemap": "Fond de carte",
             "overlay": "Surcouche",
             "create": "Créer la couche",
-            "update": "Mettre à jour la couche"
+            "update": "Mettre à jour la couche",
+            "source_layer": "Couche(s) source",
+            "source_layer_placeholder": "p. ex. contour, contour_ft"
         },
         "opacity": "Opacité de la surcouche",
         "terrain": "Source du relief",

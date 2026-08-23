@@ -328,14 +328,16 @@
             "new": "新建自定义图层",
             "edit": "编辑自定义图层",
             "urls": "URL(s)",
-            "url_placeholder": "WMTS、WMS 或 MapLibre style JSON",
+            "url_placeholder": "WMTS、WMS、TileJSON 或 MapLibre style URL",
             "max_zoom": "最大缩放等级",
             "tile_size": "瓦片大小",
             "layer_type": "图层类型",
             "basemap": "底图",
             "overlay": "叠加层",
             "create": "创建图层",
-            "update": "更新图层"
+            "update": "更新图层",
+            "source_layer": "源图层",
+            "source_layer_placeholder": "例如 contour、contour_ft"
         },
         "opacity": "图层透明度",
         "terrain": "地形来源",

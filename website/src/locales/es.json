@@ -328,14 +328,16 @@
             "new": "Nueva capa personalizada",
             "edit": "Editar capa personalizada",
             "urls": "URL(s)",
-            "url_placeholder": "WMTS, WMS o JSON estilo Mapbox",
+            "url_placeholder": "WMTS, WMS, TileJSON o URL de estilo MapLibre",
             "max_zoom": "Zoom máximo",
             "tile_size": "Tamaño de tesela",
             "layer_type": "Tipo de capa",
             "basemap": "Mapa base",
             "overlay": "Superponer",
             "create": "Crear capa",
-            "update": "Actualizar capa"
+            "update": "Actualizar capa",
+            "source_layer": "Capa(s) de origen",
+            "source_layer_placeholder": "p. ej. contour, contour_ft"
         },
         "opacity": "Opacidad de la capa superpuesta",
         "terrain": "Origen del terreno",
