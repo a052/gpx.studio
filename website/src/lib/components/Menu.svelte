@@ -633,6 +633,13 @@
                 e.target.role === 'menuitemradio' ||
                 e.target.role === 'menuitemcheckbox');
 
+        // When focus is in a text field / form widget, let the browser (or the
+        // widget) handle Ctrl/Cmd shortcuts natively (text undo/redo, select-all,
+        // etc.) instead of hijacking them for track-editing actions.
+        if (targetInput && (e.metaKey || e.ctrlKey)) {
+            return;
+        }
+
         if (e.key === '+' && (e.metaKey || e.ctrlKey)) {
             createFile();
             e.preventDefault();
