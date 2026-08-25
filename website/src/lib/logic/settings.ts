@@ -219,6 +219,7 @@ type RoutingProfile =
     | 'water'
     | 'railway';
 type RoutingProvider = 'default' | 'official' | 'custom';
+type OverpassProvider = 'default' | 'custom';
 type ElevationSource = 'mapterhorn' | 'aws' | 'custom';
 type TerrainSource = 'mapterhorn';
 type Projection = 'globe' | 'mercator';
@@ -289,6 +290,12 @@ export const settings = {
     ),
     graphhopperApiKey: new Setting<string>('graphhopperApiKey', ''),
     graphhopperCustomUrl: new Setting<string>('graphhopperCustomUrl', ''),
+    overpassProvider: new Setting<OverpassProvider>(
+        'overpassProvider',
+        'default',
+        getValueValidator<OverpassProvider>(['default', 'custom'], 'default')
+    ),
+    overpassCustomUrl: new Setting<string>('overpassCustomUrl', ''),
     elevationSource: new Setting<ElevationSource>(
         'elevationSource',
         'mapterhorn',

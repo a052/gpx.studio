@@ -80,6 +80,17 @@
             "url": "代理 URL",
             "url_help": "目标 URL 会直接附加到此地址后。留空则禁用。示例：https://your-proxy/ 会将对 https://example.com/x 的请求转换为 https://your-proxy/https://example.com/x。"
         },
+        "overpass": {
+            "title": "Overpass API",
+            "help": "选择用于查询兴趣点的 Overpass 服务器。默认服务器无需配置。",
+            "provider": "提供方",
+            "providers": {
+                "default": "默认 (overpass-api.de)",
+                "custom": "自定义 URL"
+            },
+            "custom_url": "API URL",
+            "custom_url_help": "Overpass interpreter 端点的完整 URL（例如 https://overpass-api.de/api/interpreter）。"
+        },
         "distance_markers": "距离标记",
         "direction_markers": "方向箭头",
         "points_of_interest": "兴趣点",

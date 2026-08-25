@@ -50,6 +50,7 @@
         Waypoints,
         Mountain,
         MountainSnow,
+        Server,
         SquareDashed,
     } from '@lucide/svelte';
     import { editMetadata } from '$lib/components/file-list/metadata/utils.svelte';
@@ -62,6 +63,7 @@
     import CorsProxySettings from '$lib/components/CorsProxySettings.svelte';
     import ElevationSettings from '$lib/components/ElevationSettings.svelte';
     import ElevationSourceSettings from '$lib/components/ElevationSourceSettings.svelte';
+    import OverpassSettings from '$lib/components/OverpassSettings.svelte';
     import { ListFileItem, ListTrackItem } from '$lib/components/file-list/file-list';
     import Export from '$lib/components/export/Export.svelte';
     import { mode, setMode } from 'mode-watcher';
@@ -119,6 +121,7 @@
 
     let layerSettingsOpen = $state(false);
     let routingSettingsOpen = $state(false);
+    let overpassSettingsOpen = $state(false);
     let corsProxySettingsOpen = $state(false);
     let elevationSettingsOpen = $state(false);
     let elevationSourceSettingsOpen = $state(false);
@@ -573,6 +576,10 @@
                         <Route size="16" />
                         {i18n._('toolbar.routing.provider.title')}
                     </Menubar.Item>
+                    <Menubar.Item onclick={() => (overpassSettingsOpen = true)}>
+                        <Server size="16" />
+                        {i18n._('menu.overpass.title')}
+                    </Menubar.Item>
                     <Menubar.Item onclick={() => (corsProxySettingsOpen = true)}>
                         <Waypoints size="16" />
                         {i18n._('menu.cors_proxy.title')}
@@ -613,6 +620,7 @@
 <Export />
 <LayerControlSettings bind:open={layerSettingsOpen} />
 <RoutingSettings bind:open={routingSettingsOpen} />
+<OverpassSettings bind:open={overpassSettingsOpen} />
 <CorsProxySettings bind:open={corsProxySettingsOpen} />
 <ElevationSettings bind:open={elevationSettingsOpen} />
 <ElevationSourceSettings bind:open={elevationSourceSettingsOpen} />

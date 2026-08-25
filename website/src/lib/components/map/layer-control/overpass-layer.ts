@@ -12,7 +12,9 @@ import { ANCHOR_LAYER_KEY } from '$lib/components/map/style';
 import type { MapLayerEventManager } from '$lib/components/map/map-layer-event-manager';
 import { loadSVGIcon } from '$lib/utils';
 
-const { currentOverpassQueries } = settings;
+const { currentOverpassQueries, overpassProvider, overpassCustomUrl } = settings;
+
+const DEFAULT_OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 
 const mercator = new SphericalMercator({
     size: 256,
@@ -25,7 +27,6 @@ liveQuery(() => db.overpassdata.toArray()).subscribe((pois) => {
 });
 
 export class OverpassLayer {
-    overpassUrl = 'https://overpass.gpx.studio/api/interpreter';
     minZoom = 12;
     queryZoom = 12;
     expirationTime = 7 * 24 * 3600 * 1000;
@@ -195,7 +196,7 @@ export class OverpassLayer {
         this.currentQueries.add(`${x},${y}`);
 
         const bounds = mercator.bbox(x, y, this.queryZoom);
-        fetch(`${this.overpassUrl}?data=${getQueryForBounds(bounds, queries)}`)
+        fetch(`${getOverpassUrl()}?data=${getQueryForBounds(bounds, queries)}`)
             .then(
                 (response) => {
                     if (response.ok) {
@@ -332,4 +333,11 @@ function getCurrentQueries() {
     return Object.entries(getLayers(currentQueries))
         .filter(([, selected]) => selected)
         .map(([query]) => query);
+}
+
+function getOverpassUrl() {
+    if (get(overpassProvider) === 'custom') {
+        return get(overpassCustomUrl).trim() || DEFAULT_OVERPASS_URL;
+    }
+    return DEFAULT_OVERPASS_URL;
 }

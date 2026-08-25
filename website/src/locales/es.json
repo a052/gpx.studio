@@ -80,6 +80,17 @@
             "url": "URL del proxy",
             "url_help": "La URL de destino se añade directamente a esta dirección. Déjelo vacío para desactivarlo. Ejemplo: https://your-proxy/ convierte una solicitud a https://example.com/x en https://your-proxy/https://example.com/x."
         },
+        "overpass": {
+            "title": "API Overpass",
+            "help": "Elija qué servidor Overpass se consulta para los puntos de interés. El servidor predeterminado no requiere configuración.",
+            "provider": "Proveedor",
+            "providers": {
+                "default": "Predeterminado (overpass-api.de)",
+                "custom": "URL personalizada"
+            },
+            "custom_url": "URL de la API",
+            "custom_url_help": "URL completa del endpoint interpreter de Overpass (p. ej. https://overpass-api.de/api/interpreter)."
+        },
         "distance_markers": "Indicadores de distancia",
         "direction_markers": "Flechas de dirección",
         "points_of_interest": "Puntos de interés",
