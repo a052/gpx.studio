@@ -15,7 +15,13 @@
         poi: PopupItem<any>;
     } = $props();
 
-    let tags: Record<string, string> = $derived(poi ? JSON.parse(poi.item.tags) : {});
+    // Since MapLibre GL JS v6, nested GeoJSON feature properties are returned as real
+    // objects (previously JSON strings). Keep the string fallback for any legacy/serialized data.
+    let tags: Record<string, string> = $derived.by(() => {
+        if (!poi) return {};
+        const t = poi.item.tags;
+        return typeof t === 'string' ? JSON.parse(t) : (t ?? {});
+    });
     let name = $derived.by(() => {
         if (poi) {
             if (tags.name !== undefined && tags.name !== '') {

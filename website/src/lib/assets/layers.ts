@@ -21,6 +21,10 @@ import {
     Wrench,
     Binoculars,
     Toilet,
+    Footprints,
+    Waves,
+    RadioTower,
+    Fan,
 } from 'lucide-static';
 import { type RasterDEMSourceSpecification, type StyleSpecification } from 'maplibre-gl';
 import ignFrTopo from './custom/ign-fr-topo.json';
@@ -960,6 +964,20 @@ export const overlayTree: LayerTreeType = {
 // Hierachy containing all Overpass layers
 export const overpassTree: LayerTreeType = {
     points_of_interest: {
+        outdoor: {
+            viewpoint: true,
+            campsite: true,
+            shelter: true,
+            hut: true,
+            summit: true,
+            pass: true,
+            saddle: true,
+            spring: true,
+            ford: true,
+            'hot-spring': true,
+            'power-tower': true,
+            'wind-turbine': true,
+        },
         food: {
             bakery: true,
             'food-store': true,
@@ -969,19 +987,13 @@ export const overpassTree: LayerTreeType = {
             toilets: true,
             water: true,
             shower: true,
-            shelter: true,
             barrier: true,
             cemetery: true,
         },
         tourism: {
             attraction: true,
-            viewpoint: true,
             hotel: true,
-            campsite: true,
-            hut: true,
             picnic: true,
-            summit: true,
-            pass: true,
             climbing: true,
         },
         bicycle: {
@@ -1047,6 +1059,20 @@ export const defaultOverlays: LayerTreeType = {
 // Default Overpass queries used (none)
 export const defaultOverpassQueries: LayerTreeType = {
     points_of_interest: {
+        outdoor: {
+            viewpoint: false,
+            campsite: false,
+            shelter: false,
+            hut: false,
+            summit: false,
+            pass: false,
+            saddle: false,
+            spring: false,
+            ford: false,
+            'hot-spring': false,
+            'power-tower': false,
+            'wind-turbine': false,
+        },
         food: {
             bakery: false,
             'food-store': false,
@@ -1056,19 +1082,13 @@ export const defaultOverpassQueries: LayerTreeType = {
             toilets: false,
             water: false,
             shower: false,
-            shelter: false,
             barrier: false,
             cemetery: false,
         },
         tourism: {
             attraction: false,
-            viewpoint: false,
             hotel: false,
-            campsite: false,
-            hut: false,
             picnic: false,
-            summit: false,
-            pass: false,
             climbing: false,
         },
         bicycle: {
@@ -1186,6 +1206,20 @@ export const defaultOverlayTree: LayerTreeType = {
 // Default Overpass queries shown in the layer menu
 export const defaultOverpassTree: LayerTreeType = {
     points_of_interest: {
+        outdoor: {
+            viewpoint: true,
+            campsite: true,
+            shelter: true,
+            hut: true,
+            summit: true,
+            pass: true,
+            saddle: true,
+            spring: true,
+            ford: true,
+            'hot-spring': true,
+            'power-tower': true,
+            'wind-turbine': true,
+        },
         food: {
             bakery: true,
             'food-store': true,
@@ -1195,19 +1229,13 @@ export const defaultOverpassTree: LayerTreeType = {
             toilets: true,
             water: true,
             shower: false,
-            shelter: false,
             barrier: false,
             cemetery: false,
         },
         tourism: {
             attraction: false,
-            viewpoint: false,
             hotel: true,
-            campsite: true,
-            hut: true,
             picnic: false,
-            summit: true,
-            pass: true,
             climbing: false,
         },
         bicycle: {
@@ -1485,6 +1513,60 @@ export const overpassQueryData: Record<string, OverpassQueryData> = {
         },
         tags: {
             sport: 'climbing',
+        },
+    },
+    saddle: {
+        icon: {
+            svg: Mountain,
+            color: 'Green',
+        },
+        tags: {
+            natural: 'saddle',
+        },
+    },
+    spring: {
+        icon: {
+            svg: Droplet,
+            color: 'DeepSkyBlue',
+        },
+        tags: {
+            natural: 'spring',
+        },
+    },
+    ford: {
+        icon: {
+            svg: Footprints,
+            color: 'DeepSkyBlue',
+        },
+        tags: {
+            ford: ['yes', 'stepping_stones'],
+        },
+    },
+    'hot-spring': {
+        icon: {
+            svg: Waves,
+            color: 'OrangeRed',
+        },
+        tags: {
+            natural: 'hot_spring',
+        },
+    },
+    'power-tower': {
+        icon: {
+            svg: RadioTower,
+            color: '#000000',
+        },
+        tags: {
+            power: 'tower',
+        },
+    },
+    'wind-turbine': {
+        icon: {
+            svg: Fan,
+            color: 'SteelBlue',
+        },
+        tags: {
+            'generator:method': 'wind_turbine',
         },
     },
     'bicycle-parking': {

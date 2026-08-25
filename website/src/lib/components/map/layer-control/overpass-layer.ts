@@ -299,13 +299,15 @@ function getQueryItem(tags: Record<string, string | string[]>) {
             .map(
                 (val) =>
                     `nwr${Object.entries(tags)
-                        .map(([tag, value]) => `[${tag}=${tag === arrayEntry[0] ? val : value}]`)
+                        .map(
+                            ([tag, value]) => `["${tag}"="${tag === arrayEntry[0] ? val : value}"]`
+                        )
                         .join('')};`
             )
             .join('');
     } else {
         return `nwr${Object.entries(tags)
-            .map(([tag, value]) => `[${tag}=${value}]`)
+            .map(([tag, value]) => `["${tag}"="${value}"]`)
             .join('')};`;
     }
 }
