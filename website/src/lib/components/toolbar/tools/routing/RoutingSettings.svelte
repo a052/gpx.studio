@@ -12,7 +12,7 @@
 
     let { open = $bindable() }: { open: boolean } = $props();
 
-    const providers = ['default', 'official', 'custom'];
+    const providers = ['default', 'official', 'custom', 'brouter'];
 </script>
 
 <Sheet.Root bind:open>

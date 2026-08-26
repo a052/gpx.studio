@@ -240,12 +240,13 @@
             },
             "provider": {
                 "title": "路线规划 API",
-                "help": "选择要使用的 GraphHopper 路线规划服务器。默认服务器由 gpx.studio 提供，无需任何配置。",
+                "help": "选择路线的计算方式。默认使用 OSRM 演示服务器（无需配置）。水路和铁路活动始终使用 BRouter。",
                 "provider": "服务商",
                 "providers": {
-                    "default": "默认 (gpx.studio)",
+                    "default": "默认 (OSRM)",
                     "official": "官方 GraphHopper",
-                    "custom": "自定义 URL"
+                    "custom": "自定义 GraphHopper URL",
+                    "brouter": "BRouter"
                 },
                 "api_key": "API 密钥",
                 "api_key_placeholder": "您的 GraphHopper API 密钥",

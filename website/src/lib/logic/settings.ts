@@ -218,7 +218,7 @@ type RoutingProfile =
     | 'motorcycle'
     | 'water'
     | 'railway';
-type RoutingProvider = 'default' | 'official' | 'custom';
+type RoutingProvider = 'default' | 'official' | 'custom' | 'brouter';
 type OverpassProvider = 'default' | 'custom';
 type ElevationSource = 'mapterhorn' | 'aws' | 'custom';
 type TerrainSource = 'mapterhorn';
@@ -286,7 +286,7 @@ export const settings = {
     routingProvider: new Setting<RoutingProvider>(
         'routingProvider',
         'default',
-        getValueValidator<RoutingProvider>(['default', 'official', 'custom'], 'default')
+        getValueValidator<RoutingProvider>(['default', 'official', 'custom', 'brouter'], 'default')
     ),
     graphhopperApiKey: new Setting<string>('graphhopperApiKey', ''),
     graphhopperCustomUrl: new Setting<string>('graphhopperCustomUrl', ''),

@@ -240,12 +240,13 @@
             },
             "provider": {
                 "title": "Routing-API",
-                "help": "Wähle, welcher GraphHopper-Routing-Server verwendet werden soll. Der Standardserver wird von gpx.studio bereitgestellt und erfordert keine Konfiguration.",
+                "help": "Wähle, wie Routen berechnet werden. Die Standardoption nutzt den OSRM-Demoserver (keine Konfiguration nötig). Die Aktivitäten Wasser und Bahn nutzen immer BRouter.",
                 "provider": "Anbieter",
                 "providers": {
-                    "default": "Standard (gpx.studio)",
+                    "default": "Standard (OSRM)",
                     "official": "Offizieller GraphHopper",
-                    "custom": "Benutzerdefinierte URL"
+                    "custom": "Benutzerdefinierte GraphHopper-URL",
+                    "brouter": "BRouter"
                 },
                 "api_key": "API-Schlüssel",
                 "api_key_placeholder": "Dein GraphHopper-API-Schlüssel",

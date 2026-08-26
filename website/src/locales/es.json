@@ -240,12 +240,13 @@
             },
             "provider": {
                 "title": "API de ruteo",
-                "help": "Elija qué servidor de ruteo de GraphHopper usar. El servidor predeterminado lo proporciona gpx.studio y no requiere configuración.",
+                "help": "Elige cómo se calculan las rutas. La opción predeterminada usa el servidor de demostración de OSRM (sin configuración). Las actividades Agua y Ferrocarril siempre usan BRouter.",
                 "provider": "Proveedor",
                 "providers": {
-                    "default": "Predeterminado (gpx.studio)",
+                    "default": "Predeterminado (OSRM)",
                     "official": "GraphHopper oficial",
-                    "custom": "URL personalizada"
+                    "custom": "URL de GraphHopper personalizada",
+                    "brouter": "BRouter"
                 },
                 "api_key": "Clave de API",
                 "api_key_placeholder": "Su clave de API de GraphHopper",

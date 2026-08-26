@@ -240,12 +240,13 @@
             },
             "provider": {
                 "title": "API de routage",
-                "help": "Choisissez quel serveur de routage GraphHopper utiliser. Le serveur par défaut est fourni par gpx.studio et ne nécessite aucune configuration.",
+                "help": "Choisissez comment les itinéraires sont calculés. L'option par défaut utilise le serveur de démonstration OSRM (aucune configuration requise). Les activités Eau et Rail utilisent toujours BRouter.",
                 "provider": "Fournisseur",
                 "providers": {
-                    "default": "Par défaut (gpx.studio)",
+                    "default": "Par défaut (OSRM)",
                     "official": "GraphHopper officiel",
-                    "custom": "URL personnalisée"
+                    "custom": "URL GraphHopper personnalisée",
+                    "brouter": "BRouter"
                 },
                 "api_key": "Clé API",
                 "api_key_placeholder": "Votre clé API GraphHopper",

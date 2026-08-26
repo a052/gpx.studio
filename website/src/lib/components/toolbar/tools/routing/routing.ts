@@ -17,30 +17,54 @@ const DEFAULT_GRAPHHOPPER_URL = 'https://graphhopper.gpx.studio/route';
 const OFFICIAL_GRAPHHOPPER_URL = 'https://graphhopper.com/api/1/route';
 
 export type RoutingProfile = {
-    engine: 'graphhopper' | 'brouter';
-    profile: string;
+    graphhopper?: string;
+    osrm?: 'bike' | 'foot' | 'car';
+    brouter: string;
 };
 
+// One profile name per engine. Which engine is actually used depends on the selected provider
+// (see resolveRouting): water/railway always route through BRouter, otherwise the provider decides.
 export const routingProfiles: { [key: string]: RoutingProfile } = {
-    bike: { engine: 'graphhopper', profile: 'bike' },
-    racing_bike: { engine: 'graphhopper', profile: 'racingbike' },
-    gravel_bike: { engine: 'graphhopper', profile: 'gravelbike' },
-    mountain_bike: { engine: 'graphhopper', profile: 'mtb' },
-    foot: { engine: 'graphhopper', profile: 'foot' },
-    motorcycle: { engine: 'graphhopper', profile: 'motorbike' },
-    water: { engine: 'brouter', profile: 'river' },
-    railway: { engine: 'brouter', profile: 'rail' },
+    bike: { graphhopper: 'bike', osrm: 'bike', brouter: 'fastbike' },
+    racing_bike: { graphhopper: 'racingbike', osrm: 'bike', brouter: 'fastbike' },
+    gravel_bike: { graphhopper: 'gravelbike', osrm: 'bike', brouter: 'trekking' },
+    mountain_bike: { graphhopper: 'mtb', osrm: 'bike', brouter: 'trekking' },
+    foot: { graphhopper: 'foot', osrm: 'foot', brouter: 'hiking-mountain' },
+    motorcycle: { graphhopper: 'motorbike', osrm: 'car', brouter: 'moped' },
+    water: { brouter: 'river' },
+    railway: { brouter: 'rail' },
 };
+
+function resolveRouting(
+    activity: string,
+    provider: string
+): { engine: 'graphhopper' | 'osrm' | 'brouter'; profile: string } {
+    const def = routingProfiles[activity];
+    // Water and railway have no GraphHopper/OSRM equivalent, so they always use BRouter, as does
+    // the dedicated BRouter provider for every activity.
+    if (activity === 'water' || activity === 'railway' || provider === 'brouter') {
+        return { engine: 'brouter', profile: def.brouter };
+    }
+    if (provider === 'default') {
+        return { engine: 'osrm', profile: def.osrm ?? 'foot' };
+    }
+    // 'official' | 'custom' → GraphHopper (graphhopper.com or a self-hosted server).
+    return { engine: 'graphhopper', profile: def.graphhopper ?? 'foot' };
+}
 
 export function route(points: Coordinates[]): Promise<TrackPoint[]> {
     if (get(routing)) {
-        const profile = routingProfiles[get(routingProfile)];
-        if (profile.engine === 'graphhopper') {
-            return getGraphHopperRoute(points, profile.profile, get(privateRoads)).then(
+        const { engine, profile } = resolveRouting(get(routingProfile), get(routingProvider));
+        if (engine === 'graphhopper') {
+            return getGraphHopperRoute(points, profile, get(privateRoads)).then(
+                withMapterhornElevation
+            );
+        } else if (engine === 'osrm') {
+            return getOSRMRoute(points, profile as 'bike' | 'foot' | 'car').then(
                 withMapterhornElevation
             );
         } else {
-            return getBRouterRoute(points, profile.profile).then(withMapterhornElevation);
+            return getBRouterRoute(points, profile).then(withMapterhornElevation);
         }
     } else {
         return getIntermediatePoints(points);
@@ -254,6 +278,49 @@ async function getGraphHopperRoute(
                 }
             }
         }
+    }
+
+    return route;
+}
+
+const OSRM_BASE_URL = 'https://routing.openstreetmap.de';
+
+async function getOSRMRoute(
+    points: Coordinates[],
+    osrmProfile: 'bike' | 'foot' | 'car'
+): Promise<TrackPoint[]> {
+    // routing.openstreetmap.de hosts one OSRM instance per profile (routed-bike/foot/car); the
+    // mode segment in the path is always "driving" regardless of the instance.
+    const coords = points
+        .map((point) => `${point.lon.toFixed(6)},${point.lat.toFixed(6)}`)
+        .join(';');
+    const url = `${OSRM_BASE_URL}/routed-${osrmProfile}/route/v1/driving/${coords}?overview=full&geometries=geojson`;
+
+    const response = await fetch(url);
+    const json = await response.json().catch(() => ({}));
+
+    if (!response.ok || json.code !== 'Ok') {
+        if (json?.code === 'NoSegment') {
+            throw new Error('toolbar.routing.error.from');
+        } else if (json?.code === 'NoRoute') {
+            throw new Error('toolbar.routing.error.connection');
+        } else {
+            throw new Error(json?.message || 'toolbar.routing.error.connection');
+        }
+    }
+
+    // OSRM geometry is 2D (no elevation) and carries no way tags; withMapterhornElevation adds ele.
+    const route: TrackPoint[] = [];
+    const coordinates = json.routes[0].geometry.coordinates;
+    for (let i = 0; i < coordinates.length; i++) {
+        route.push(
+            new TrackPoint({
+                attributes: {
+                    lat: coordinates[i][1],
+                    lon: coordinates[i][0],
+                },
+            })
+        );
     }
 
     return route;
