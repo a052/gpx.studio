@@ -1,6 +1,7 @@
 import { SphericalMercator } from '@mapbox/sphericalmercator';
 import { getLayers } from './utils';
-import { get, writable } from 'svelte/store';
+import { get } from 'svelte/store';
+import { safeWritable } from '$lib/logic/safe-store';
 import { liveQuery } from 'dexie';
 import { overpassQueryData } from '$lib/assets/layers';
 import { MapPopup } from '$lib/components/map/map-popup';
@@ -20,7 +21,10 @@ const mercator = new SphericalMercator({
     size: 256,
 });
 
-const data = writable<GeoJSON.FeatureCollection>({ type: 'FeatureCollection', features: [] });
+const data = safeWritable<GeoJSON.FeatureCollection>(
+    { type: 'FeatureCollection', features: [] },
+    'overpassData'
+);
 
 liveQuery(() => db.overpassdata.toArray()).subscribe((pois) => {
     data.set({ type: 'FeatureCollection', features: pois.map((poi) => poi.poi) });

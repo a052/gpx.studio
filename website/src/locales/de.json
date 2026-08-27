@@ -27,6 +27,7 @@
         "edit": "Bearbeiten",
         "undo": "Rückgängig",
         "redo": "Wiederholen",
+        "history_error": "Diese Änderung aus dem Bearbeitungsverlauf konnte nicht angewendet werden.",
         "delete": "Löschen",
         "delete_all": "Alle löschen",
         "select_all": "Alle auswählen",

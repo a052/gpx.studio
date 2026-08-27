@@ -1,3 +1,3 @@
-import { writable } from 'svelte/store';
+import { safeWritable } from '$lib/logic/safe-store';
 
-export const streetViewEnabled = writable(false);
+export const streetViewEnabled = safeWritable(false, 'streetViewEnabled');

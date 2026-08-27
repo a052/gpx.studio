@@ -6,7 +6,8 @@ import { GPXFileStateCollectionObserver, type GPXFileState } from '$lib/logic/fi
 import { selection } from '$lib/logic/selection';
 import { ramerDouglasPeucker, TrackPoint, type SimplifiedTrackPoint } from 'gpx';
 import type { GeoJSONSource } from 'maplibre-gl';
-import { get, writable } from 'svelte/store';
+import { get } from 'svelte/store';
+import { safeWritable } from '$lib/logic/safe-store';
 
 export const minTolerance = 0.1;
 
@@ -47,7 +48,7 @@ export class ReducedGPXLayer {
     }
 }
 
-export const tolerance = writable<number>(0);
+export const tolerance = safeWritable<number>(0, 'reduceTolerance');
 
 export class ReducedGPXLayerCollection {
     private _layers: Map<string, ReducedGPXLayer> = new Map();

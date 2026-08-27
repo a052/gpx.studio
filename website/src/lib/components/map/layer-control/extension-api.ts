@@ -1,5 +1,6 @@
 import { settings } from '$lib/logic/settings';
-import { derived, get, writable, type Writable } from 'svelte/store';
+import { derived, get, type Writable } from 'svelte/store';
+import { guardSubscribers, safeWritable } from '$lib/logic/safe-store';
 import { isSelected, remove, removeAll } from './utils';
 import { overlays, overlayTree, type LayerTreeType } from '$lib/assets/layers';
 import { browser } from '$app/environment';
@@ -16,7 +17,10 @@ export type CustomOverlay = {
 };
 
 export class ExtensionAPI {
-    private _overlays: Writable<Map<string, CustomOverlay>> = writable(new Map());
+    private _overlays: Writable<Map<string, CustomOverlay>> = safeWritable(
+        new Map(),
+        'extensionOverlays'
+    );
 
     init() {
         if (browser && !Object.hasOwn(window, 'gpxstudio')) {
@@ -177,13 +181,19 @@ export class ExtensionAPI {
         });
     }
 
-    isLayerFromExtension = derived(this._overlays, ($overlays) => {
-        return (id: string) => $overlays.has(id);
-    });
+    isLayerFromExtension = guardSubscribers(
+        derived(this._overlays, ($overlays) => {
+            return (id: string) => $overlays.has(id);
+        }),
+        'isLayerFromExtension'
+    );
 
-    getLayerName = derived(this._overlays, ($overlays) => {
-        return (id: string) => $overlays.get(id)?.name || '';
-    });
+    getLayerName = guardSubscribers(
+        derived(this._overlays, ($overlays) => {
+            return (id: string) => $overlays.get(id)?.name || '';
+        }),
+        'getLayerName'
+    );
 
     private getOverlayId(id: string): string {
         return `extension-${id}`;

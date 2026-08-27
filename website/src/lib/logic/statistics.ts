@@ -6,7 +6,8 @@ import {
     ListWaypointItem,
     ListWaypointsItem,
 } from '$lib/components/file-list/file-list';
-import { get, writable, type Writable } from 'svelte/store';
+import { get, type Writable } from 'svelte/store';
+import { safeWritable } from '$lib/logic/safe-store';
 import { settings } from '$lib/logic/settings';
 
 const { fileOrder } = settings;
@@ -22,7 +23,7 @@ export class SelectedGPXStatistics {
     >;
 
     constructor() {
-        this._statistics = writable(new GPXStatisticsGroup());
+        this._statistics = safeWritable(new GPXStatisticsGroup(), 'selectedStatistics');
         this._files = new Map();
         selection.subscribe(() => this.update());
         fileOrder.subscribe(() => this.update());
@@ -80,9 +81,9 @@ export class SelectedGPXStatistics {
 export const gpxStatistics = new SelectedGPXStatistics();
 
 export const slicedGPXStatistics: Writable<[GPXGlobalStatistics, number, number] | undefined> =
-    writable(undefined);
+    safeWritable(undefined, 'slicedGPXStatistics');
 
-export const hoveredPoint: Writable<Coordinates | null> = writable(null);
+export const hoveredPoint: Writable<Coordinates | null> = safeWritable(null, 'hoveredPoint');
 
 gpxStatistics.subscribe(() => {
     slicedGPXStatistics.set(undefined);

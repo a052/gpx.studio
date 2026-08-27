@@ -1,4 +1,5 @@
-import { writable, type Writable } from 'svelte/store';
+import { type Writable } from 'svelte/store';
+import { safeWritable } from '$lib/logic/safe-store';
 
 export enum Tool {
     ROUTING,
@@ -12,4 +13,4 @@ export enum Tool {
     CLEAN,
 }
 
-export const currentTool: Writable<Tool | null> = writable(null);
+export const currentTool: Writable<Tool | null> = safeWritable(null, 'currentTool');

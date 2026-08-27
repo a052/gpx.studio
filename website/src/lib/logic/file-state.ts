@@ -3,8 +3,9 @@ import { type Database } from '$lib/db';
 import { liveQuery } from 'dexie';
 import { GPXFile, setElevationOptions } from 'gpx';
 import { GPXStatisticsTree, type GPXFileWithStatistics } from '$lib/logic/statistics-tree';
+import { safeWritable } from '$lib/logic/safe-store';
 import { settings } from '$lib/logic/settings';
-import { get, writable, type Subscriber, type Writable } from 'svelte/store';
+import { get, type Subscriber, type Writable } from 'svelte/store';
 
 // Observe a single file from the database, and maintain its statistics
 export class GPXFileState {
@@ -14,25 +15,33 @@ export class GPXFileState {
 
     constructor(fileId: string, file?: GPXFile) {
         this._fileId = fileId;
-        this._file = writable(file ? { file, statistics: new GPXStatisticsTree(file) } : undefined);
+        this._file = safeWritable(
+            file ? { file, statistics: new GPXStatisticsTree(file) } : undefined,
+            `file ${fileId}`
+        );
     }
 
     connectToDatabase(db: Database) {
         if (this._subscription) return;
         this._subscription = liveQuery(() => db.files.get(this._fileId)).subscribe((value) => {
+            if (value === undefined) {
+                return;
+            }
+            let rehydrated: GPXFileWithStatistics;
             try {
-                if (value !== undefined) {
-                    const file = new GPXFile(value);
-                    updateAnchorPoints(file);
-                    const statistics = new GPXStatisticsTree(file);
-                    this._file.set({ file, statistics });
-                }
+                const file = new GPXFile(value);
+                updateAnchorPoints(file);
+                rehydrated = { file, statistics: new GPXStatisticsTree(file) };
             } catch (error) {
                 // Rehydration/statistics computation can fail on malformed data. Swallowing the error
                 // here prevents a single broken file from aborting the reactive update chain and
                 // freezing the whole UI. The stored file is left as-is for the next liveQuery event.
                 console.error(`Failed to rehydrate file ${this._fileId}:`, error);
+                return;
             }
+            // Outside the try on purpose: an error raised by a subscriber of this store is not a
+            // rehydration failure, and it reports itself through the store's own guard.
+            this._file.set(rehydrated);
         });
     }
 
@@ -45,17 +54,18 @@ export class GPXFileState {
     // changes, since those do not modify the stored file and therefore do not trigger the liveQuery.
     recomputeStatistics() {
         const current = get(this._file);
-        if (current !== undefined) {
-            try {
-                this._file.set({
-                    file: current.file,
-                    statistics: new GPXStatisticsTree(current.file),
-                });
-            } catch (error) {
-                // Keep the previous statistics rather than breaking the reactive graph.
-                console.error(`Failed to recompute statistics for file ${this._fileId}:`, error);
-            }
+        if (current === undefined) {
+            return;
         }
+        let statistics: GPXStatisticsTree;
+        try {
+            statistics = new GPXStatisticsTree(current.file);
+        } catch (error) {
+            // Keep the previous statistics rather than breaking the reactive graph.
+            console.error(`Failed to recompute statistics for file ${this._fileId}:`, error);
+            return;
+        }
+        this._file.set({ file: current.file, statistics });
     }
 
     destroy() {
@@ -78,7 +88,7 @@ export class GPXFileStateCollection {
     private _subscription: { unsubscribe: () => void } | null = null;
 
     constructor() {
-        this._files = writable(new Map());
+        this._files = safeWritable(new Map(), 'fileStateCollection');
     }
 
     connectToDatabase(db: Database): Promise<void> {

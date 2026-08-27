@@ -3,7 +3,8 @@ import Sortable, { type Direction } from 'sortablejs/Sortable';
 import { ListItem, ListLevel, ListRootItem } from './file-list';
 import { selection } from '$lib/logic/selection';
 import { getFileIds, moveItems } from '$lib/logic/file-actions';
-import { get, writable, type Readable } from 'svelte/store';
+import { get, type Readable } from 'svelte/store';
+import { safeWritable } from '$lib/logic/safe-store';
 import { settings } from '$lib/logic/settings';
 import type { GPXFileWithStatistics } from '$lib/logic/statistics-tree';
 import type { AnyGPXTreeElement, GPXTreeElement, Waypoint } from 'gpx';
@@ -29,7 +30,7 @@ export const allowedPastes: Record<ListLevel, ListLevel[]> = {
     [ListLevel.WAYPOINT]: [ListLevel.FILE, ListLevel.WAYPOINTS, ListLevel.WAYPOINT],
 };
 
-export const dragging = writable<ListLevel | null>(null);
+export const dragging = safeWritable<ListLevel | null>(null, 'dragging');
 
 type SortableWithItem = Sortable & { _item: ListItem; _waypointRoot: boolean };
 

@@ -18,16 +18,16 @@
     import { i18n } from '$lib/i18n.svelte';
     import { getURLForLanguage } from '$lib/utils';
     import { exampleGPXFile } from '$lib/assets/example';
-    import { writable } from 'svelte/store';
+    import { safeWritable } from '$lib/logic/safe-store';
     import Scissors from '$lib/components/toolbar/tools/scissors/Scissors.svelte';
     import { currentTool, Tool } from '$lib/components/toolbar/tools';
     import { onDestroy, onMount } from 'svelte';
 
-    let gpxStatistics = writable(exampleGPXFile.getStatistics());
-    let slicedGPXStatistics = writable(undefined);
-    let hoveredPoint = writable(null);
-    let additionalDatasets = writable(['speed', 'atemp']);
-    let elevationFill = writable(undefined);
+    let gpxStatistics = safeWritable(exampleGPXFile.getStatistics(), 'landingStatistics');
+    let slicedGPXStatistics = safeWritable(undefined, 'landingSlicedStatistics');
+    let hoveredPoint = safeWritable(null, 'landingHoveredPoint');
+    let additionalDatasets = safeWritable(['speed', 'atemp'], 'landingAdditionalDatasets');
+    let elevationFill = safeWritable(undefined, 'landingElevationFill');
 
     onMount(() => {
         $currentTool = Tool.SCISSORS;

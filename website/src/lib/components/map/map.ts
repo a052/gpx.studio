@@ -11,7 +11,8 @@ import MaplibreGeocoder, {
     type MaplibreGeocoderFeatureResults,
 } from '@maplibre/maplibre-gl-geocoder';
 import '@maplibre/maplibre-gl-geocoder/dist/maplibre-gl-geocoder.css';
-import { get, writable, type Writable } from 'svelte/store';
+import { get, type Writable } from 'svelte/store';
+import { safeWritable } from '$lib/logic/safe-store';
 import { settings } from '$lib/logic/settings';
 import { tick } from 'svelte';
 import { ANCHOR_LAYER_KEY, StyleManager, SKY } from '$lib/components/map/style';
@@ -43,7 +44,7 @@ const MAX_PITCH = 85;
 
 export class MapLibreGLMap {
     private _map: maplibregl.Map | null = null;
-    private _mapStore: Writable<maplibregl.Map | null> = writable(null);
+    private _mapStore: Writable<maplibregl.Map | null> = safeWritable(null, 'map');
     private _styleManager: StyleManager | null = null;
     private _onLoadCallbacks: ((map: maplibregl.Map) => void)[] = [];
     private _unsubscribes: (() => void)[] = [];

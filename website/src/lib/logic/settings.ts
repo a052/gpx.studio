@@ -15,7 +15,8 @@ import {
     type LayerTreeType,
 } from '$lib/assets/layers';
 import { browser } from '$app/environment';
-import { get, writable, type Writable } from 'svelte/store';
+import { get, type Writable } from 'svelte/store';
+import { safeWritable } from '$lib/logic/safe-store';
 
 export class Setting<V> {
     private _db: Database | null = null;
@@ -26,7 +27,7 @@ export class Setting<V> {
 
     constructor(key: string, initial: V, validator?: (value: V) => V) {
         this._key = key;
-        this._value = writable(initial);
+        this._value = safeWritable(initial, `setting ${key}`);
         this._validator = validator;
     }
 
@@ -84,7 +85,7 @@ export class SettingInitOnFirstRead<V> {
 
     constructor(key: string, initial: V, validator?: (value: V) => V) {
         this._key = key;
-        this._value = writable(undefined);
+        this._value = safeWritable(undefined, `setting ${key}`);
         this._initial = initial;
         this._validator = validator;
     }

@@ -1,4 +1,5 @@
-import { get, writable, type Writable } from 'svelte/store';
+import { get, type Writable } from 'svelte/store';
+import { safeWritable } from '$lib/logic/safe-store';
 import { SelectedGPXFilesObserver, selection } from '$lib/logic/selection';
 import { fileStateCollection } from '$lib/logic/file-state';
 import {
@@ -13,7 +14,7 @@ export class AllHidden {
     private _value: Writable<boolean>;
 
     constructor() {
-        this._value = writable(false);
+        this._value = safeWritable(false, 'allHidden');
         new SelectedGPXFilesObserver(() => this.update());
     }
 

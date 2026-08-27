@@ -27,6 +27,7 @@
         "edit": "Edit",
         "undo": "Undo",
         "redo": "Redo",
+        "history_error": "Could not apply this change from the edit history.",
         "delete": "Delete",
         "delete_all": "Delete all",
         "select_all": "Select all",

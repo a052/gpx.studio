@@ -3,14 +3,15 @@ import { fileStateCollection } from '$lib/logic/file-state';
 import { selection } from '$lib/logic/selection';
 import { settings } from '$lib/logic/settings';
 import type { Waypoint } from 'gpx';
-import { get, writable, type Writable } from 'svelte/store';
+import { get, type Writable } from 'svelte/store';
+import { safeWritable } from '$lib/logic/safe-store';
 
 export class WaypointSelection {
     private _selection: Writable<[Waypoint, string] | undefined>;
     private _fileUnsubscribe: (() => void) | undefined;
 
     constructor() {
-        this._selection = writable(undefined);
+        this._selection = safeWritable(undefined, 'waypointSelection');
         settings.treeFileView.subscribe(() => {
             this.update();
         });

@@ -1,9 +1,17 @@
 import Dexie from 'dexie';
 import type { GPXFile } from 'gpx';
-import { enableMapSet, enablePatches, type Patch } from 'immer';
+import { enableMapSet, enablePatches, setAutoFreeze, type Patch } from 'immer';
 
 enableMapSet();
 enablePatches();
+// The app deliberately keeps long-lived mutable state next to immer: FileActionManager._files and
+// the rehydrated GPXFile trees the UI holds. immer's auto-freeze deep-freezes that live state — a
+// producer that changes nothing freezes the base Map itself — which turned an ordinary edit into a
+// permanent app-wide freeze (a frozen Map throws on .set(), the throw escaped through a Svelte store
+// flush, and svelte/store's shared subscriber queue then stopped delivering to every store).
+// Nothing in the codebase relies on frozen state, and the freeze walk costs O(all trackpoints) on
+// every edit. The explicit freeze() calls used as immer perf hints are unaffected by this flag.
+setAutoFreeze(false);
 
 export class Database extends Dexie {
     fileids!: Dexie.Table<string, string>;

@@ -1,7 +1,8 @@
 import { TrackPoint, Waypoint } from 'gpx';
 import * as maplibregl from 'maplibre-gl';
 import { mount, tick, unmount } from 'svelte';
-import { get, writable, type Writable } from 'svelte/store';
+import { get, type Writable } from 'svelte/store';
+import { safeWritable } from '$lib/logic/safe-store';
 import MapPopupComponent from '$lib/components/map/MapPopup.svelte';
 
 export type PopupItem<T = Waypoint | TrackPoint | any> = {
@@ -13,7 +14,7 @@ export type PopupItem<T = Waypoint | TrackPoint | any> = {
 export class MapPopup {
     map: maplibregl.Map;
     popup: maplibregl.Popup;
-    item: Writable<PopupItem | null> = writable(null);
+    item: Writable<PopupItem | null> = safeWritable(null, 'mapPopupItem');
     component: ReturnType<typeof mount>;
     maybeHideBinded = this.maybeHide.bind(this);
 

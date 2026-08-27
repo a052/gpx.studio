@@ -27,6 +27,7 @@
         "edit": "编辑",
         "undo": "撤销",
         "redo": "恢复",
+        "history_error": "无法应用编辑历史中的此项更改。",
         "delete": "删除",
         "delete_all": "全部删除",
         "select_all": "全选",

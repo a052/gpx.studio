@@ -27,6 +27,7 @@
         "edit": "Editar",
         "undo": "Deshacer",
         "redo": "Rehacer",
+        "history_error": "No se pudo aplicar este cambio del historial de edición.",
         "delete": "Eliminar track",
         "delete_all": "Borrar todos",
         "select_all": "Seleccionar todo",

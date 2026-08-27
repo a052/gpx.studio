@@ -1,5 +1,6 @@
 import { distance, type Coordinates, TrackPoint, TrackSegment, Track, projectedPoint } from 'gpx';
-import { get, writable, type Readable } from 'svelte/store';
+import { get, type Readable } from 'svelte/store';
+import { safeWritable } from '$lib/logic/safe-store';
 import * as maplibregl from 'maplibre-gl';
 import {
     type MapMouseEvent,
@@ -28,7 +29,7 @@ import { ANCHOR_LAYER_KEY } from '$lib/components/map/style';
 import { MAX_ANCHOR_ZOOM, MIN_ANCHOR_ZOOM } from './simplify';
 
 const { streetViewSource } = settings;
-export const canChangeStart = writable(false);
+export const canChangeStart = safeWritable(false, 'canChangeStart');
 
 type AnchorProperties = {
     trackIndex: number;

@@ -27,6 +27,7 @@
         "edit": "Édition",
         "undo": "Annuler",
         "redo": "Rétablir",
+        "history_error": "Impossible d'appliquer cette modification de l'historique.",
         "delete": "Supprimer",
         "delete_all": "Supprimer tout",
         "select_all": "Sélectionner tout",

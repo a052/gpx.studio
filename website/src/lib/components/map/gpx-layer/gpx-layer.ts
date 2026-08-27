@@ -693,8 +693,13 @@ export class GPXLayer {
             if (this.draggedWaypointIndex === null) {
                 return;
             }
+            // Capture the index: the producer must not depend on a field that is reset right below.
+            const waypointIndex = this.draggedWaypointIndex;
             fileActionManager.applyToFile(this.fileId, (file) => {
-                const wpt = file.wpt[this.draggedWaypointIndex!];
+                const wpt = file.wpt[waypointIndex];
+                if (!wpt) {
+                    return;
+                }
                 wpt.setCoordinates({
                     lat: e.lngLat.lat,
                     lon: e.lngLat.lng,

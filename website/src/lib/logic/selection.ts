@@ -12,7 +12,8 @@ import {
 import { fileStateCollection, GPXFileStateCollectionObserver } from '$lib/logic/file-state';
 import { settings } from '$lib/logic/settings';
 import type { GPXFile } from 'gpx';
-import { get, writable, type Readable, type Writable } from 'svelte/store';
+import { get, type Readable, type Writable } from 'svelte/store';
+import { safeWritable } from '$lib/logic/safe-store';
 import { SelectionTreeType } from '$lib/logic/selection-tree';
 
 export class Selection {
@@ -21,9 +22,9 @@ export class Selection {
     private _cut: Writable<boolean>;
 
     constructor() {
-        this._selection = writable(new SelectionTreeType(new ListRootItem()));
-        this._copied = writable(undefined);
-        this._cut = writable(false);
+        this._selection = safeWritable(new SelectionTreeType(new ListRootItem()), 'selection');
+        this._copied = safeWritable(undefined, 'copiedSelection');
+        this._cut = safeWritable(false, 'cutSelection');
     }
 
     subscribe(

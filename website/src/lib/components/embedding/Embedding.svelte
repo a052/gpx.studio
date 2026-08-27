@@ -6,7 +6,7 @@
     import Map from '$lib/components/map/Map.svelte';
     import LayerControl from '$lib/components/map/layer-control/LayerControl.svelte';
     import OpenIn from '$lib/components/embedding/OpenIn.svelte';
-    import { writable } from 'svelte/store';
+    import { safeWritable } from '$lib/logic/safe-store';
     import type { GPXFile } from 'gpx';
     import {
         allowedEmbeddingBasemaps,
@@ -28,8 +28,11 @@
         hash = $bindable(),
     }: { useHash?: boolean; options: EmbeddingOptions; hash: string } = $props();
 
-    let additionalDatasets = writable<string[]>([]);
-    let elevationFill = writable<'slope' | 'surface' | 'highway' | undefined>(undefined);
+    let additionalDatasets = safeWritable<string[]>([], 'embedAdditionalDatasets');
+    let elevationFill = safeWritable<'slope' | 'surface' | 'highway' | undefined>(
+        undefined,
+        'embedElevationFill'
+    );
 
     const {
         currentBasemap,

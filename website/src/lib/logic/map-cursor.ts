@@ -1,5 +1,6 @@
 import { map } from '$lib/components/map/map';
-import { get, writable, type Writable } from 'svelte/store';
+import { get, type Writable } from 'svelte/store';
+import { safeWritable } from '$lib/logic/safe-store';
 
 export enum MapCursorState {
     DEFAULT,
@@ -34,7 +35,7 @@ export class MapCursor {
     private _states: Writable<Set<MapCursorState>>;
 
     constructor() {
-        this._states = writable(new Set());
+        this._states = safeWritable(new Set(), 'mapCursor');
         this._states.subscribe((states) => {
             const state = Array.from(states.values()).reduce((max, value) => {
                 return value > max ? value : max;
