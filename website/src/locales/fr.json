@@ -271,6 +271,9 @@
             "pick_date": "Choisir une date",
             "artificial": "Créer des données de temps réalistes",
             "update": "Mettre à jour les données temporelles",
+            "clear": "Effacer les données temporelles",
+            "cleared": "Données temporelles effacées.",
+            "clear_error": "Impossible d'effacer les données temporelles pour cette sélection.",
             "help": "Utilisez le formulaire pour définir de nouvelles données temporelles.",
             "help_invalid_selection": "Sélectionnez une seule trace pour gérer ses données temporelles.",
             "error": "Impossible de mettre à jour les données temporelles pour cette sélection."

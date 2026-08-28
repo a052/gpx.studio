@@ -271,6 +271,9 @@
             "pick_date": "Datum auswählen",
             "artificial": "Erstelle realistische Zeitdaten",
             "update": "Aktualisiere Zeitdaten",
+            "clear": "Zeitdaten löschen",
+            "cleared": "Zeitdaten gelöscht.",
+            "clear_error": "Die Zeitdaten für diese Auswahl konnten nicht gelöscht werden.",
             "help": "Verwenden Sie das Formular, um neue Zeitdaten festzulegen.",
             "help_invalid_selection": "",
             "error": "Die Zeitdaten für diese Auswahl konnten nicht aktualisiert werden."

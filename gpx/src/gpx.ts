@@ -467,6 +467,27 @@ export class GPXFile extends GPXTreeNode<Track> {
         });
     }
 
+    // Remove all timestamps from the selected scope. When the whole file is targeted, the file-level
+    // metadata timestamp and the waypoint timestamps go as well, since they belong to the file rather
+    // than to a single track or segment.
+    clearTimestamps(trackIndex?: number, segmentIndex?: number) {
+        this.trk.forEach((track, index) => {
+            if (trackIndex === undefined || trackIndex === index) {
+                track.clearTimestamps(segmentIndex);
+            }
+        });
+        if (trackIndex === undefined) {
+            if (this.metadata.time !== undefined) {
+                delete this.metadata.time;
+            }
+            this.wpt.forEach((waypoint) => {
+                if (waypoint.time !== undefined) {
+                    waypoint.time = undefined;
+                }
+            });
+        }
+    }
+
     addElevation(
         elevations: number[],
         trackIndices?: number[],
@@ -771,6 +792,14 @@ export class Track extends GPXTreeNode<TrackSegment> {
                 if (segment.trkpt.length > 0) {
                     lastPoint = segment.trkpt[segment.trkpt.length - 1];
                 }
+            }
+        });
+    }
+
+    clearTimestamps(segmentIndex?: number) {
+        this.trkseg.forEach((segment, index) => {
+            if (segmentIndex === undefined || segmentIndex === index) {
+                segment.clearTimestamps();
             }
         });
     }
@@ -1352,6 +1381,21 @@ export class TrackSegment extends GPXTreeLeaf {
         this.trkpt = freeze(trkpt); // Pre-freeze the array, faster as well
     }
 
+    clearTimestamps() {
+        let og = getOriginal(this); // Read as much as possible from the original object because it is faster
+        if (!og.trkpt.some((point) => point.time !== undefined)) {
+            // Nothing to clear. Leaving the draft untouched keeps the immer patch empty, so no
+            // no-op entry is added to the edit history.
+            return;
+        }
+        let trkpt = og.trkpt.map((point) => {
+            let pt = point.clone();
+            pt.time = undefined;
+            return pt;
+        });
+        this.trkpt = freeze(trkpt); // Pre-freeze the array, faster as well
+    }
+
     setHidden(hidden: boolean) {
         this._data.hidden = hidden;
     }
@@ -1854,7 +1898,9 @@ function withArtificialTimestamps(
         console.warn('Cannot distribute artificial timestamps: total weight is 0');
         return points.map((point, i) => {
             let pt = point.clone();
-            pt.time = new Date(startTime.getTime() + (totalTime * 1000 * i) / Math.max(1, points.length - 1));
+            pt.time = new Date(
+                startTime.getTime() + (totalTime * 1000 * i) / Math.max(1, points.length - 1)
+            );
             return pt;
         });
     }

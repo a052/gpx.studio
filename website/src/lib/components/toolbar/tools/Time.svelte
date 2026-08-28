@@ -12,7 +12,15 @@
         nauticalMilesToKilometers,
     } from '$lib/units';
     import { CalendarDate, type DateValue } from '@internationalized/date';
-    import { CalendarClock, CirclePlay, CircleStop, CircleX, Timer, Zap } from '@lucide/svelte';
+    import {
+        CalendarClock,
+        CalendarOff,
+        CirclePlay,
+        CircleStop,
+        CircleX,
+        Timer,
+        Zap,
+    } from '@lucide/svelte';
     import { untrack } from 'svelte';
     import { i18n } from '$lib/i18n.svelte';
     import {
@@ -26,6 +34,8 @@
     import { selection } from '$lib/logic/selection';
     import { settings } from '$lib/logic/settings';
     import { fileActionManager } from '$lib/logic/file-action-manager';
+    import { fileActions } from '$lib/logic/file-actions';
+    import { fileStateCollection } from '$lib/logic/file-state';
     import { gpxStatistics } from '$lib/logic/statistics';
     import { toast } from 'svelte-sonner';
 
@@ -182,6 +192,36 @@
     let canUpdate = $derived(
         $selection.size === 1 && $selection.hasAnyChildren(new ListRootItem(), true, ['waypoints'])
     );
+
+    // The statistics only cover track point timestamps. A whole-file selection can also carry a
+    // file-level timestamp or waypoint timestamps, which are cleared too, so check those as well.
+    let hasTimeData = $derived.by(() => {
+        if ($gpxStatistics.global.time.start !== undefined) {
+            return true;
+        }
+        const item = $selection.getSelected()[0];
+        if (!(item instanceof ListFileItem)) {
+            return false;
+        }
+        const file = $fileStateCollection.get(item.getFileId())?.file;
+        return (
+            file !== undefined &&
+            (file.metadata.time !== undefined || file.wpt.some((wpt) => wpt.time !== undefined))
+        );
+    });
+
+    let canClear = $derived(canUpdate && hasTimeData);
+
+    async function clearTimeData() {
+        try {
+            if (await fileActions.clearTimeDataFromSelection()) {
+                toast.success(i18n._('toolbar.time.cleared'));
+            }
+        } catch (e) {
+            console.error('Clearing the time data failed:', e);
+            toast.error(i18n._('toolbar.time.clear_error'));
+        }
+    }
 </script>
 
 <div class="flex flex-col gap-3 w-full max-w-80 {props.class ?? ''}">
@@ -406,6 +446,15 @@
         >
             <CalendarClock size="16" class="shrink-0" />
             {i18n._('toolbar.time.update')}
+        </Button>
+        <Button
+            variant="outline"
+            disabled={!canClear}
+            class="grow shrink whitespace-normal h-fit min-h-8 py-1"
+            onclick={clearTimeData}
+        >
+            <CalendarOff size="16" class="shrink-0" />
+            {i18n._('toolbar.time.clear')}
         </Button>
         <Button variant="outline" size="icon" onclick={setGPXData}>
             <CircleX size="16" />

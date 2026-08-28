@@ -271,6 +271,9 @@
             "pick_date": "Seleccione una fecha",
             "artificial": "Crear datos de tiempo realistas",
             "update": "Actualizar datos de tiempo",
+            "clear": "Borrar datos de tiempo",
+            "cleared": "Datos de tiempo borrados.",
+            "clear_error": "No se pudieron borrar los datos de tiempo de esta selección.",
             "help": "Use el formulario para establecer nuevos datos de tiempo.",
             "help_invalid_selection": "Seleccione un único trazado para gestionar sus datos de tiempo.",
             "error": "No se pudieron actualizar los datos de tiempo de esta selección."

@@ -271,6 +271,9 @@
             "pick_date": "选择日期",
             "artificial": "创建实际时间数据",
             "update": "更新时间数据",
+            "clear": "清除时间数据",
+            "cleared": "时间数据已清除。",
+            "clear_error": "无法清除此选区的时间数据。",
             "help": "使用表单设置新的时间数据。",
             "help_invalid_selection": "选择一个单一的轨迹来管理其时间数据。",
             "error": "无法更新此选区的时间数据。"

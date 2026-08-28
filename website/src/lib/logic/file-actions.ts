@@ -882,6 +882,32 @@ export const fileActions = {
             });
         });
     },
+    clearTimeDataFromSelection: (): Promise<boolean> => {
+        if (get(selection).size === 0) {
+            return Promise.resolve(false);
+        }
+        return fileActionManager.applyGlobal((draft) => {
+            selection.applyToOrderedSelectedItemsFromFile((fileId, level, items) => {
+                const file = draft.get(fileId);
+                if (file) {
+                    if (level === ListLevel.FILE) {
+                        file.clearTimestamps();
+                    } else if (level === ListLevel.TRACK) {
+                        for (const item of items) {
+                            const trackIndex = (item as ListTrackItem).getTrackIndex();
+                            file.clearTimestamps(trackIndex);
+                        }
+                    } else if (level === ListLevel.SEGMENT) {
+                        for (const item of items) {
+                            const trackIndex = (item as ListTrackSegmentItem).getTrackIndex();
+                            const segmentIndex = (item as ListTrackSegmentItem).getSegmentIndex();
+                            file.clearTimestamps(trackIndex, segmentIndex);
+                        }
+                    }
+                }
+            });
+        });
+    },
     deleteSelectedFiles: () => {
         if (get(selection).size === 0) {
             return;
