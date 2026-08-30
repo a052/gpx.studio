@@ -9,7 +9,7 @@
     import Help from '$lib/components/Help.svelte';
     import { onDestroy, onMount, untrack } from 'svelte';
     import { getURLForLanguage } from '$lib/utils';
-    import { MapPin, CircleX, Save } from '@lucide/svelte';
+    import { Bookmark, CircleX, Save } from '@lucide/svelte';
     import { getSymbolKey, symbols } from '$lib/assets/symbols';
     import { selection } from '$lib/logic/selection';
     import { selectedWaypoint } from './waypoint';
@@ -266,7 +266,7 @@
                 <Save size="16" class="shrink-0" />
                 {i18n._('menu.metadata.save')}
             {:else}
-                <MapPin size="16" class="shrink-0" />
+                <Bookmark size="16" class="shrink-0" />
                 {i18n._('toolbar.waypoint.create')}
             {/if}
         </Button>

@@ -90,11 +90,13 @@
                 "custom": "自定义 URL"
             },
             "custom_url": "API URL",
-            "custom_url_help": "Overpass interpreter 端点的完整 URL（例如 https://overpass-api.de/api/interpreter）。"
+            "custom_url_help": "Overpass interpreter 端点的完整 URL（例如 https://overpass-api.de/api/interpreter）。",
+            "default_warning_before": "该服务可能不稳定。如需查看替代服务器或自行搭建，请访问 ",
+            "default_warning_after": "。"
         },
         "distance_markers": "距离标记",
         "direction_markers": "方向箭头",
-        "points_of_interest": "兴趣点",
+        "points_of_interest": "路点",
         "coordinate_readout": "光标坐标与海拔",
         "zoom_in_for_elevation": "放大以获取海拔",
         "help": "帮助",
@@ -253,7 +255,9 @@
                 "api_key_placeholder": "您的 GraphHopper API 密钥",
                 "official_warning": "在免费套餐下，仅支持自行车、跑步/徒步和汽车。公路自行车、砾石自行车、山地自行车和摩托车，以及屏蔽私有道路，可能无法使用。",
                 "custom_url": "API URL",
-                "custom_url_help": "GraphHopper 路线端点的完整 URL（例如 https://your-server/route）。"
+                "custom_url_help": "GraphHopper 路线端点的完整 URL（例如 https://your-server/route）。",
+                "unstable_warning_before": "该服务可能不稳定。如需更稳定的路线规划，请到 ",
+                "unstable_warning_after": " 注册获取免费 API 密钥，或自行搭建 GraphHopper 服务器。"
             }
         },
         "scissors": {
@@ -306,15 +310,15 @@
             "error": "无法请求海拔数据。"
         },
         "waypoint": {
-            "tooltip": "创建或编辑兴趣点",
+            "tooltip": "创建或编辑路点",
             "icon": "图标",
             "link": "链接",
             "longitude": "经度",
             "latitude": "纬度",
-            "create": "创建兴趣点",
+            "create": "创建路点",
             "add": "将兴趣点添加到文件",
-            "help": "通过表单创建新兴趣点，或点击现有兴趣点以编辑。 点击地图并填充坐标点，或拖动兴趣点以移动坐标。",
-            "help_no_selection": "选择文件以创建或编辑兴趣点。"
+            "help": "通过表单创建新路点，或点击现有路点以编辑。 点击地图并填充坐标点，或拖动路点以移动坐标。",
+            "help_no_selection": "选择文件以创建或编辑路点。"
         },
         "reduce": {
             "tooltip": "精简 GPS 点数量",

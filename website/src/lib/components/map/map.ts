@@ -147,7 +147,11 @@ export class MapLibreGLMap {
         const scaleControl = new maplibregl.ScaleControl({
             unit: get(distanceUnits),
         });
-        map.addControl(scaleControl);
+        // Place the scale bar in the bottom-right corner. MapLibre inserts bottom-corner controls
+        // before the existing ones, and the default attribution control is added during map
+        // construction (before this), so the scale ends up stacked directly above the
+        // "Toggle attribution" button.
+        map.addControl(scaleControl, 'bottom-right');
         map.on('load', () => {
             this._map = map;
             this._mapStore.set(map); // only set the store after the map has loaded

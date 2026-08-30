@@ -90,11 +90,13 @@
                 "custom": "URL personnalisée"
             },
             "custom_url": "URL de l'API",
-            "custom_url_help": "URL complète du point de terminaison interpreter d'Overpass (par ex. https://overpass-api.de/api/interpreter)."
+            "custom_url_help": "URL complète du point de terminaison interpreter d'Overpass (par ex. https://overpass-api.de/api/interpreter).",
+            "default_warning_before": "Ce service peut être instable. Pour des serveurs alternatifs ou pour héberger le vôtre, consultez ",
+            "default_warning_after": "."
         },
         "distance_markers": "Marqueurs de distance",
         "direction_markers": "Flèches de direction",
-        "points_of_interest": "Points d'intérêt",
+        "points_of_interest": "Points de passage",
         "coordinate_readout": "Coordonnées du curseur et altitude",
         "zoom_in_for_elevation": "Zoomez pour afficher l'altitude",
         "help": "Aide",
@@ -253,7 +255,9 @@
                 "api_key_placeholder": "Votre clé API GraphHopper",
                 "official_warning": "Dans l'offre gratuite, seuls Vélo, Course à pied/randonnée et voiture sont pris en charge. Vélo de route, vélo gravel, VTT et moto, ainsi que le blocage des routes privées, peuvent ne pas fonctionner.",
                 "custom_url": "URL de l'API",
-                "custom_url_help": "URL complète du point de terminaison route de GraphHopper (par ex. https://your-server/route)."
+                "custom_url_help": "URL complète du point de terminaison route de GraphHopper (par ex. https://your-server/route).",
+                "unstable_warning_before": "Ce service peut être instable. Pour un calcul d'itinéraire plus fiable, obtenez une clé API gratuite sur ",
+                "unstable_warning_after": " ou hébergez votre propre serveur GraphHopper."
             }
         },
         "scissors": {
@@ -306,15 +310,15 @@
             "error": "Impossible de récupérer les données d'altitude."
         },
         "waypoint": {
-            "tooltip": "Créer et modifier des points d'intérêt",
+            "tooltip": "Créer et modifier des points de passage",
             "icon": "Icône",
             "link": "Lien",
             "longitude": "Longitude",
             "latitude": "Latitude",
-            "create": "Créer le point d'intérêt",
+            "create": "Créer le point de passage",
             "add": "Ajouter le point d'intérêt au fichier",
-            "help": "Remplissez le formulaire pour créer un nouveau point d'intérêt, ou cliquez sur un point existant pour le modifier. Cliquez sur la carte pour remplir les coordonnées, ou faites glisser les points d'intérêt pour les déplacer.",
-            "help_no_selection": "Sélectionnez un fichier pour créer ou éditer des points d'intérêt."
+            "help": "Remplissez le formulaire pour créer un nouveau point de passage, ou cliquez sur un point existant pour le modifier. Cliquez sur la carte pour remplir les coordonnées, ou faites glisser les points de passage pour les déplacer.",
+            "help_no_selection": "Sélectionnez un fichier pour créer ou éditer des points de passage."
         },
         "reduce": {
             "tooltip": "Réduire le nombre de points GPS",

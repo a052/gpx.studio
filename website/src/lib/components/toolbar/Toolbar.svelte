@@ -8,7 +8,7 @@
         Pencil,
         SquareDashedMousePointer,
         Ungroup,
-        MapPin,
+        Bookmark,
         Funnel,
         Scissors,
         MountainSnow,
@@ -29,7 +29,7 @@
             <Pencil size="18" class="size-4.5" />
         </ToolbarItem>
         <ToolbarItem itemTool={Tool.WAYPOINT} label={i18n._('toolbar.waypoint.tooltip')}>
-            <MapPin size="18" class="size-4.5" />
+            <Bookmark size="18" class="size-4.5" />
         </ToolbarItem>
         <ToolbarItem itemTool={Tool.SCISSORS} label={i18n._('toolbar.scissors.tooltip')}>
             <Scissors size="18" class="size-4.5" />

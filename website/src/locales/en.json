@@ -90,11 +90,13 @@
                 "custom": "Custom URL"
             },
             "custom_url": "API URL",
-            "custom_url_help": "Full URL of the Overpass interpreter endpoint (e.g. https://overpass-api.de/api/interpreter)."
+            "custom_url_help": "Full URL of the Overpass interpreter endpoint (e.g. https://overpass-api.de/api/interpreter).",
+            "default_warning_before": "This service may be unstable. For alternative servers or to host your own, see ",
+            "default_warning_after": "."
         },
         "distance_markers": "Distance markers",
         "direction_markers": "Direction arrows",
-        "points_of_interest": "Points of interest",
+        "points_of_interest": "Waypoints",
         "coordinate_readout": "Cursor coordinates and elevation",
         "zoom_in_for_elevation": "Zoom in for elevation",
         "help": "Help",
@@ -253,7 +255,9 @@
                 "api_key_placeholder": "Your GraphHopper API key",
                 "official_warning": "On the free plan, only Bike, Run/hike and car are supported. Road bike, gravel bike, mountain bike and motorcycle, as well as private-road blocking, may not work.",
                 "custom_url": "API URL",
-                "custom_url_help": "Full URL of the GraphHopper route endpoint (e.g. https://your-server/route)."
+                "custom_url_help": "Full URL of the GraphHopper route endpoint (e.g. https://your-server/route).",
+                "unstable_warning_before": "This service may be unstable. For more reliable routing, get a free API key at ",
+                "unstable_warning_after": ", or host your own GraphHopper server."
             }
         },
         "scissors": {
@@ -306,15 +310,15 @@
             "error": "Could not request elevation data."
         },
         "waypoint": {
-            "tooltip": "Create and edit points of interest",
+            "tooltip": "Create and edit waypoints",
             "icon": "Icon",
             "link": "Link",
             "longitude": "Longitude",
             "latitude": "Latitude",
-            "create": "Create point of interest",
+            "create": "Create waypoint",
             "add": "Add point of interest to file",
-            "help": "Fill in the form to create a new point of interest, or click on an existing one to edit it. Click on the map to fill the coordinates, or drag points of interest to move them.",
-            "help_no_selection": "Select a file to create or edit points of interest."
+            "help": "Fill in the form to create a new waypoint, or click on an existing one to edit it. Click on the map to fill the coordinates, or drag waypoints to move them.",
+            "help_no_selection": "Select a file to create or edit waypoints."
         },
         "reduce": {
             "tooltip": "Reduce the number of GPS points",

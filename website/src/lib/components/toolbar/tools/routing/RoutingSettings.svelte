@@ -72,6 +72,18 @@
                                 {i18n._('toolbar.routing.provider.custom_url_help')}
                             </p>
                         </div>
+                    {:else if $routingProvider === 'default' || $routingProvider === 'brouter'}
+                        <p class="flex flex-row gap-1.5 text-xs text-muted-foreground leading-snug">
+                            <TriangleAlert size="14" class="shrink-0 mt-0.5" />
+                            <span>
+                                {i18n._('toolbar.routing.provider.unstable_warning_before')}<a
+                                    href="https://www.graphhopper.com/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="text-link underline">graphhopper.com</a
+                                >{i18n._('toolbar.routing.provider.unstable_warning_after')}
+                            </span>
+                        </p>
                     {/if}
                 </div>
             </ScrollArea>

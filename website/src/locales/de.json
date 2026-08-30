@@ -90,11 +90,13 @@
                 "custom": "Benutzerdefinierte URL"
             },
             "custom_url": "API-URL",
-            "custom_url_help": "Vollständige URL des Overpass-Interpreter-Endpunkts (z. B. https://overpass-api.de/api/interpreter)."
+            "custom_url_help": "Vollständige URL des Overpass-Interpreter-Endpunkts (z. B. https://overpass-api.de/api/interpreter).",
+            "default_warning_before": "Dieser Dienst kann instabil sein. Alternative Server oder Anleitungen zum Selbst-Hosten findest du unter ",
+            "default_warning_after": "."
         },
         "distance_markers": "Entfernungsmarkierungen",
         "direction_markers": "Richtungspfeile",
-        "points_of_interest": "Interessante Orte",
+        "points_of_interest": "Wegpunkte",
         "coordinate_readout": "Cursor-Koordinaten und Höhe",
         "zoom_in_for_elevation": "Für Höhe heranzoomen",
         "help": "Hilfe",
@@ -253,7 +255,9 @@
                 "api_key_placeholder": "Dein GraphHopper-API-Schlüssel",
                 "official_warning": "Im kostenlosen Tarif werden nur Fahrrad, Laufen/Wandern und Auto unterstützt. Rennrad, Schotterrad, Mountainbike und Motorrad sowie das Sperren privater Straßen funktionieren möglicherweise nicht.",
                 "custom_url": "API-URL",
-                "custom_url_help": "Vollständige URL des GraphHopper-Routen-Endpunkts (z. B. https://your-server/route)."
+                "custom_url_help": "Vollständige URL des GraphHopper-Routen-Endpunkts (z. B. https://your-server/route).",
+                "unstable_warning_before": "Dieser Dienst kann instabil sein. Für zuverlässigeres Routing hol dir einen kostenlosen API-Schlüssel auf ",
+                "unstable_warning_after": " oder betreibe deinen eigenen GraphHopper-Server."
             }
         },
         "scissors": {
@@ -306,15 +310,15 @@
             "error": "Höhendaten konnten nicht angefragt werden."
         },
         "waypoint": {
-            "tooltip": "Punkte von Interesse erstellen und bearbeiten",
+            "tooltip": "Wegpunkte erstellen und bearbeiten",
             "icon": "Icon",
             "link": "Link",
             "longitude": "Längengrad",
             "latitude": "Breitengrad",
-            "create": "POI erstellen",
+            "create": "Wegpunkt erstellen",
             "add": "POI hinzufügen",
-            "help": "Füllen Sie das Formular aus, um einen neuen Point of Interest zu erstellen, oder klicken Sie auf einen bestehenden zu bearbeiten. Klicken Sie auf die Karte, um die Koordinaten zu füllen, oder ziehen Sie Punkte von Interesse um sie zu verschieben.",
-            "help_no_selection": "Wählen Sie eine Datei aus, um interessante Punkte zu erstellen oder zu bearbeiten."
+            "help": "Füllen Sie das Formular aus, um einen neuen Wegpunkt zu erstellen, oder klicken Sie auf einen bestehenden zum Bearbeiten. Klicken Sie auf die Karte, um die Koordinaten zu füllen, oder ziehen Sie Wegpunkte, um sie zu verschieben.",
+            "help_no_selection": "Wählen Sie eine Datei aus, um Wegpunkte zu erstellen oder zu bearbeiten."
         },
         "reduce": {
             "tooltip": "Die Anzahl Wegpunkte verringern",

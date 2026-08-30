@@ -1,6 +1,6 @@
 <script lang="ts">
     import ButtonWithTooltip from '$lib/components/ButtonWithTooltip.svelte';
-    import { ChartArea, Coins, MapPinned, Milestone } from '@lucide/svelte';
+    import { Bookmark, ChartArea, Coins, Milestone } from '@lucide/svelte';
     import { i18n } from '$lib/i18n.svelte';
     import { settings } from '$lib/logic/settings';
 
@@ -17,7 +17,7 @@
             $showWaypoints = !$showWaypoints;
         }}
     >
-        <MapPinned size="16" color={$showWaypoints ? '#33b5e5' : 'currentColor'} />
+        <Bookmark size="16" color={$showWaypoints ? '#33b5e5' : 'currentColor'} />
     </ButtonWithTooltip>
     <ButtonWithTooltip
         variant="outline"

@@ -90,11 +90,13 @@
                 "custom": "URL personalizada"
             },
             "custom_url": "URL de la API",
-            "custom_url_help": "URL completa del endpoint interpreter de Overpass (p. ej. https://overpass-api.de/api/interpreter)."
+            "custom_url_help": "URL completa del endpoint interpreter de Overpass (p. ej. https://overpass-api.de/api/interpreter).",
+            "default_warning_before": "Este servicio puede ser inestable. Para ver servidores alternativos o alojar el tuyo propio, consulta ",
+            "default_warning_after": "."
         },
         "distance_markers": "Indicadores de distancia",
         "direction_markers": "Flechas de dirección",
-        "points_of_interest": "Puntos de interés",
+        "points_of_interest": "Puntos de ruta",
         "coordinate_readout": "Coordenadas del cursor y altura",
         "zoom_in_for_elevation": "Acerque para ver la altura",
         "help": "Ayuda",
@@ -253,7 +255,9 @@
                 "api_key_placeholder": "Su clave de API de GraphHopper",
                 "official_warning": "En el plan gratuito, solo se admiten En bicicleta, Correr/Caminar y coche. La bicicleta de carretera, la bicicleta de grava, la bicicleta de montaña y la motocicleta, así como el bloqueo de caminos privados, pueden no funcionar.",
                 "custom_url": "URL de la API",
-                "custom_url_help": "URL completa del endpoint de ruta de GraphHopper (p. ej. https://your-server/route)."
+                "custom_url_help": "URL completa del endpoint de ruta de GraphHopper (p. ej. https://your-server/route).",
+                "unstable_warning_before": "Este servicio puede ser inestable. Para un enrutamiento más fiable, obtén una clave de API gratuita en ",
+                "unstable_warning_after": " o aloja tu propio servidor GraphHopper."
             }
         },
         "scissors": {
@@ -306,15 +310,15 @@
             "error": "No se pudieron solicitar los datos de desnivel."
         },
         "waypoint": {
-            "tooltip": "Crear y editar puntos de interés",
+            "tooltip": "Crear y editar puntos de ruta",
             "icon": "Icono",
             "link": "Enlace",
             "longitude": "Longitud",
             "latitude": "Latitud",
-            "create": "Crear punto de interés",
+            "create": "Crear punto de ruta",
             "add": "Añadir punto de interés al archivo",
-            "help": "Rellene el formulario para crear un nuevo punto de interés o haga clic en uno existente para editarlo. Haga clic en el mapa para rellenar las coordenadas o arrastre los puntos de interés para moverlos.",
-            "help_no_selection": "Seleccione un archivo para crear o editar puntos de interés."
+            "help": "Rellene el formulario para crear un nuevo punto de ruta o haga clic en uno existente para editarlo. Haga clic en el mapa para rellenar las coordenadas o arrastre los puntos de ruta para moverlos.",
+            "help_no_selection": "Seleccione un archivo para crear o editar puntos de ruta."
         },
         "reduce": {
             "tooltip": "Reducir la cantidad de puntos GPS",

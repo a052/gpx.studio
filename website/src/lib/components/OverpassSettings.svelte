@@ -4,6 +4,7 @@
     import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
     import { Label } from '$lib/components/ui/label';
     import { Input } from '$lib/components/ui/input';
+    import { TriangleAlert } from '@lucide/svelte';
     import { i18n } from '$lib/i18n.svelte';
     import { settings } from '$lib/logic/settings';
 
@@ -54,6 +55,19 @@
                                 {i18n._('menu.overpass.custom_url_help')}
                             </p>
                         </div>
+                    {:else if $overpassProvider === 'default'}
+                        <p class="flex flex-row gap-1.5 text-xs text-muted-foreground leading-snug">
+                            <TriangleAlert size="14" class="shrink-0 mt-0.5" />
+                            <span>
+                                {i18n._('menu.overpass.default_warning_before')}<a
+                                    href="https://wiki.openstreetmap.org/wiki/Overpass_API"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="text-link underline break-all"
+                                    >wiki.openstreetmap.org/wiki/Overpass_API</a
+                                >{i18n._('menu.overpass.default_warning_after')}
+                            </span>
+                        </p>
                     {/if}
                 </div>
             </ScrollArea>
