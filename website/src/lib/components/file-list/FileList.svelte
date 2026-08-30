@@ -35,6 +35,42 @@
         untrack(() => recursive)
     );
 
+    // Scrollable viewport of the ScrollArea. In the horizontal (bottom-bar) layout the
+    // scrollbar is hidden and a plain mouse wheel produces a vertical deltaY, which browsers
+    // do NOT translate into horizontal scroll — so overflowing files would be unreachable.
+    // Bind the viewport and drive scrollLeft ourselves from the wheel.
+    let viewportRef: HTMLElement | null = $state(null);
+
+    $effect(() => {
+        if (orientation !== 'horizontal' || !viewportRef) {
+            return;
+        }
+        const el = viewportRef;
+        // Native (non-passive so preventDefault works) rather than an inline onwheel attribute:
+        // avoids the a11y_no_static_element_interactions lint warning and fires via bubbling
+        // from the pointer-events-auto file buttons up to this (pointer-events-none) viewport.
+        const onWheel = (e: WheelEvent) => {
+            const maxScroll = el.scrollWidth - el.clientWidth;
+            if (maxScroll <= 0) {
+                return; // nothing to scroll — let the event pass through
+            }
+            // Dominant axis so trackpad horizontal scroll keeps working.
+            let delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+            if (delta === 0) {
+                return;
+            }
+            if (e.deltaMode === 1) {
+                delta *= 16; // lines → px (Firefox)
+            } else if (e.deltaMode === 2) {
+                delta *= el.clientWidth; // pages → px
+            }
+            el.scrollLeft += delta;
+            e.preventDefault(); // take over the wheel; don't zoom the map or scroll the page
+        };
+        el.addEventListener('wheel', onWheel, { passive: false });
+        return () => el.removeEventListener('wheel', onWheel);
+    });
+
     onMount(() => {
         if (orientation === 'horizontal') {
             selection.update(($selection) => {
@@ -51,6 +87,7 @@
 </script>
 
 <ScrollArea
+    bind:viewportRef
     class="shrink-0 {orientation === 'vertical' ? 'p-0 pr-3' : 'h-10 px-1'}"
     {orientation}
     scrollbarXClasses={orientation === 'vertical' ? '' : 'hidden'}
