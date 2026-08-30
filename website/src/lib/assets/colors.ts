@@ -152,6 +152,23 @@ export function getHighwayColor(
     return backgroundColor;
 }
 
+// Vertical elevation-fill gradient (used when no fill mode is selected):
+// t = 0 → lowest elevation (green), t = 1 → highest elevation (red).
+// Hue sweeps 120° (green) → 0° (red), passing through yellow/orange.
+export function getElevationColor(t: number): string {
+    const clamped = Math.min(Math.max(t, 0), 1);
+    //    const hue = 90 * (1 - clamped);
+    const hue = 90 - 70 * clamped;
+    return `hsl(${hue}, 90%, 50%)`;
+}
+
+// Solid line color for the elevation curve in the default (gradient) fill mode,
+// darker than the fill's top (highest-elevation) red.
+export const elevationLineColor = '#8b2e2e';
+
+// Line color for the speed curve in the elevation profile.
+export const speedLineColor = '#008000';
+
 const maxSlope = 20;
 export function getSlopeColor(slope: number): string {
     if (slope > maxSlope) {

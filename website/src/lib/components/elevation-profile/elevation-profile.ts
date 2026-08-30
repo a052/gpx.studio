@@ -23,7 +23,14 @@ import Chart, {
 import { get, type Readable, type Writable } from 'svelte/store';
 import type { Coordinates, GPXGlobalStatistics, GPXStatisticsGroup } from 'gpx';
 import { mode } from 'mode-watcher';
-import { getHighwayColor, getSlopeColor, getSurfaceColor } from '$lib/assets/colors';
+import {
+    elevationLineColor,
+    getElevationColor,
+    getHighwayColor,
+    getSlopeColor,
+    getSurfaceColor,
+    speedLineColor,
+} from '$lib/assets/colors';
 
 const { distanceUnits, velocityUnits, temperatureUnits } = settings;
 
@@ -50,6 +57,7 @@ export class ElevationProfile {
     private _overlay: HTMLCanvasElement;
     private _dragging = false;
     private _panning = false;
+    private _gradientCache: { key: string; value: CanvasGradient } | null = null;
 
     private _gpxStatistics: Readable<GPXStatisticsGroup>;
     private _slicedGPXStatistics: Writable<[GPXGlobalStatistics, number, number] | undefined>;
@@ -142,7 +150,7 @@ export class ElevationProfile {
                 line: {
                     pointRadius: 0,
                     tension: 0.4,
-                    borderWidth: 2,
+                    borderWidth: 1,
                     cubicInterpolationMode: 'monotone',
                 },
             },
@@ -482,6 +490,9 @@ export class ElevationProfile {
             data: datasets[1],
             normalized: true,
             yAxisID: 'yspeed',
+            // Override the auto-assigned color via `segment` so the Colors plugin keeps coloring the
+            // remaining datasets (setting a dataset-level color would switch it off for all of them).
+            segment: { borderColor: speedLineColor },
         };
         this._chart.data.datasets[2] = {
             data: datasets[2],
@@ -558,23 +569,23 @@ export class ElevationProfile {
         }
         const elevationFill = get(this._elevationFill);
         const dataset = this._chart.data.datasets[0];
-        let segment: any = {};
+        // The curve line uses the same dark-red color in every fill mode; only the fill varies.
+        // Applied through `segment` (not dataset-level colors) so the Chart.js Colors plugin keeps
+        // auto-coloring the other datasets.
+        let backgroundColor: any;
         if (elevationFill === 'slope') {
-            segment = {
-                backgroundColor: this.slopeFillCallback,
-            };
+            backgroundColor = this.slopeFillCallback;
         } else if (elevationFill === 'surface') {
-            segment = {
-                backgroundColor: this.surfaceFillCallback,
-            };
+            backgroundColor = this.surfaceFillCallback;
         } else if (elevationFill === 'highway') {
-            segment = {
-                backgroundColor: this.highwayFillCallback,
-            };
+            backgroundColor = this.highwayFillCallback;
         } else {
-            segment = {};
+            // Default (no fill mode): vertical gradient keyed to elevation.
+            backgroundColor = this.elevationGradientFillCallback;
         }
-        Object.assign(dataset, { segment });
+        Object.assign(dataset, {
+            segment: { backgroundColor, borderColor: elevationLineColor },
+        });
     }
 
     updateOverlay() {
@@ -642,6 +653,33 @@ export class ElevationProfile {
             point.extensions.mtb_scale
         );
     }
+
+    // Arrow function so `this` resolves to the instance (needs `this._chart`). Returns the same
+    // cached gradient for every segment: because the gradient is defined in absolute canvas
+    // coordinates (chartArea.top → bottom), reusing it yields one seamless vertical gradient across
+    // the whole fill instead of rebuilding it once per line segment.
+    elevationGradientFillCallback = (): CanvasGradient | undefined => {
+        if (!this._chart) {
+            return undefined;
+        }
+        const { ctx, chartArea } = this._chart;
+        if (!chartArea || chartArea.bottom <= chartArea.top) {
+            // Layout not ready yet; Chart.js re-resolves the scriptable on the next draw.
+            return undefined;
+        }
+        const key = `${Math.round(chartArea.top)}-${Math.round(chartArea.bottom)}`;
+        if (this._gradientCache && this._gradientCache.key === key) {
+            return this._gradientCache.value;
+        }
+        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+        const steps = 10;
+        for (let i = 0; i <= steps; i++) {
+            // Top (i = 0) = highest elevation = red (t = 1); bottom = lowest = green (t = 0).
+            gradient.addColorStop(i / steps, getElevationColor(1 - i / steps));
+        }
+        this._gradientCache = { key, value: gradient };
+        return gradient;
+    };
 
     destroy() {
         if (this._chart) {
