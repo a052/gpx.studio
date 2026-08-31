@@ -253,7 +253,6 @@ export class ElevationProfile {
                     pan: {
                         enabled: true,
                         mode: 'x',
-                        modifierKey: 'shift',
                         onPanStart: () => {
                             this._panning = true;
                             this._slicedGPXStatistics.set(undefined);
@@ -366,16 +365,26 @@ export class ElevationProfile {
 
         let dragStarted = false;
         const onMouseDown = (evt: PointerEvent) => {
-            if (evt.shiftKey) {
-                // Panning interaction
-                return;
+            if (evt.button === 2) {
+                // Selection interaction (right button)
+                dragStarted = true;
+                this._canvas.style.cursor = 'col-resize';
+                startIndex = getIndex(evt);
+            } else if (evt.button === 0) {
+                // Panning interaction, handled by chartjs-plugin-zoom
+                this._canvas.style.cursor = 'grabbing';
             }
-            dragStarted = true;
-            this._canvas.style.cursor = 'col-resize';
-            startIndex = getIndex(evt);
         };
         const onMouseMove = (evt: PointerEvent) => {
             if (dragStarted) {
+                if ((evt.buttons & 2) === 0) {
+                    // Right button was released while outside the canvas (no pointer capture):
+                    // end the drag instead of letting the selection follow the cursor.
+                    dragStarted = false;
+                    this._dragging = false;
+                    this._canvas.style.cursor = '';
+                    return;
+                }
                 this._dragging = true;
                 endIndex = getIndex(evt);
                 if (endIndex !== undefined) {
@@ -402,6 +411,9 @@ export class ElevationProfile {
             }
         };
         const onMouseUp = (evt: PointerEvent) => {
+            if (!dragStarted) {
+                return;
+            }
             try {
                 endIndex = getIndex(evt);
                 if (startIndex === endIndex) {
@@ -417,6 +429,9 @@ export class ElevationProfile {
         this._canvas.addEventListener('pointerdown', onMouseDown);
         this._canvas.addEventListener('pointermove', onMouseMove);
         this._canvas.addEventListener('pointerup', onMouseUp);
+        this._canvas.addEventListener('contextmenu', (evt) => {
+            evt.preventDefault();
+        });
     }
 
     updateData() {
