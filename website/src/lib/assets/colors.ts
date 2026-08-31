@@ -166,8 +166,28 @@ export function getElevationColor(t: number): string {
 // darker than the fill's top (highest-elevation) red.
 export const elevationLineColor = '#8b2e2e';
 
-// Line color for the speed curve in the elevation profile.
+// Line colors for the additional curves in the elevation profile, also used to
+// color the matching right-hand axis ticks. Chosen to stay readable as text in
+// both light and dark mode.
 export const speedLineColor = '#008000';
+export const heartRateLineColor = '#ff9f40';
+export const cadenceLineColor = '#ca8a04';
+export const temperatureLineColor = '#0d9488';
+export const powerLineColor = '#8b5cf6';
+
+// 50%-alpha variant of a line color, used for the tooltip swatch fill of the
+// additional curves (mirrors what Chart.js's built-in Colors plugin produced).
+export function withAlpha(color: string, alpha: number = 0.5): string {
+    const match = color.match(/^#([0-9a-f]{6})$/i);
+    if (!match) {
+        return color;
+    }
+    const rgb = parseInt(match[1], 16);
+    const r = (rgb >> 16) & 0xff;
+    const g = (rgb >> 8) & 0xff;
+    const b = rgb & 0xff;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 const maxSlope = 20;
 export function getSlopeColor(slope: number): string {

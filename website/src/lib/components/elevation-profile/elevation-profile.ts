@@ -24,12 +24,17 @@ import { get, type Readable, type Writable } from 'svelte/store';
 import type { Coordinates, GPXGlobalStatistics, GPXStatisticsGroup } from 'gpx';
 import { mode } from 'mode-watcher';
 import {
+    cadenceLineColor,
     elevationLineColor,
     getElevationColor,
     getHighwayColor,
     getSlopeColor,
     getSurfaceColor,
+    heartRateLineColor,
+    powerLineColor,
     speedLineColor,
+    temperatureLineColor,
+    withAlpha,
 } from '$lib/assets/colors';
 
 const { distanceUnits, velocityUnits, temperatureUnits } = settings;
@@ -51,6 +56,28 @@ interface ElevationProfilePoint {
     index: number;
 }
 
+type AdditionalCurveId = 'speed' | 'hr' | 'cad' | 'atemp' | 'power';
+
+const ADDITIONAL_CURVES: AdditionalCurveId[] = ['speed', 'hr', 'cad', 'atemp', 'power'];
+
+// Per-curve right-axis config. Speed ticks strip trailing whole decimals
+// ("12.00 km/h" → "12 km/h"); the precise value stays available in the tooltip.
+const additionalCurveConfigs: Array<{
+    id: AdditionalCurveId;
+    color: string;
+    format: (value: number) => string;
+}> = [
+    {
+        id: 'speed',
+        color: speedLineColor,
+        format: (v) => getVelocityWithUnits(v, false).replace(/\.0+ /, ' '),
+    },
+    { id: 'hr', color: heartRateLineColor, format: (v) => getHeartRateWithUnits(v) },
+    { id: 'cad', color: cadenceLineColor, format: (v) => getCadenceWithUnits(v) },
+    { id: 'atemp', color: temperatureLineColor, format: (v) => getTemperatureWithUnits(v, false) },
+    { id: 'power', color: powerLineColor, format: (v) => getPowerWithUnits(v) },
+];
+
 export class ElevationProfile {
     private _chart: Chart | null = null;
     private _canvas: HTMLCanvasElement;
@@ -58,6 +85,9 @@ export class ElevationProfile {
     private _dragging = false;
     private _panning = false;
     private _gradientCache: { key: string; value: CanvasGradient } | null = null;
+    // The additional curve whose y-axis is currently shown on the right. The other enabled
+    // curves' axes stay hidden; clicking the visible axis cycles to the next one.
+    private _activeAdditionalCurve: AdditionalCurveId | null = null;
 
     private _gpxStatistics: Readable<GPXStatisticsGroup>;
     private _slicedGPXStatistics: Writable<[GPXGlobalStatistics, number, number] | undefined>;
@@ -297,16 +327,26 @@ export class ElevationProfile {
             },
         };
 
-        const datasets: string[] = ['speed', 'hr', 'cad', 'atemp', 'power'];
-        datasets.forEach((id) => {
+        // All additional curves have a right-hand scale registered, but only the active curve's
+        // one is displayed at a time (see setVisibility) — showing all of them side by side
+        // would eat a lot of horizontal space. Ticks are color-coded to the curve.
+        additionalCurveConfigs.forEach(({ id, color, format }) => {
             options.scales![`y${id}`] = {
                 type: 'linear',
                 position: 'right',
+                display: false,
                 grid: {
                     display: false,
                 },
+                border: {
+                    display: false,
+                },
+                ticks: {
+                    callback: (value) => format(value as number),
+                    color,
+                    maxTicksLimit: 6,
+                },
                 reverse: id === 'speed' && get(velocityUnits) === 'pace',
-                display: false,
             };
         });
 
@@ -371,8 +411,13 @@ export class ElevationProfile {
                 this._canvas.style.cursor = 'col-resize';
                 startIndex = getIndex(evt);
             } else if (evt.button === 0) {
-                // Panning interaction, handled by chartjs-plugin-zoom
-                this._canvas.style.cursor = 'grabbing';
+                // Panning interaction, handled by chartjs-plugin-zoom — unless the click lands
+                // on the active additional-curve axis, where it cycles to the next curve.
+                if (this.isPointOnActiveAxis(evt)) {
+                    this.cycleAdditionalCurve();
+                } else {
+                    this._canvas.style.cursor = 'grabbing';
+                }
             }
         };
         const onMouseMove = (evt: PointerEvent) => {
@@ -408,6 +453,11 @@ export class ElevationProfile {
                         }
                     }
                 }
+            } else if (this.isPointOnActiveAxis(evt)) {
+                // Advertise the click-to-cycle interaction on the active axis.
+                this._canvas.style.cursor = 'pointer';
+            } else if (this._canvas.style.cursor === 'pointer') {
+                this._canvas.style.cursor = '';
             }
         };
         const onMouseUp = (evt: PointerEvent) => {
@@ -500,34 +550,45 @@ export class ElevationProfile {
             fill: 'start',
             order: 1,
             segment: {},
+            // Dataset-level colors are what the tooltip swatch uses (segment colors are not);
+            // the per-segment callbacks set in setFill() override these when drawing.
+            borderColor: elevationLineColor,
+            backgroundColor: withAlpha(elevationLineColor),
         };
         this._chart.data.datasets[1] = {
             data: datasets[1],
             normalized: true,
             yAxisID: 'yspeed',
-            // Override the auto-assigned color via `segment` so the Colors plugin keeps coloring the
-            // remaining datasets (setting a dataset-level color would switch it off for all of them).
-            segment: { borderColor: speedLineColor },
+            borderColor: speedLineColor,
+            backgroundColor: withAlpha(speedLineColor),
         };
         this._chart.data.datasets[2] = {
             data: datasets[2],
             normalized: true,
             yAxisID: 'yhr',
+            borderColor: heartRateLineColor,
+            backgroundColor: withAlpha(heartRateLineColor),
         };
         this._chart.data.datasets[3] = {
             data: datasets[3],
             normalized: true,
             yAxisID: 'ycad',
+            borderColor: cadenceLineColor,
+            backgroundColor: withAlpha(cadenceLineColor),
         };
         this._chart.data.datasets[4] = {
             data: datasets[4],
             normalized: true,
             yAxisID: 'yatemp',
+            borderColor: temperatureLineColor,
+            backgroundColor: withAlpha(temperatureLineColor),
         };
         this._chart.data.datasets[5] = {
             data: datasets[5],
             normalized: true,
             yAxisID: 'ypower',
+            borderColor: powerLineColor,
+            backgroundColor: withAlpha(powerLineColor),
         };
 
         this._chart.options.scales!.x!['min'] = 0;
@@ -556,18 +617,37 @@ export class ElevationProfile {
         }
 
         const additionalDatasets = get(this._additionalDatasets);
-        const includeSpeed = additionalDatasets.includes('speed');
-        const includeHeartRate = additionalDatasets.includes('hr');
-        const includeCadence = additionalDatasets.includes('cad');
-        const includeTemperature = additionalDatasets.includes('atemp');
-        const includePower = additionalDatasets.includes('power');
+
         if (this._chart.data.datasets.length == 6) {
-            this._chart.data.datasets[1].hidden = !includeSpeed;
-            this._chart.data.datasets[2].hidden = !includeHeartRate;
-            this._chart.data.datasets[3].hidden = !includeCadence;
-            this._chart.data.datasets[4].hidden = !includeTemperature;
-            this._chart.data.datasets[5].hidden = !includePower;
+            // Also hide datasets with no data (curve not present in this file), so they don't
+            // render an empty curve and never become candidates for the active axis.
+            for (let i = 1; i < 6; i++) {
+                const dataset = this._chart.data.datasets[i];
+                dataset.hidden =
+                    !additionalDatasets.includes(ADDITIONAL_CURVES[i - 1]) ||
+                    dataset.data.length === 0;
+            }
         }
+
+        // Curves currently enabled (visible and present in the file), in canonical order.
+        const enabledCurves = this.getEnabledAdditionalCurves();
+
+        // Keep the active curve valid: fall back to the first enabled curve, or none if
+        // the user disabled it or the file doesn't contain that data.
+        if (
+            this._activeAdditionalCurve === null ||
+            !enabledCurves.includes(this._activeAdditionalCurve)
+        ) {
+            this._activeAdditionalCurve = enabledCurves[0] ?? null;
+        }
+
+        // Only the active curve gets its right-hand axis; the others stay hidden.
+        additionalCurveConfigs.forEach(({ id }) => {
+            const scale = this._chart?.options.scales?.[`y${id}`];
+            if (scale) {
+                scale.display = id === this._activeAdditionalCurve;
+            }
+        });
     }
 
     updateFill() {
@@ -585,8 +665,8 @@ export class ElevationProfile {
         const elevationFill = get(this._elevationFill);
         const dataset = this._chart.data.datasets[0];
         // The curve line uses the same dark-red color in every fill mode; only the fill varies.
-        // Applied through `segment` (not dataset-level colors) so the Chart.js Colors plugin keeps
-        // auto-coloring the other datasets.
+        // Applied through `segment`, which overrides the dataset-level colors (kept in
+        // updateData for the tooltip swatch) when drawing.
         let backgroundColor: any;
         if (elevationFill === 'slope') {
             backgroundColor = this.slopeFillCallback;
@@ -601,6 +681,52 @@ export class ElevationProfile {
         Object.assign(dataset, {
             segment: { backgroundColor, borderColor: elevationLineColor },
         });
+    }
+
+    // Curves currently enabled (visible and present in the file), in canonical order.
+    getEnabledAdditionalCurves(): AdditionalCurveId[] {
+        if (!this._chart || this._chart.data.datasets.length != 6) {
+            return [];
+        }
+        return ADDITIONAL_CURVES.filter((id, i) => {
+            const dataset = this._chart?.data.datasets[i + 1];
+            return dataset !== undefined && !dataset.hidden;
+        });
+    }
+
+    // Is the pointer over the active additional-curve axis (its tick-label strip on the
+    // right edge of the chart)? Used both for the click-to-cycle interaction and to show
+    // a pointer cursor on hover.
+    isPointOnActiveAxis(evt: PointerEvent | MouseEvent): boolean {
+        if (!this._chart || this._activeAdditionalCurve === null) {
+            return false;
+        }
+        const scale = this._chart.scales[`y${this._activeAdditionalCurve}`];
+        if (!scale) {
+            return false;
+        }
+        const rect = this._canvas.getBoundingClientRect();
+        const x = evt.clientX - rect.left;
+        const y = evt.clientY - rect.top;
+        return x >= scale.left && x <= scale.right && y >= scale.top && y <= scale.bottom;
+    }
+
+    // Switch the right-hand axis to the next enabled additional curve (wraps around).
+    cycleAdditionalCurve() {
+        if (!this._chart) {
+            return;
+        }
+        const enabledCurves = this.getEnabledAdditionalCurves();
+        if (enabledCurves.length < 2) {
+            // Nothing to cycle to — keep the single enabled axis (if any).
+            return;
+        }
+        const currentIndex = this._activeAdditionalCurve
+            ? enabledCurves.indexOf(this._activeAdditionalCurve)
+            : -1;
+        this._activeAdditionalCurve = enabledCurves[(currentIndex + 1) % enabledCurves.length];
+        this.setVisibility();
+        this._chart.update();
     }
 
     updateOverlay() {
