@@ -43,8 +43,8 @@ const fitBoundsOptions: maplibregl.MapOptions['fitBoundsOptions'] = {
 // ground), which is what made right-drag jump.
 const MAX_PITCH = 85;
 
-// The fields the geocoder reads from a Nominatim `/search?format=json` hit. Nominatim returns
-// the coordinates as strings, which is why they are handed to the geocoder unparsed below.
+// The fields we read from a Nominatim `/search?format=json` hit. Nominatim returns the
+// coordinates as strings, hence the parseFloat when building the geocoder features below.
 type NominatimResult = {
     lon: string;
     lat: string;
@@ -115,15 +115,25 @@ export class MapLibreGLMap {
                         try {
                             const request = `https://nominatim.openstreetmap.org/search?format=json&q=${config.query}&limit=5&accept-language=${language}`;
                             const response = await fetch(request);
-                            const geojson = await response.json();
-                            results.features = geojson.map((result: NominatimResult) => {
+                            const geojson: NominatimResult[] = await response.json();
+                            // Carmen GeoJSON requires text/place_type/properties. The geocoder
+                            // falls back to `place_name` when `text` is absent, so setting both to
+                            // display_name leaves the rendered result and the input value exactly
+                            // as before; place_type and properties are never read.
+                            results.features = geojson.map((result) => {
                                 return {
                                     type: 'Feature',
                                     geometry: {
                                         type: 'Point',
-                                        coordinates: [result.lon, result.lat],
+                                        coordinates: [
+                                            parseFloat(result.lon),
+                                            parseFloat(result.lat),
+                                        ],
                                     },
+                                    properties: {},
+                                    text: result.display_name,
                                     place_name: result.display_name,
+                                    place_type: ['place'],
                                 };
                             });
                         } catch {

@@ -27,11 +27,9 @@
     let description = $state('');
     let link = $state('');
     let sym = $state('');
-    // These hold a string, not a number, between a map click (setCoordinates stores the
-    // .toFixed(6) text so the inputs keep their trailing zeros) and the next createOrUpdate,
-    // which re-parses them. The union documents that; it is not a new behaviour.
-    let longitude: number | string = $state(0);
-    let latitude: number | string = $state(0);
+    // null while a coordinate input is empty — Svelte's number binding maps '' to null.
+    let longitude: number | null = $state(0);
+    let latitude: number | null = $state(0);
     let symbolKey = $derived(getSymbolKey(sym));
 
     let canCreate = $derived($selection.size > 0);
@@ -79,11 +77,8 @@
     });
 
     function createOrUpdateWaypoint() {
-        if (typeof latitude === 'string') {
-            latitude = parseFloat(latitude);
-        }
-        if (typeof longitude === 'string') {
-            longitude = parseFloat(longitude);
+        if (latitude === null || longitude === null) {
+            return; // a coordinate input is empty — nothing valid to save
         }
         latitude = parseFloat(latitude.toFixed(6));
         longitude = parseFloat(longitude.toFixed(6));
@@ -109,8 +104,8 @@
     }
 
     function setCoordinates(e: maplibregl.MapMouseEvent) {
-        latitude = e.lngLat.lat.toFixed(6);
-        longitude = e.lngLat.lng.toFixed(6);
+        latitude = parseFloat(e.lngLat.lat.toFixed(6));
+        longitude = parseFloat(e.lngLat.lng.toFixed(6));
     }
 
     $effect(() => {
@@ -119,12 +114,14 @@
                 marker.remove();
                 marker = null;
             }
-        } else if (latitude != 0 || longitude != 0) {
+        } else if (latitude === null || longitude === null) {
+            // A coordinate input is mid-edit: leave the marker where it is rather than letting
+            // the missing value coerce to 0 and jump it to the equator.
+        } else if (latitude !== 0 || longitude !== 0) {
             if ($map) {
                 if (marker) {
-                    marker
-                        .setLngLat([longitude, latitude] as [number, number])
-                        .getElement().innerHTML = getSvgForSymbol(symbolKey);
+                    marker.setLngLat([longitude, latitude]).getElement().innerHTML =
+                        getSvgForSymbol(symbolKey);
                 } else {
                     let element = document.createElement('div');
                     element.classList.add('w-8', 'h-8');
@@ -133,7 +130,7 @@
                         element,
                         anchor: 'bottom',
                     })
-                        .setLngLat([longitude, latitude] as [number, number])
+                        .setLngLat([longitude, latitude])
                         .addTo($map);
                 }
             }
@@ -262,7 +259,7 @@
     <div class="flex flex-row gap-1.5 items-center">
         <Button
             variant="outline"
-            disabled={!canCreate && !$selectedWaypoint}
+            disabled={(!canCreate && !$selectedWaypoint) || latitude === null || longitude === null}
             class="grow shrink h-fit min-h-8 whitespace-normal py-1"
             onclick={createOrUpdateWaypoint}
         >
