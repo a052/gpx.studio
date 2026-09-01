@@ -21,7 +21,7 @@
     import { i18n } from '$lib/i18n.svelte';
     import { defaultBasemap, type CustomLayer, type LayerTreeType } from '$lib/assets/layers';
     import { onMount } from 'svelte';
-    import { remove } from './utils';
+    import { getSubtree, remove } from './utils';
     import { detectVectorKind } from './vector-style';
     import { settings } from '$lib/logic/settings';
     import { dndzone } from 'svelte-dnd-action';
@@ -158,10 +158,7 @@
     function addLayer(layerId: string) {
         if (layerType === 'basemap') {
             selectedBasemapTree.update(($tree) => {
-                if (!Object.hasOwn($tree.basemaps, 'custom')) {
-                    $tree.basemaps['custom'] = {};
-                }
-                $tree.basemaps['custom'][layerId] = true;
+                getSubtree(getSubtree($tree, 'basemaps'), 'custom')[layerId] = true;
                 return $tree;
             });
 
@@ -174,18 +171,12 @@
             }
         } else {
             selectedOverlayTree.update(($tree) => {
-                if (!Object.hasOwn($tree.overlays, 'custom')) {
-                    $tree.overlays['custom'] = {};
-                }
-                $tree.overlays['custom'][layerId] = true;
+                getSubtree(getSubtree($tree, 'overlays'), 'custom')[layerId] = true;
                 return $tree;
             });
 
-            currentOverlays.update(($overlays) => {
-                if (!Object.hasOwn($overlays.overlays, 'custom')) {
-                    $overlays.overlays['custom'] = {};
-                }
-                $overlays.overlays['custom'][layerId] = true;
+            currentOverlays.updateWhenLoaded(($overlays) => {
+                getSubtree(getSubtree($overlays, 'overlays'), 'custom')[layerId] = true;
                 return $overlays;
             });
 

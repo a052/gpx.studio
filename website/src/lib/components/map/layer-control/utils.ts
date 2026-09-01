@@ -31,6 +31,17 @@ export function getLayers(
     return layers;
 }
 
+// Fetch a child of a layer tree as a tree, creating it when absent. Extracts the
+// hasOwn-then-cast dance that every caller mutating a nested tree would otherwise repeat, since
+// LayerTreeType's index signature yields `LayerTreeType | boolean`. Only for callers that want
+// create-if-absent — a caller that must skip a missing key has to test hasOwn itself.
+export function getSubtree(node: LayerTreeType, key: string): LayerTreeType {
+    if (!Object.hasOwn(node, key)) {
+        node[key] = {};
+    }
+    return node[key] as LayerTreeType;
+}
+
 export function isSelected(node: LayerTreeType, id: string) {
     return Object.keys(node).some((key) => {
         if (key === id) {

@@ -70,13 +70,7 @@ export class Setting<V> {
         }
     }
 
-    // Deliberately loose. Tightening this to `(value: V) => V` is correct in principle but the
-    // LayerTreeType callers (extension-api.ts, CustomLayers.svelte, LayerControlSettings.svelte)
-    // then need ~36 casts through that type's `LayerTreeType | boolean` index signature, and one
-    // of them would have to assert away a value that can genuinely be undefined before the first
-    // read. Left as-is until those call sites are cleaned up.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    update(callback: (value: any) => any) {
+    update(callback: (value: V) => V) {
         this.set(callback(get(this._value)));
     }
 }
@@ -142,10 +136,40 @@ export class SettingInitOnFirstRead<V> {
         }
     }
 
-    // Loose for the same reason as Setting.update above.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    update(callback: (value: any) => any) {
+    // The parameter is `V | undefined` because that is honestly what the store holds before the
+    // first read. Callers that cannot cope with undefined should use updateWhenLoaded instead.
+    update(callback: (value: V | undefined) => V) {
         this.set(callback(get(this._value)));
+    }
+
+    // Like update(), but for callers that must not run before the stored value has arrived: the
+    // callback gets a defined value, immediately if one is already loaded and otherwise on the
+    // first defined emission. Writing earlier than that cannot work — before connectToDatabase
+    // the write lands in _value and is then overwritten by the liveQuery's first emission, and
+    // after it the write races that same initial read.
+    updateWhenLoaded(callback: (value: V) => V) {
+        const value = get(this._value);
+        if (value !== undefined) {
+            this.set(callback(value));
+            return;
+        }
+        // subscribe() runs its callback synchronously with the current value, which we just
+        // established is undefined, so that first invocation returns at the guard below and
+        // `unsubscribe` is never read before it is initialised.
+        //
+        // `done` is what guarantees the callback runs at most once, and it is not redundant with
+        // the unsubscribe: set() below re-enters svelte/store's shared notification flush, which
+        // re-notifies the subscriptions still registered at that point. Without the flag, queueing
+        // three callbacks before the first emission runs them 6 times in total.
+        let done = false;
+        const unsubscribe = this.subscribe((pending) => {
+            if (done || pending === undefined) {
+                return;
+            }
+            done = true;
+            unsubscribe();
+            this.set(callback(pending));
+        });
     }
 }
 

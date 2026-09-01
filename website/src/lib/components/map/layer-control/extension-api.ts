@@ -1,7 +1,7 @@
 import { settings } from '$lib/logic/settings';
 import { derived, get, type Writable } from 'svelte/store';
 import { guardSubscribers, safeWritable } from '$lib/logic/safe-store';
-import { isSelected, remove, removeAll } from './utils';
+import { getSubtree, isSelected, remove, removeAll } from './utils';
 import { overlays, overlayTree, type LayerTreeType } from '$lib/assets/layers';
 import { browser } from '$app/environment';
 import { map } from '$lib/components/map/map';
@@ -88,38 +88,26 @@ export class ExtensionAPI {
             ],
         };
 
-        if (!Object.hasOwn(overlayTree.overlays as LayerTreeType, overlay.extensionName)) {
-            (overlayTree.overlays as LayerTreeType)[overlay.extensionName] = {};
-        }
-
-        ((overlayTree.overlays as LayerTreeType)[overlay.extensionName] as LayerTreeType)[
-            overlay.id
-        ] = true;
+        getSubtree(getSubtree(overlayTree, 'overlays'), overlay.extensionName)[overlay.id] = true;
 
         selectedOverlayTree.update((selected) => {
-            if (!Object.hasOwn(selected.overlays, overlay.extensionName)) {
-                selected.overlays[overlay.extensionName] = {};
-            }
-            selected.overlays[overlay.extensionName][overlay.id] = true;
+            getSubtree(getSubtree(selected, 'overlays'), overlay.extensionName)[overlay.id] = true;
             return selected;
         });
 
-        const current = get(currentOverlays);
-        let show = false;
-        if (current && isSelected(current, overlay.id)) {
-            show = true;
-            try {
-                get(map)?.removeLayer(overlay.id);
-            } catch {
-                // No reliable way to check if the map is ready to remove sources and layers
+        // Deferred until the stored value arrives: `currentOverlays` is undefined until the Dexie
+        // liveQuery delivers, and both `show` and the write below need the loaded tree.
+        currentOverlays.updateWhenLoaded((current) => {
+            let show = false;
+            if (isSelected(current, overlay.id)) {
+                show = true;
+                try {
+                    get(map)?.removeLayer(overlay.id);
+                } catch {
+                    // No reliable way to check if the map is ready to remove sources and layers
+                }
             }
-        }
-
-        currentOverlays.update((current) => {
-            if (!Object.hasOwn(current.overlays, overlay.extensionName)) {
-                current.overlays[overlay.extensionName] = {};
-            }
-            current.overlays[overlay.extensionName][overlay.id] = show;
+            getSubtree(getSubtree(current, 'overlays'), overlay.extensionName)[overlay.id] = show;
             return current;
         });
     }
@@ -130,7 +118,7 @@ export class ExtensionAPI {
             (id) => !ids.includes(id)
         );
 
-        currentOverlays.update((current) => {
+        currentOverlays.updateWhenLoaded((current) => {
             removeAll(current, idsToRemove);
             return current;
         });
@@ -161,21 +149,26 @@ export class ExtensionAPI {
     updateOverlaysOrder(ids: string[]) {
         ids = ids.map((id) => this.getOverlayId(id));
         selectedOverlayTree.update((selected) => {
-            const isSelected: Record<string, boolean> = {};
+            const overlaysTree = selected.overlays as LayerTreeType;
+            // Holds tree leaves rather than plain booleans, and named so it no longer shadows the
+            // imported isSelected(). Not getSubtree() below: a missing extension must be skipped,
+            // not created.
+            const selectedState: LayerTreeType = {};
             ids.forEach((id) => {
                 const overlay = get(this._overlays).get(id);
                 if (
                     overlay &&
-                    Object.hasOwn(selected.overlays, overlay.extensionName) &&
-                    Object.hasOwn(selected.overlays[overlay.extensionName], id)
+                    Object.hasOwn(overlaysTree, overlay.extensionName) &&
+                    Object.hasOwn(overlaysTree[overlay.extensionName] as LayerTreeType, id)
                 ) {
-                    isSelected[id] = selected.overlays[overlay.extensionName][id];
-                    delete selected.overlays[overlay.extensionName][id];
+                    const extensionOverlays = overlaysTree[overlay.extensionName] as LayerTreeType;
+                    selectedState[id] = extensionOverlays[id];
+                    delete extensionOverlays[id];
                 }
             });
-            Object.entries(isSelected).forEach(([id, value]) => {
+            Object.entries(selectedState).forEach(([id, value]) => {
                 const overlay = get(this._overlays).get(id)!;
-                selected.overlays[overlay.extensionName][id] = value;
+                (overlaysTree[overlay.extensionName] as LayerTreeType)[id] = value;
             });
             return selected;
         });
@@ -201,7 +194,7 @@ export class ExtensionAPI {
 
     private destroy() {
         const ids = Array.from(get(this._overlays).keys());
-        currentOverlays.update((current) => {
+        currentOverlays.updateWhenLoaded((current) => {
             ids.forEach((id) => {
                 remove(current, id);
             });

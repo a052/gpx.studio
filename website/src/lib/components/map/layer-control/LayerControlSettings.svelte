@@ -75,7 +75,9 @@
                         ([id, checked]) => checked && !isSelected($selectedOverlayTree, id)
                     );
                     if (toRemove.length > 0) {
-                        currentOverlays.update((tree) => {
+                        // updateWhenLoaded, not update: the outer `if ($currentOverlays)` proves the
+                        // value is loaded, but TypeScript cannot carry that into the callback.
+                        currentOverlays.updateWhenLoaded((tree) => {
                             toRemove.forEach(([id]) => {
                                 toggle(tree, id);
                             });
@@ -96,7 +98,7 @@
                         ([id, checked]) => checked && !isSelected($selectedOverpassTree, id)
                     );
                     if (toRemove.length > 0) {
-                        currentOverpassQueries.update((tree) => {
+                        currentOverpassQueries.updateWhenLoaded((tree) => {
                             toRemove.forEach(([id]) => {
                                 toggle(tree, id);
                             });
