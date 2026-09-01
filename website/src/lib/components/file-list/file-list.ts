@@ -8,6 +8,11 @@ export enum ListLevel {
 }
 
 export abstract class ListItem {
+    // Load-bearing: callers hold a bare `ListItem` and call subclass methods on it
+    // (getTrackIndex/getSegmentIndex/getWaypointIndex in selection.ts and Menu.svelte), guarded
+    // only by a `level` check that TypeScript cannot narrow on. Removing this signature turns
+    // those into compile errors whose fix is `instanceof` narrowing at each call site.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [x: string]: any;
     level: ListLevel;
 

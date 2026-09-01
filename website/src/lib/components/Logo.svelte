@@ -1,7 +1,10 @@
 <script lang="ts">
     import { mode } from 'mode-watcher';
     import { base } from '$app/paths';
+    import type { HTMLImgAttributes } from 'svelte/elements';
 
+    // `others` is spread onto the <img> in the gpx.studio branch; the inline-SVG branches only
+    // read `others.class`, which HTMLImgAttributes also covers.
     let {
         iconOnly = false,
         company = 'gpx.studio',
@@ -9,8 +12,7 @@
     }: {
         iconOnly?: boolean;
         company?: 'gpx.studio' | 'github' | 'facebook' | 'reddit';
-        [key: string]: any;
-    } = $props();
+    } & HTMLImgAttributes = $props();
 </script>
 
 {#if company === 'gpx.studio'}

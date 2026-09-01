@@ -11,14 +11,10 @@
 
     // Local mirrors of the sliders so dragging stays smooth; the persisted setting (which
     // triggers a statistics recompute) is only written on pointer release via onValueCommit.
-    let elevationThresholdValue = $state($elevationGainThreshold);
-    let elevationSmoothingValue = $state($elevationSmoothingWindow);
-    $effect(() => {
-        elevationThresholdValue = $elevationGainThreshold;
-    });
-    $effect(() => {
-        elevationSmoothingValue = $elevationSmoothingWindow;
-    });
+    // Writable $derived: dragging overrides the value locally, and the override is dropped as
+    // soon as the setting itself changes (on commit, or from elsewhere).
+    let elevationThresholdValue = $derived($elevationGainThreshold);
+    let elevationSmoothingValue = $derived($elevationSmoothingWindow);
 </script>
 
 <Sheet.Root bind:open>

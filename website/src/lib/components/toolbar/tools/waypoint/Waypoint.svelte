@@ -27,8 +27,11 @@
     let description = $state('');
     let link = $state('');
     let sym = $state('');
-    let longitude = $state(0);
-    let latitude = $state(0);
+    // These hold a string, not a number, between a map click (setCoordinates stores the
+    // .toFixed(6) text so the inputs keep their trailing zeros) and the next createOrUpdate,
+    // which re-parses them. The union documents that; it is not a new behaviour.
+    let longitude: number | string = $state(0);
+    let latitude: number | string = $state(0);
     let symbolKey = $derived(getSymbolKey(sym));
 
     let canCreate = $derived($selection.size > 0);
@@ -105,7 +108,7 @@
         reset();
     }
 
-    function setCoordinates(e: any) {
+    function setCoordinates(e: maplibregl.MapMouseEvent) {
         latitude = e.lngLat.lat.toFixed(6);
         longitude = e.lngLat.lng.toFixed(6);
     }
@@ -119,8 +122,9 @@
         } else if (latitude != 0 || longitude != 0) {
             if ($map) {
                 if (marker) {
-                    marker.setLngLat([longitude, latitude]).getElement().innerHTML =
-                        getSvgForSymbol(symbolKey);
+                    marker
+                        .setLngLat([longitude, latitude] as [number, number])
+                        .getElement().innerHTML = getSvgForSymbol(symbolKey);
                 } else {
                     let element = document.createElement('div');
                     element.classList.add('w-8', 'h-8');
@@ -129,7 +133,7 @@
                         element,
                         anchor: 'bottom',
                     })
-                        .setLngLat([longitude, latitude])
+                        .setLngLat([longitude, latitude] as [number, number])
                         .addTo($map);
                 }
             }

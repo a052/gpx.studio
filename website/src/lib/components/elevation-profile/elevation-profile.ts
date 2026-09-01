@@ -17,6 +17,8 @@ import {
 import Chart, {
     type ChartEvent,
     type ChartOptions,
+    type Color,
+    type Scriptable,
     type ScriptableLineSegmentContext,
     type TooltipItem,
 } from 'chart.js/auto';
@@ -54,12 +56,24 @@ interface ElevationProfilePoint {
         segment: number;
         length: number;
     };
-    extensions: Record<string, any>;
+    extensions: Record<string, string>;
     coordinates: Coordinates;
     index: number;
 }
 
+// The `segment.backgroundColor` slot of a line dataset, as chart.js declares it: a colour or a
+// scriptable per-segment callback. setFill() always assigns one of the four fill callbacks.
+type SegmentFill = Scriptable<Color | undefined, ScriptableLineSegmentContext>;
+
 type AdditionalCurveId = 'speed' | 'hr' | 'cad' | 'atemp' | 'power';
+
+// Point shape for the five additional curves: `index` maps back to the track point so hovering
+// any curve can drive the same tooltip and map highlight as the elevation curve.
+type AdditionalCurvePoint = {
+    x: number;
+    y: number;
+    index: number;
+};
 
 const ADDITIONAL_CURVES: AdditionalCurveId[] = ['speed', 'hr', 'cad', 'atemp', 'power'];
 
@@ -315,13 +329,15 @@ export class ElevationProfile {
                             enabled: true,
                         },
                         mode: 'x',
-                        onZoomStart: ({ event }: { chart: Chart; event: any }) => {
+                        // chartjs-plugin-zoom declares `event` as the DOM base `Event`; only wheel
+                        // zoom is enabled above, so the cast is safe and erases at compile time.
+                        onZoomStart: ({ event }: { chart: Chart; event: Event }) => {
                             if (!this._chart) {
                                 return false;
                             }
                             const maxZoom = this._chart.getInitialScaleBounds()?.x?.max ?? 0;
                             if (
-                                event.deltaY < 0 &&
+                                (event as WheelEvent).deltaY < 0 &&
                                 Math.abs(maxZoom / this._chart.getZoomLevel()) < 0.01
                             ) {
                                 // Disable wheel pan if zoomed in to the max, and zooming in
@@ -387,8 +403,10 @@ export class ElevationProfile {
             ],
         });
 
-        let startIndex = 0;
-        let endIndex = 0;
+        // getIndex() returns undefined when the pointer is inside the chart area but over no
+        // point, which the guards below already handle — so these mirror that nullability.
+        let startIndex: number | undefined = 0;
+        let endIndex: number | undefined = 0;
         const getIndex = (evt: PointerEvent) => {
             if (!this._chart) {
                 return undefined;
@@ -413,9 +431,11 @@ export class ElevationProfile {
                 }
             }
 
-            const point = points.find((point) => (point.element as any).raw);
+            const point = points.find(
+                (point) => (point.element as unknown as { raw?: ElevationProfilePoint }).raw
+            );
             if (point) {
-                return (point.element as any).raw.index;
+                return (point.element as unknown as { raw: ElevationProfilePoint }).raw.index;
             } else {
                 return points[0].index;
             }
@@ -522,7 +542,16 @@ export class ElevationProfile {
         // matching global.time.total). Carry the last value forward for the rare timeless point.
         let lastHours = 0;
 
-        const datasets: Array<Array<any>> = [[], [], [], [], [], []];
+        // Dataset 0 holds the elevation curve (the rich point objects the tooltip and fill
+        // callbacks read back); datasets 1-5 are the additional curves, in ADDITIONAL_CURVES order.
+        const datasets: [ElevationProfilePoint[], ...AdditionalCurvePoint[][]] = [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+        ];
         data.forEachTrackPoint((trkpt, distance, speed, slope, index) => {
             const convertedDistance = getConvertedDistance(distance, units.distance);
             // Every dataset shares this x for the same index, keeping the curves aligned.
@@ -705,7 +734,7 @@ export class ElevationProfile {
         // The curve line uses the same dark-red color in every fill mode; only the fill varies.
         // Applied through `segment`, which overrides the dataset-level colors (kept in
         // updateData for the tooltip swatch) when drawing.
-        let backgroundColor: any;
+        let backgroundColor: SegmentFill;
         if (elevationFill === 'slope') {
             backgroundColor = this.slopeFillCallback;
         } else if (elevationFill === 'surface') {
@@ -822,18 +851,20 @@ export class ElevationProfile {
         }
     }
 
-    slopeFillCallback(context: ScriptableLineSegmentContext & { p0: { raw: any } }) {
-        const point = context.p0.raw as ElevationProfilePoint;
+    // chart.js attaches the original data object to each point element as `raw`, which its
+    // PointElement type does not declare — hence the cast in each of the three callbacks below.
+    slopeFillCallback(context: ScriptableLineSegmentContext) {
+        const point = (context.p0 as unknown as { raw: ElevationProfilePoint }).raw;
         return getSlopeColor(point.slope.segment);
     }
 
-    surfaceFillCallback(context: ScriptableLineSegmentContext & { p0: { raw: any } }) {
-        const point = context.p0.raw as ElevationProfilePoint;
+    surfaceFillCallback(context: ScriptableLineSegmentContext) {
+        const point = (context.p0 as unknown as { raw: ElevationProfilePoint }).raw;
         return getSurfaceColor(point.extensions.surface);
     }
 
-    highwayFillCallback(context: ScriptableLineSegmentContext & { p0: { raw: any } }) {
-        const point = context.p0.raw as ElevationProfilePoint;
+    highwayFillCallback(context: ScriptableLineSegmentContext) {
+        const point = (context.p0 as unknown as { raw: ElevationProfilePoint }).raw;
         return getHighwayColor(
             point.extensions.highway,
             point.extensions.sac_scale,

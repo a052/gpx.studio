@@ -195,7 +195,10 @@
         }
     }
 
-    function tryDeleteLayer(node: any, id: string): any {
+    function tryDeleteLayer(
+        node: Record<string, CustomLayer>,
+        id: string
+    ): Record<string, CustomLayer> {
         if (Object.hasOwn(node, id)) {
             delete node[id];
         }

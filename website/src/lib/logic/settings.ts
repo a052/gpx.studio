@@ -39,13 +39,13 @@ export class Setting<V> {
         this._subscription = liveQuery(() => db.settings.get(this._key)).subscribe((value) => {
             if (value === undefined) {
                 if (!first) {
-                    this._value.set(value);
+                    this._value.set(value as V);
                 }
             } else {
                 if (this._validator) {
-                    value = this._validator(value);
+                    value = this._validator(value as V);
                 }
-                this._value.set(value);
+                this._value.set(value as V);
             }
             first = false;
         });
@@ -70,6 +70,12 @@ export class Setting<V> {
         }
     }
 
+    // Deliberately loose. Tightening this to `(value: V) => V` is correct in principle but the
+    // LayerTreeType callers (extension-api.ts, CustomLayers.svelte, LayerControlSettings.svelte)
+    // then need ~36 casts through that type's `LayerTreeType | boolean` index signature, and one
+    // of them would have to assert away a value that can genuinely be undefined before the first
+    // read. Left as-is until those call sites are cleaned up.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     update(callback: (value: any) => any) {
         this.set(callback(get(this._value)));
     }
@@ -104,9 +110,9 @@ export class SettingInitOnFirstRead<V> {
                 }
             } else {
                 if (this._validator) {
-                    value = this._validator(value);
+                    value = this._validator(value as V);
                 }
-                this._value.set(value);
+                this._value.set(value as V);
             }
             first = false;
         });
@@ -136,6 +142,8 @@ export class SettingInitOnFirstRead<V> {
         }
     }
 
+    // Loose for the same reason as Setting.update above.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     update(callback: (value: any) => any) {
         this.set(callback(get(this._value)));
     }
@@ -160,7 +168,7 @@ function getArrayValidator<V>(allowed: V[]) {
     return (value: V[]) => value.filter((v) => dict.has(v));
 }
 
-function getLayerValidator(allowed: Record<string, any>, fallback: string) {
+function getLayerValidator(allowed: Record<string, unknown>, fallback: string) {
     return (layer: string) =>
         Object.hasOwn(allowed, layer) ||
         layer.startsWith('custom-') ||
@@ -383,7 +391,7 @@ export const settings = {
     rightPanelSize: new Setting('rightPanelSize', 240),
     connectToDatabase(db: Database) {
         for (const key in settings) {
-            const setting = (settings as any)[key];
+            const setting = (settings as Record<string, unknown>)[key];
             if (setting instanceof Setting || setting instanceof SettingInitOnFirstRead) {
                 setting.connectToDatabase(db);
             }
@@ -391,7 +399,7 @@ export const settings = {
     },
     disconnectFromDatabase() {
         for (const key in settings) {
-            const setting = (settings as any)[key];
+            const setting = (settings as Record<string, unknown>)[key];
             if (setting instanceof Setting || setting instanceof SettingInitOnFirstRead) {
                 setting.disconnectFromDatabase();
             }
@@ -399,7 +407,7 @@ export const settings = {
     },
     initialize() {
         for (const key in settings) {
-            const setting = (settings as any)[key];
+            const setting = (settings as Record<string, unknown>)[key];
             if (setting instanceof SettingInitOnFirstRead) {
                 setting.initialize();
             }

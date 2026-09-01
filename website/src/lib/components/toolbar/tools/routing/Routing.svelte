@@ -68,7 +68,7 @@
         $selection.hasAnyChildren(new ListRootItem(), true, ['waypoints'])
     );
 
-    function createFileWithPoint(e: any) {
+    function createFileWithPoint(e: maplibregl.MapMouseEvent) {
         if ($selection.size === 0) {
             let file = newGPXFile();
             file.replaceTrackPoints(0, 0, 0, 0, [

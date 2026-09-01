@@ -122,12 +122,12 @@ export class GPXLayer {
     currentWaypointData: GeoJSON.FeatureCollection | null = null;
     draggedWaypointIndex: number | null = null;
     draggingStartingPosition: maplibregl.Point = new maplibregl.Point(0, 0);
-    unsubscribe: Function[] = [];
+    unsubscribe: (() => void)[] = [];
 
     updateBinded: () => void = this.update.bind(this);
-    layerOnMouseEnterBinded: (e: any) => void = this.layerOnMouseEnter.bind(this);
+    layerOnMouseEnterBinded: (e: MapLayerMouseEvent) => void = this.layerOnMouseEnter.bind(this);
     layerOnMouseLeaveBinded: () => void = this.layerOnMouseLeave.bind(this);
-    layerOnMouseMoveBinded: (e: any) => void = this.layerOnMouseMove.bind(this);
+    layerOnMouseMoveBinded: (e: MapLayerMouseEvent) => void = this.layerOnMouseMove.bind(this);
     layerOnClickBinded: (e: MapLayerMouseEvent) => void = this.layerOnClick.bind(this);
     layerOnContextMenuBinded: (e: MapLayerMouseEvent) => void = this.layerOnContextMenu.bind(this);
     waypointLayerOnMouseEnterBinded: (e: MapLayerMouseEvent) => void =
@@ -437,9 +437,9 @@ export class GPXLayer {
         }
     }
 
-    layerOnMouseEnter(e: any) {
-        const trackIndex = e.features[0].properties.trackIndex;
-        const segmentIndex = e.features[0].properties.segmentIndex;
+    layerOnMouseEnter(e: MapLayerMouseEvent) {
+        const trackIndex = e.features![0].properties.trackIndex;
+        const segmentIndex = e.features![0].properties.segmentIndex;
 
         if (
             get(currentTool) === Tool.SCISSORS &&
@@ -458,10 +458,10 @@ export class GPXLayer {
         mapCursor.notify(MapCursorState.LAYER_HOVER, false);
     }
 
-    layerOnMouseMove(e: any) {
+    layerOnMouseMove(e: MapLayerMouseEvent) {
         if (e.originalEvent.shiftKey) {
-            const trackIndex = e.features[0].properties.trackIndex;
-            const segmentIndex = e.features[0].properties.segmentIndex;
+            const trackIndex = e.features![0].properties.trackIndex;
+            const segmentIndex = e.features![0].properties.segmentIndex;
 
             const file = get(this.file)?.file;
             if (file) {
@@ -526,7 +526,7 @@ export class GPXLayer {
         }
     }
 
-    layerOnContextMenu(e: any) {
+    layerOnContextMenu(e: MapLayerMouseEvent) {
         if (e.originalEvent.ctrlKey) {
             this.layerOnClick(e);
         }

@@ -63,7 +63,7 @@ export class FileActionManager {
 
         liveQuery(() => db.settings.get('patchIndex')).subscribe((value) => {
             if (value !== undefined) {
-                this._patchIndex.set(value);
+                this._patchIndex.set(value as number);
             }
         });
         liveQuery(() =>
@@ -172,7 +172,7 @@ export class FileActionManager {
     // the database instead, which is authoritative.
     private async _readPatchIndex(): Promise<number> {
         const stored = await this._db.settings.get('patchIndex');
-        return stored ?? -1;
+        return (stored as number) ?? -1;
     }
 
     // Update the mirror immediately so undo/redo buttons react without waiting for the liveQuery.
@@ -237,11 +237,13 @@ export class FileActionManager {
         return this.applyToFiles([fileId], callback);
     }
 
-    applyEachToFilesAndGlobal(
+    // `context` is threaded verbatim to every callback so a caller can share state (e.g. the
+    // cloned items being moved) between the per-file mutations and the global one.
+    applyEachToFilesAndGlobal<C>(
         fileIds: string[],
-        callbacks: ((file: WritableDraft<GPXFile>, context?: any) => void)[],
-        globalCallback: (files: Map<string, GPXFile>, context?: any) => void,
-        context?: any
+        callbacks: ((file: WritableDraft<GPXFile>, context: C) => void)[],
+        globalCallback: (files: Map<string, GPXFile>, context: C) => void,
+        context: C
     ) {
         return this._applyWithPatches((draft) => {
             fileIds.forEach((fileId, index) => {
@@ -303,7 +305,7 @@ export class FileActionManager {
             this._db.patches,
             this._db.settings,
             async () => {
-                const current = (await this._db.settings.get('patchIndex')) ?? -1;
+                const current = ((await this._db.settings.get('patchIndex')) as number) ?? -1;
                 await this._db.patches.where(':id').above(current).delete(); // Delete all patches after the current patch to avoid redoing them
                 if (trim !== undefined) {
                     await this._db.patches.where(':id').belowOrEqual(trim).delete();

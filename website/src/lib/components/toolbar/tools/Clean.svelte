@@ -84,12 +84,14 @@
     });
 
     let mousedown = false;
-    function onMouseDown(e: any) {
+    // Registered on both the mouse and touch event pairs below, so the parameter is the
+    // structural intersection of MapMouseEvent and MapTouchEvent rather than either one.
+    function onMouseDown(e: { lngLat: maplibregl.LngLat }) {
         mousedown = true;
         rectangleCoordinates = [e.lngLat, e.lngLat];
     }
 
-    function onMouseMove(e: any) {
+    function onMouseMove(e: { lngLat: maplibregl.LngLat }) {
         if (mousedown) {
             rectangleCoordinates[1] = e.lngLat;
         }

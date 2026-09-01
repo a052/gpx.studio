@@ -10,11 +10,11 @@
     let embeddingOptions: EmbeddingOptions | undefined = undefined;
 
     onMount(() => {
-        let options = page.url.searchParams.get('options');
-        if (options === null) {
+        const raw = page.url.searchParams.get('options');
+        if (raw === null) {
             return;
         }
-        options = JSON.parse(options);
+        const options = JSON.parse(raw);
         if (options === null) {
             return;
         }

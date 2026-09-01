@@ -4,6 +4,7 @@
     import TrackpointPopup from '$lib/components/map/gpx-layer/TrackpointPopup.svelte';
     import OverpassPopup from '$lib/components/map/layer-control/OverpassPopup.svelte';
     import type { PopupItem } from '$lib/components/map/map-popup';
+    import type { OverpassPopupItem } from '$lib/components/map/layer-control/overpass-layer';
     import type { Writable } from 'svelte/store';
 
     let {
@@ -24,11 +25,11 @@
 <div bind:this={container}>
     {#if $item}
         {#if $item.item instanceof Waypoint}
-            <WaypointPopup waypoint={$item} />
+            <WaypointPopup waypoint={$item as PopupItem<Waypoint>} />
         {:else if $item.item instanceof TrackPoint}
-            <TrackpointPopup trackpoint={$item} />
+            <TrackpointPopup trackpoint={$item as PopupItem<TrackPoint>} />
         {:else}
-            <OverpassPopup poi={$item} />
+            <OverpassPopup poi={$item as PopupItem<OverpassPopupItem>} />
         {/if}
     {/if}
 </div>

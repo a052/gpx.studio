@@ -6,13 +6,14 @@
     import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
     import type { WaypointType } from 'gpx';
     import type { PopupItem } from '$lib/components/map/map-popup';
+    import type { OverpassPopupItem } from '$lib/components/map/layer-control/overpass-layer';
     import { fileActions } from '$lib/logic/file-actions';
     import { selection } from '$lib/logic/selection';
 
     let {
         poi,
     }: {
-        poi: PopupItem<any>;
+        poi: PopupItem<OverpassPopupItem>;
     } = $props();
 
     // Since MapLibre GL JS v6, nested GeoJSON feature properties are returned as real

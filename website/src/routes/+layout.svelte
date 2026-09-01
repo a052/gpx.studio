@@ -7,7 +7,7 @@
     import Footer from '$lib/components/Footer.svelte';
     import { onMount, type Snippet } from 'svelte';
     import { convertOldEmbeddingOptions } from '$lib/components/embedding/embedding';
-    import { base } from '$app/paths';
+    import { resolve } from '$app/paths';
     import { languages } from '$lib/languages';
     import { browser } from '$app/environment';
     import { goto } from '$app/navigation';
@@ -43,7 +43,7 @@
                     if (Object.hasOwn(languages, lang)) {
                         i18n.lang = lang;
                     } else if (browser) {
-                        goto(`${base}/404`);
+                        goto(resolve('/404'));
                     }
                 }
             } else if (i18n.lang !== 'en') {

@@ -17,7 +17,7 @@ export class Database extends Dexie {
     fileids!: Dexie.Table<string, string>;
     files!: Dexie.Table<GPXFile, string>;
     patches!: Dexie.Table<{ patch: Patch[]; inversePatch: Patch[]; index: number }, number>;
-    settings!: Dexie.Table<any, string>;
+    settings!: Dexie.Table<unknown, string>;
     overpasstiles!: Dexie.Table<
         { query: string; x: number; y: number; time: number },
         [string, number, number]

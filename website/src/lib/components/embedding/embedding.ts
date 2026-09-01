@@ -46,30 +46,38 @@ export const defaultEmbeddingOptions = {
     theme: 'system',
 };
 
+// An options object before validation: arbitrary JSON, either straight from the ?options= query
+// parameter or a partial override built by the playground. getMergedEmbeddingOptions folds one of
+// these onto the defaults to produce a complete EmbeddingOptions.
+type EmbeddingOptionsInput = Record<string, unknown>;
+
 export function getMergedEmbeddingOptions(
-    options: any,
-    defaultOptions: any = defaultEmbeddingOptions
+    options: EmbeddingOptionsInput,
+    defaultOptions: EmbeddingOptionsInput = defaultEmbeddingOptions
 ): EmbeddingOptions {
-    const mergedOptions = JSON.parse(JSON.stringify(defaultOptions));
+    const mergedOptions: EmbeddingOptionsInput = JSON.parse(JSON.stringify(defaultOptions));
     for (const key in options) {
         if (
             typeof options[key] === 'object' &&
             options[key] !== null &&
             !Array.isArray(options[key])
         ) {
-            mergedOptions[key] = getMergedEmbeddingOptions(options[key], defaultOptions[key]);
+            mergedOptions[key] = getMergedEmbeddingOptions(
+                options[key] as EmbeddingOptionsInput,
+                defaultOptions[key] as EmbeddingOptionsInput
+            );
         } else {
             mergedOptions[key] = options[key];
         }
     }
-    return mergedOptions;
+    return mergedOptions as EmbeddingOptions;
 }
 
 export function getCleanedEmbeddingOptions(
-    options: any,
-    defaultOptions: any = defaultEmbeddingOptions
-): any {
-    const cleanedOptions = JSON.parse(JSON.stringify(options));
+    options: EmbeddingOptionsInput,
+    defaultOptions: EmbeddingOptionsInput = defaultEmbeddingOptions
+): EmbeddingOptionsInput {
+    const cleanedOptions: EmbeddingOptionsInput = JSON.parse(JSON.stringify(options));
     for (const key in cleanedOptions) {
         if (
             typeof cleanedOptions[key] === 'object' &&
@@ -77,10 +85,10 @@ export function getCleanedEmbeddingOptions(
             !Array.isArray(cleanedOptions[key])
         ) {
             cleanedOptions[key] = getCleanedEmbeddingOptions(
-                cleanedOptions[key],
-                defaultOptions[key]
+                cleanedOptions[key] as EmbeddingOptionsInput,
+                defaultOptions[key] as EmbeddingOptionsInput
             );
-            if (Object.keys(cleanedOptions[key]).length === 0) {
+            if (Object.keys(cleanedOptions[key] as EmbeddingOptionsInput).length === 0) {
                 delete cleanedOptions[key];
             }
         } else if (JSON.stringify(cleanedOptions[key]) === JSON.stringify(defaultOptions[key])) {
@@ -102,8 +110,10 @@ export function getURLForGoogleDriveFile(fileId: string): string {
     return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=AIzaSyA2ZadQob_hXiT2VaYIkAyafPvz_4ZMssk`;
 }
 
-export function convertOldEmbeddingOptions(options: URLSearchParams): any {
-    const newOptions: any = {
+export function convertOldEmbeddingOptions(
+    options: URLSearchParams
+): EmbeddingOptionsInput & { files: string[]; ids: string[] } {
+    const newOptions: EmbeddingOptionsInput & { files: string[]; ids: string[] } = {
         files: [],
         ids: [],
     };

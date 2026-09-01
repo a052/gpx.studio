@@ -17,11 +17,11 @@ import { loadSVGIcon } from '$lib/utils';
 export class SplitControls {
     map: maplibregl.Map;
     layerEventManager: MapLayerEventManager;
-    unsubscribes: Function[] = [];
+    unsubscribes: (() => void)[] = [];
 
-    layerOnMouseEnterBinded: (e: any) => void = this.layerOnMouseEnter.bind(this);
+    layerOnMouseEnterBinded: () => void = this.layerOnMouseEnter.bind(this);
     layerOnMouseLeaveBinded: () => void = this.layerOnMouseLeave.bind(this);
-    layerOnClickBinded: (e: any) => void = this.layerOnClick.bind(this);
+    layerOnClickBinded: (e: maplibregl.MapLayerMouseEvent) => void = this.layerOnClick.bind(this);
 
     constructor(map: maplibregl.Map, layerEventManager: MapLayerEventManager) {
         this.map = map;

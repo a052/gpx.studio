@@ -17,6 +17,34 @@ const { currentOverpassQueries, overpassProvider, overpassCustomUrl } = settings
 
 const DEFAULT_OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 
+// The subset of the Overpass API response this layer consumes. Nodes carry lat/lon directly;
+// ways and relations only have them via `center` (the queries below use `out center`).
+type OverpassElement = {
+    id: number;
+    type: string;
+    lat: number;
+    lon: number;
+    center?: { lat: number; lon: number };
+    tags?: Record<string, string>;
+};
+
+type OverpassResponse = {
+    elements?: OverpassElement[];
+};
+
+// What onHover publishes to the popup: the POI layer's GeoJSON feature properties plus the symbol
+// key injected here. `tags` may still arrive as a JSON string from data cached before MapLibre v6.
+export type OverpassPopupItem = {
+    id: number;
+    type: string;
+    lat: number;
+    lon: number;
+    query: string;
+    icon: string;
+    tags?: Record<string, string> | string;
+    sym: string;
+};
+
 const mercator = new SphericalMercator({
     size: 256,
 });
@@ -147,11 +175,11 @@ export class OverpassLayer {
         }
     }
 
-    onHover(e: any) {
+    onHover(e: maplibregl.MapLayerMouseEvent) {
         this.popup.setItem({
             item: {
-                ...e.features[0].properties,
-                sym: overpassQueryData[e.features[0].properties.query].symbol ?? '',
+                ...e.features![0].properties,
+                sym: overpassQueryData[e.features![0].properties.query].symbol ?? '',
             },
         });
     }
@@ -215,7 +243,7 @@ export class OverpassLayer {
             .catch(() => this.currentQueries.delete(`${x},${y}`));
     }
 
-    storeOverpassData(x: number, y: number, queries: string[], data: any) {
+    storeOverpassData(x: number, y: number, queries: string[], data: OverpassResponse) {
         const time = Date.now();
         const queryTiles = queries.map((query) => ({ x, y, query, time }));
         const pois: { query: string; id: number; poi: GeoJSON.Feature }[] = [];
@@ -316,7 +344,7 @@ function getQueryItem(tags: Record<string, string | string[]>) {
     }
 }
 
-function belongsToQuery(element: any, query: string) {
+function belongsToQuery(element: OverpassElement, query: string) {
     if (Array.isArray(overpassQueryData[query].tags)) {
         return overpassQueryData[query].tags.some((tags) => belongsToQueryItem(element, tags));
     } else {
@@ -324,9 +352,9 @@ function belongsToQuery(element: any, query: string) {
     }
 }
 
-function belongsToQueryItem(element: any, tags: Record<string, string | string[]>) {
+function belongsToQueryItem(element: OverpassElement, tags: Record<string, string | string[]>) {
     return Object.entries(tags).every(([tag, value]) =>
-        Array.isArray(value) ? value.includes(element.tags[tag]) : element.tags[tag] === value
+        Array.isArray(value) ? value.includes(element.tags![tag]) : element.tags![tag] === value
     );
 }
 

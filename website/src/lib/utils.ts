@@ -20,10 +20,19 @@ export type WithoutChildren<T> = T extends { children?: any } ? Omit<T, 'childre
 export type WithoutChildrenOrChild<T> = WithoutChildren<WithoutChild<T>>;
 export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & { ref?: U | null };
 
+// Out-parameter of getClosestLinePoint: it reports which segment the closest point sits on so
+// callers can insert relative to it. Every field is written together or not at all — an empty
+// bag means `points` was too short to have a segment.
+export type ClosestLinePointDetails = {
+    before?: boolean;
+    index?: number;
+    distance?: number;
+};
+
 export function getClosestLinePoint(
     points: TrackPoint[],
     point: TrackPoint | Coordinates,
-    details: any = {}
+    details: ClosestLinePointDetails = {}
 ): TrackPoint {
     let closest = points[0];
     let closestDist = Number.MAX_VALUE;

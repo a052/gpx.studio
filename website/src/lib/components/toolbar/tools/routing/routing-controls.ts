@@ -15,7 +15,7 @@ import {
     ListTrackItem,
     ListTrackSegmentItem,
 } from '$lib/components/file-list/file-list';
-import { getClosestLinePoint, loadSVGIcon } from '$lib/utils';
+import { getClosestLinePoint, loadSVGIcon, type ClosestLinePointDetails } from '$lib/utils';
 import type { GPXFileWithStatistics } from '$lib/logic/statistics-tree';
 import { mapCursor, MapCursorState } from '$lib/logic/map-cursor';
 import { settings } from '$lib/logic/settings';
@@ -55,7 +55,7 @@ export class RoutingControls {
     popup: maplibregl.Popup;
     popupElement: HTMLElement;
     fileUnsubscribe: () => void = () => {};
-    unsubscribes: Function[] = [];
+    unsubscribes: (() => void)[] = [];
 
     updateControlsBinded: () => void = this.updateControls.bind(this);
     appendAnchorBinded: (e: MapMouseEvent) => void = this.appendAnchor.bind(this);
@@ -336,7 +336,7 @@ export class RoutingControls {
                 lat: anchor.geometry.coordinates[1],
             },
         });
-        const details: any = {};
+        const details: ClosestLinePointDetails = {};
         const closest = getClosestLinePoint(segment.trkpt, anchorPoint, details);
 
         const permanentAnchor: Anchor = {
@@ -373,10 +373,12 @@ export class RoutingControls {
                 lat: this.temporaryAnchor.geometry.coordinates[1],
             },
         });
-        const details: any = {};
+        const details: ClosestLinePointDetails = {};
         getClosestLinePoint(segment.trkpt, anchorPoint, details);
 
-        const before = details.before ? details.index : details.index - 1;
+        // getClosestLinePoint always fills `index` here: the caller only reaches this branch for a
+        // segment that has at least two track points. The assertions keep the arithmetic as-is.
+        const before = details.before ? details.index! : details.index! - 1;
 
         const projectedPt = projectedPoint(
             segment.trkpt[before],
@@ -704,8 +706,8 @@ export class RoutingControls {
         let response: TrackPoint[];
         try {
             response = await route(targetTrackPoints.map((trkpt) => trkpt.getCoordinates()));
-        } catch (e: any) {
-            toast.error(i18n._(e.message, e.message));
+        } catch (e) {
+            toast.error(i18n._((e as Error).message, (e as Error).message));
             return false;
         }
 
@@ -1058,7 +1060,7 @@ export class RoutingControls {
         });
     }
 
-    temporaryAnchorCloseToOtherAnchor(e: any) {
+    temporaryAnchorCloseToOtherAnchor(e: maplibregl.MapMouseEvent) {
         const map_ = get(map);
         if (!map_) {
             return false;

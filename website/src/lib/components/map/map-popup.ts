@@ -5,7 +5,13 @@ import { get, type Writable } from 'svelte/store';
 import { safeWritable } from '$lib/logic/safe-store';
 import MapPopupComponent from '$lib/components/map/MapPopup.svelte';
 
-export type PopupItem<T = Waypoint | TrackPoint | any> = {
+// Popup items that are not a Waypoint or TrackPoint (currently only Overpass POIs) carry their
+// position as plain lon/lat fields. Kept local to avoid an import cycle with overpass-layer.ts.
+type PopupCoordinates = { lon: number; lat: number };
+
+// `item` is whatever the popup's producer put there — a Waypoint, a TrackPoint or an Overpass
+// POI bag. MapPopup.svelte discriminates on it and casts to the concrete popup's parameter.
+export type PopupItem<T = unknown> = {
     item: T;
     fileId?: string;
     hide?: () => void;
@@ -80,6 +86,9 @@ export class MapPopup {
         }
         return item.item instanceof Waypoint || item.item instanceof TrackPoint
             ? item.item.getCoordinates()
-            : new maplibregl.LngLat(item.item.lon, item.item.lat);
+            : new maplibregl.LngLat(
+                  (item.item as PopupCoordinates).lon,
+                  (item.item as PopupCoordinates).lat
+              );
     }
 }

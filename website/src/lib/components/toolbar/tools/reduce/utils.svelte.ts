@@ -51,8 +51,14 @@ export class ReducedGPXLayer {
 export const tolerance = safeWritable<number>(0, 'reduceTolerance');
 
 export class ReducedGPXLayerCollection {
+    // Plain Maps on purpose: neither is reactive state. `_layers` is lifecycle bookkeeping and
+    // `_simplified` is only read inside update(), which is driven imperatively from the store
+    // subscriptions below. The reactive surface is _currentPoints/_maxPoints. Using SvelteMap
+    // would add reactive reads inside a method that writes $state in the same tick.
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity
     private _layers: Map<string, ReducedGPXLayer> = new Map();
-    private _simplified: Map<string, [ListItem, number, SimplifiedTrackPoint[]]>;
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity
+    private _simplified: Map<string, [ListItem, number, SimplifiedTrackPoint[]]> = new Map();
     private _currentPoints = $state(0);
     private _maxPoints = $state(0);
     private _fileStateCollectionObserver: GPXFileStateCollectionObserver;
@@ -60,8 +66,6 @@ export class ReducedGPXLayerCollection {
     private _unsubscribes: (() => void)[] = [];
 
     constructor() {
-        this._layers = new Map();
-        this._simplified = new Map();
         this._fileStateCollectionObserver = new GPXFileStateCollectionObserver(
             (newFiles) => {
                 newFiles.forEach((fileState, fileId) => {
@@ -162,6 +166,8 @@ export class ReducedGPXLayerCollection {
     }
 
     reduce() {
+        // Local to this call and handed straight to fileActions.reduce() — never read reactively.
+        // eslint-disable-next-line svelte/prefer-svelte-reactivity
         const itemsAndPoints = new Map<ListItem, TrackPoint[]>();
         this._simplified.forEach(([item, , points]) => {
             if (!get(selection).hasAnyParent(item)) {

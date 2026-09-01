@@ -47,16 +47,24 @@ export default [
     prettier,
     ...svelte.configs['flat/prettier'],
     {
-        // Pre-existing debt kept visible as warnings so `eslint .` stays green.
-        // These need case-by-case judgement (typing, intentional {@html},
-        // navigation/reactivity idioms); fix opportunistically, don't add new ones.
+        // Enforced, not advisory: `eslint .` must stay at zero. Where one of these rules is
+        // genuinely the wrong call for a specific line, suppress it inline with
+        // `// eslint-disable-next-line <rule>` plus a comment saying why — don't lower the
+        // severity here. Existing exceptions: the sanitized {@html} in WaypointPopup, the
+        // non-reactive Maps in toolbar/tools/reduce/utils.svelte.ts, ListItem's dynamic index
+        // signature in file-list.ts, and Setting.update's callback type in logic/settings.ts.
         rules: {
-            '@typescript-eslint/no-explicit-any': 'warn',
-            '@typescript-eslint/no-unsafe-function-type': 'warn',
-            'svelte/no-at-html-tags': 'warn',
-            'svelte/no-navigation-without-resolve': 'warn',
-            'svelte/prefer-svelte-reactivity': 'warn',
-            'svelte/prefer-writable-derived': 'warn',
+            '@typescript-eslint/no-explicit-any': 'error',
+            '@typescript-eslint/no-unsafe-function-type': 'error',
+            'svelte/no-at-html-tags': 'error',
+            // Link checking is off: every internal href is built by getURLForLanguage()
+            // (lib/utils.ts), which already applies `base`. The rule cannot see through the
+            // helper, so it only reports false positives there — and wrapping a call in
+            // resolve() would prefix `base` twice, breaking any BASE_PATH deployment.
+            // goto/pushState/replaceState stay enforced, which is where the rule earns its keep.
+            'svelte/no-navigation-without-resolve': ['error', { ignoreLinks: true }],
+            'svelte/prefer-svelte-reactivity': 'error',
+            'svelte/prefer-writable-derived': 'error',
         },
     },
 ];

@@ -43,6 +43,14 @@ const fitBoundsOptions: maplibregl.MapOptions['fitBoundsOptions'] = {
 // ground), which is what made right-drag jump.
 const MAX_PITCH = 85;
 
+// The fields the geocoder reads from a Nominatim `/search?format=json` hit. Nominatim returns
+// the coordinates as strings, which is why they are handed to the geocoder unparsed below.
+type NominatimResult = {
+    lon: string;
+    lat: string;
+    display_name: string;
+};
+
 export class MapLibreGLMap {
     private _map: maplibregl.Map | null = null;
     private _mapStore: Writable<maplibregl.Map | null> = safeWritable(null, 'map');
@@ -108,7 +116,7 @@ export class MapLibreGLMap {
                             const request = `https://nominatim.openstreetmap.org/search?format=json&q=${config.query}&limit=5&accept-language=${language}`;
                             const response = await fetch(request);
                             const geojson = await response.json();
-                            results.features = geojson.map((result: any) => {
+                            results.features = geojson.map((result: NominatimResult) => {
                                 return {
                                     type: 'Feature',
                                     geometry: {

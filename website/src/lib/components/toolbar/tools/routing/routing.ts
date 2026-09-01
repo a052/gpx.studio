@@ -103,7 +103,7 @@ const mtbRatingToScale: { [key: string]: string } = {
     '7': '6',
 };
 
-const graphhopperBlockPrivateCustomModels: { [key: string]: any } = {
+const graphhopperBlockPrivateCustomModels: Record<string, unknown> = {
     bike: {
         priority: [
             {
@@ -179,7 +179,7 @@ async function getGraphHopperRoute(
     // official server would reject them, so request only the common details there.
     const requestedDetails = official ? ['road_class', 'surface'] : graphhopperDetails;
 
-    const body: { [key: string]: any } = {
+    const body: Record<string, unknown> = {
         points: points.map((point) => [point.lon, point.lat]),
         profile: graphHopperProfile,
         elevation: true,
