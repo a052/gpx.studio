@@ -33,6 +33,7 @@
         undefined,
         'embedElevationFill'
     );
+    let xAxis = safeWritable<'distance' | 'time'>('distance', 'embedXAxis');
 
     const {
         currentBasemap,
@@ -135,6 +136,7 @@
                 {hoveredPoint}
                 {additionalDatasets}
                 {elevationFill}
+                {xAxis}
                 showControls={options.elevation.controls}
             />
         {/if}

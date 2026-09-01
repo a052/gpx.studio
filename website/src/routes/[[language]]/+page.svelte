@@ -28,6 +28,7 @@
     let hoveredPoint = safeWritable(null, 'landingHoveredPoint');
     let additionalDatasets = safeWritable(['speed', 'atemp'], 'landingAdditionalDatasets');
     let elevationFill = safeWritable(undefined, 'landingElevationFill');
+    let xAxis = safeWritable<'distance' | 'time'>('distance', 'landingXAxis');
 
     onMount(() => {
         $currentTool = Tool.SCISSORS;
@@ -142,6 +143,7 @@
                             {hoveredPoint}
                             {additionalDatasets}
                             {elevationFill}
+                            {xAxis}
                         />
                     </div>
                     <GPXStatistics {gpxStatistics} {slicedGPXStatistics} orientation="horizontal" />

@@ -472,7 +472,10 @@
         }
     },
     "chart": {
-        "settings": "Configuración del perfil de elevación"
+        "settings": "Configuración del perfil de elevación",
+        "x_axis_time": "Mostrar tiempo en el eje X",
+        "x_axis_distance": "Mostrar distancia en el eje X",
+        "no_time_data": "Sin datos de tiempo"
     },
     "quantities": {
         "distance": "Distancia",
@@ -508,7 +511,8 @@
         "knots": "kn",
         "heartrate": "ppm",
         "cadence": "rpm",
-        "power": "W"
+        "power": "W",
+        "hours": "h"
     },
     "gpx": {
         "file": "Archivo",

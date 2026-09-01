@@ -472,7 +472,10 @@
         }
     },
     "chart": {
-        "settings": "Elevation profile settings"
+        "settings": "Elevation profile settings",
+        "x_axis_time": "Show time on x-axis",
+        "x_axis_distance": "Show distance on x-axis",
+        "no_time_data": "No time data"
     },
     "quantities": {
         "distance": "Distance",
@@ -508,7 +511,8 @@
         "knots": "kn",
         "heartrate": "bpm",
         "cadence": "rpm",
-        "power": "W"
+        "power": "W",
+        "hours": "h"
     },
     "gpx": {
         "file": "File",

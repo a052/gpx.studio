@@ -472,7 +472,10 @@
         }
     },
     "chart": {
-        "settings": "Höhenprofil Einstellungen"
+        "settings": "Höhenprofil Einstellungen",
+        "x_axis_time": "Zeit auf der X-Achse anzeigen",
+        "x_axis_distance": "Distanz auf der X-Achse anzeigen",
+        "no_time_data": "Keine Zeitdaten"
     },
     "quantities": {
         "distance": "Distanz",
@@ -508,7 +511,8 @@
         "knots": "kn",
         "heartrate": "bpm",
         "cadence": "rpm",
-        "power": "W"
+        "power": "W",
+        "hours": "h"
     },
     "gpx": {
         "file": "Datei",

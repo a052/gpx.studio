@@ -472,7 +472,10 @@
         }
     },
     "chart": {
-        "settings": "Réglages du profil altimétrique"
+        "settings": "Réglages du profil altimétrique",
+        "x_axis_time": "Afficher le temps sur l'axe X",
+        "x_axis_distance": "Afficher la distance sur l'axe X",
+        "no_time_data": "Aucune donnée temporelle"
     },
     "quantities": {
         "distance": "Distance",
@@ -508,7 +511,8 @@
         "knots": "kn",
         "heartrate": "bpm",
         "cadence": "rpm",
-        "power": "W"
+        "power": "W",
+        "hours": "h"
     },
     "gpx": {
         "file": "Fichier",

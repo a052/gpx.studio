@@ -472,7 +472,10 @@
         }
     },
     "chart": {
-        "settings": "海拔剖面图设置"
+        "settings": "海拔剖面图设置",
+        "x_axis_time": "横坐标显示时间",
+        "x_axis_distance": "横坐标显示距离",
+        "no_time_data": "无时间数据"
     },
     "quantities": {
         "distance": "距离",
@@ -508,7 +511,8 @@
         "knots": "kn",
         "heartrate": "bpm",
         "cadence": "rpm",
-        "power": "W"
+        "power": "W",
+        "hours": "h"
     },
     "gpx": {
         "file": "文件",

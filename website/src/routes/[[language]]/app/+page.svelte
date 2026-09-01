@@ -32,6 +32,7 @@
         rightPanelSize,
         additionalDatasets,
         elevationFill,
+        elevationProfileXAxis,
     } = settings;
 
     let bottomPanelWidth: number | undefined = $state();
@@ -164,6 +165,7 @@
                         {hoveredPoint}
                         {additionalDatasets}
                         {elevationFill}
+                        xAxis={elevationProfileXAxis}
                     />
                 {/if}
             </div>

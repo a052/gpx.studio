@@ -210,6 +210,7 @@ type VelocityUnits = 'speed' | 'pace';
 type TemperatureUnits = 'celsius' | 'fahrenheit';
 type AdditionalDataset = 'speed' | 'hr' | 'cad' | 'atemp' | 'power';
 type ElevationFill = 'slope' | 'surface' | 'highway' | undefined;
+type ElevationProfileXAxis = 'distance' | 'time';
 type RoutingProfile =
     | 'bike'
     | 'racing_bike'
@@ -262,6 +263,11 @@ export const settings = {
         'elevationFill',
         undefined,
         getValueValidator(['slope', 'surface', 'highway', undefined], undefined)
+    ),
+    elevationProfileXAxis: new Setting<ElevationProfileXAxis>(
+        'elevationProfileXAxis',
+        'distance',
+        getValueValidator<ElevationProfileXAxis>(['distance', 'time'], 'distance')
     ),
     treeFileView: new Setting<boolean>('fileView', false),
     minimizeRoutingMenu: new Setting('minimizeRoutingMenu', false),

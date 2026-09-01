@@ -45,6 +45,9 @@ Chart.defaults.font.family =
 interface ElevationProfilePoint {
     x: number;
     y: number;
+    // Always the converted distance for this point, kept regardless of the active x-axis mode so the
+    // tooltip can show distance even when `x` holds elapsed time.
+    distance: number;
     time?: Date;
     slope: {
         at: number;
@@ -88,12 +91,17 @@ export class ElevationProfile {
     // The additional curve whose y-axis is currently shown on the right. The other enabled
     // curves' axes stay hidden; clicking the visible axis cycles to the next one.
     private _activeAdditionalCurve: AdditionalCurveId | null = null;
+    // Whether the x-axis currently plots elapsed time (hours) instead of distance. Derived in
+    // updateData() from the xAxis setting AND the presence of time data; read by the x tick
+    // formatter and updateOverlay so both stay consistent with the last drawn data.
+    private _useTime = false;
 
     private _gpxStatistics: Readable<GPXStatisticsGroup>;
     private _slicedGPXStatistics: Writable<[GPXGlobalStatistics, number, number] | undefined>;
     private _hoveredPoint: Writable<Coordinates | null>;
     private _additionalDatasets: Readable<string[]>;
     private _elevationFill: Readable<'slope' | 'surface' | 'highway' | undefined>;
+    private _xAxis: Readable<'distance' | 'time'>;
 
     constructor(
         gpxStatistics: Readable<GPXStatisticsGroup>,
@@ -101,6 +109,7 @@ export class ElevationProfile {
         hoveredPoint: Writable<Coordinates | null>,
         additionalDatasets: Readable<string[]>,
         elevationFill: Readable<'slope' | 'surface' | 'highway' | undefined>,
+        xAxis: Readable<'distance' | 'time'>,
         canvas: HTMLCanvasElement,
         overlay: HTMLCanvasElement
     ) {
@@ -109,6 +118,7 @@ export class ElevationProfile {
         this._hoveredPoint = hoveredPoint;
         this._additionalDatasets = additionalDatasets;
         this._elevationFill = elevationFill;
+        this._xAxis = xAxis;
         this._canvas = canvas;
         this._overlay = overlay;
 
@@ -148,6 +158,9 @@ export class ElevationProfile {
             this._elevationFill.subscribe(() => {
                 guard(() => this.updateFill());
             });
+            this._xAxis.subscribe(() => {
+                guard(() => this.updateData());
+            });
         });
     }
 
@@ -160,8 +173,13 @@ export class ElevationProfile {
                 x: {
                     type: 'linear',
                     ticks: {
-                        callback: function (value: number | string) {
-                            return `${(value as number).toFixed(1).replace(/\.0+$/, '')} ${getDistanceUnits()}`;
+                        // Arrow function so it can read `this._useTime`; distance ticks append the
+                        // distance unit, time ticks show elapsed decimal hours (e.g. "1.5 h").
+                        callback: (value: number | string) => {
+                            const formatted = (value as number).toFixed(1).replace(/\.0+$/, '');
+                            return this._useTime
+                                ? `${formatted} ${i18n._('units.hours')}`
+                                : `${formatted} ${getDistanceUnits()}`;
                         },
                         align: 'inner',
                         maxRotation: 0,
@@ -244,7 +262,7 @@ export class ElevationProfile {
                             const mtbScale = point.extensions.mtb_scale;
 
                             const labels = [
-                                `    ${i18n._('quantities.distance')}: ${getDistanceWithUnits(point.x, false)}`,
+                                `    ${i18n._('quantities.distance')}: ${getDistanceWithUnits(point.distance, false)}`,
                                 `    ${i18n._('quantities.slope')}: ${slope.at} %${get(this._elevationFill) === 'slope' ? ` (${slope.length} @${slope.segment} %)` : ''}`,
                             ];
 
@@ -495,11 +513,32 @@ export class ElevationProfile {
             temperature: get(temperatureUnits),
         };
 
+        // Effective x-axis mode: only plot elapsed time when the setting asks for it AND the file
+        // actually has timestamps; otherwise fall back to distance so untimed tracks still render.
+        const hasTime = data.global.time.total > 0 && data.global.time.start !== undefined;
+        this._useTime = get(this._xAxis) === 'time' && hasTime;
+        const startMs = this._useTime ? data.global.time.start!.getTime() : 0;
+        // Elapsed hours are computed from the raw timestamps (so multi-segment gaps are included,
+        // matching global.time.total). Carry the last value forward for the rare timeless point.
+        let lastHours = 0;
+
         const datasets: Array<Array<any>> = [[], [], [], [], [], []];
         data.forEachTrackPoint((trkpt, distance, speed, slope, index) => {
+            const convertedDistance = getConvertedDistance(distance, units.distance);
+            // Every dataset shares this x for the same index, keeping the curves aligned.
+            let x: number;
+            if (this._useTime) {
+                if (trkpt.time) {
+                    lastHours = (trkpt.time.getTime() - startMs) / 3600000;
+                }
+                x = lastHours;
+            } else {
+                x = convertedDistance;
+            }
             datasets[0].push({
-                x: getConvertedDistance(distance, units.distance),
+                x: x,
                 y: trkpt.ele ? getConvertedElevation(trkpt.ele, units.distance) : 0,
+                distance: convertedDistance,
                 time: trkpt.time,
                 slope: slope,
                 extensions: trkpt.getExtensions(),
@@ -508,35 +547,35 @@ export class ElevationProfile {
             });
             if (data.global.time.total > 0) {
                 datasets[1].push({
-                    x: getConvertedDistance(distance, units.distance),
+                    x: x,
                     y: getConvertedVelocity(speed, units.velocity, units.distance),
                     index: index,
                 });
             }
             if (data.global.hr.count > 0) {
                 datasets[2].push({
-                    x: getConvertedDistance(distance, units.distance),
+                    x: x,
                     y: trkpt.getHeartRate(),
                     index: index,
                 });
             }
             if (data.global.cad.count > 0) {
                 datasets[3].push({
-                    x: getConvertedDistance(distance, units.distance),
+                    x: x,
                     y: trkpt.getCadence(),
                     index: index,
                 });
             }
             if (data.global.atemp.count > 0) {
                 datasets[4].push({
-                    x: getConvertedDistance(distance, units.distance),
+                    x: x,
                     y: getConvertedTemperature(trkpt.getTemperature(), units.temperature),
                     index: index,
                 });
             }
             if (data.global.power.count > 0) {
                 datasets[5].push({
-                    x: getConvertedDistance(distance, units.distance),
+                    x: x,
                     y: trkpt.getPower(),
                     index: index,
                 });
@@ -592,10 +631,9 @@ export class ElevationProfile {
         };
 
         this._chart.options.scales!.x!['min'] = 0;
-        this._chart.options.scales!.x!['max'] = getConvertedDistance(
-            data.global.distance.total,
-            units.distance
-        );
+        this._chart.options.scales!.x!['max'] = this._useTime
+            ? data.global.time.total / 3600
+            : getConvertedDistance(data.global.distance.total, units.distance);
 
         this.setVisibility();
         this.setFill();
@@ -752,14 +790,22 @@ export class ElevationProfile {
                 selectionContext.clearRect(0, 0, this._overlay.width, this._overlay.height);
 
                 const gpxStatistics = get(this._gpxStatistics);
+                // Map a point index to its x-scale value, matching the active axis mode so the
+                // selection rectangle lines up with the plotted curves.
+                const startMs = gpxStatistics.global.time.start?.getTime() ?? 0;
+                const xValueForIndex = (index: number) => {
+                    const point = gpxStatistics.getTrackPoint(index);
+                    if (this._useTime) {
+                        return point?.trkpt.time
+                            ? (point.trkpt.time.getTime() - startMs) / 3600000
+                            : (point?.time.total ?? 0) / 3600;
+                    }
+                    return getConvertedDistance(point?.distance.total ?? 0);
+                };
                 const startPixel = this._chart.scales.x.getPixelForValue(
-                    getConvertedDistance(
-                        gpxStatistics.getTrackPoint(startIndex)?.distance.total ?? 0
-                    )
+                    xValueForIndex(startIndex)
                 );
-                const endPixel = this._chart.scales.x.getPixelForValue(
-                    getConvertedDistance(gpxStatistics.getTrackPoint(endIndex)?.distance.total ?? 0)
-                );
+                const endPixel = this._chart.scales.x.getPixelForValue(xValueForIndex(endIndex));
 
                 selectionContext.fillRect(
                     startPixel,

@@ -16,6 +16,8 @@
         Check,
         ChartNoAxesColumn,
         Construction,
+        Clock,
+        Ruler,
     } from '@lucide/svelte';
     import type { Readable, Writable } from 'svelte/store';
     import type { Coordinates, GPXGlobalStatistics, GPXStatisticsGroup } from 'gpx';
@@ -31,6 +33,7 @@
         hoveredPoint,
         additionalDatasets,
         elevationFill,
+        xAxis,
         showControls = true,
     }: {
         gpxStatistics: Readable<GPXStatisticsGroup>;
@@ -38,12 +41,16 @@
         hoveredPoint: Writable<Coordinates | null>;
         additionalDatasets: Writable<string[]>;
         elevationFill: Writable<'slope' | 'surface' | 'highway' | undefined>;
+        xAxis: Writable<'distance' | 'time'>;
         showControls?: boolean;
     } = $props();
 
     let canvas: HTMLCanvasElement;
     let overlay: HTMLCanvasElement;
     let elevationProfile: ElevationProfile | null = null;
+
+    // The time x-axis is only meaningful when the track carries timestamps.
+    let hasTimeData = $derived($gpxStatistics.global.time.total > 0);
 
     onMount(() => {
         elevationProfile = new ElevationProfile(
@@ -52,6 +59,7 @@
             hoveredPoint,
             additionalDatasets,
             elevationFill,
+            xAxis,
             canvas,
             overlay
         );
@@ -68,7 +76,7 @@
     <canvas bind:this={overlay} class="w-full h-full absolute pointer-events-none"></canvas>
     <canvas bind:this={canvas} class="w-full h-full absolute"></canvas>
     {#if showControls}
-        <div class="absolute bottom-9 right-2.5">
+        <div class="absolute bottom-9 right-2.5 flex flex-col gap-1.5 items-end">
             <Popover.Root>
                 <Popover.Trigger>
                     <ButtonWithTooltip
@@ -183,6 +191,28 @@
                     </ToggleGroup.Root>
                 </Popover.Content>
             </Popover.Root>
+            <ButtonWithTooltip
+                label={!hasTimeData
+                    ? i18n._('chart.no_time_data')
+                    : $xAxis === 'time'
+                      ? i18n._('chart.x_axis_distance')
+                      : i18n._('chart.x_axis_time')}
+                variant="outline"
+                side="left"
+                disabled={!hasTimeData}
+                class="w-7 h-7 p-0 flex justify-center opacity-70 hover:opacity-100 transition-opacity duration-300 bg-background"
+                onclick={() => {
+                    if (hasTimeData) {
+                        $xAxis = $xAxis === 'time' ? 'distance' : 'time';
+                    }
+                }}
+            >
+                {#if $xAxis === 'time' && hasTimeData}
+                    <Clock size="18" />
+                {:else}
+                    <Ruler size="18" />
+                {/if}
+            </ButtonWithTooltip>
         </div>
     {/if}
 </div>
