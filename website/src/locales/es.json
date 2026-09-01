@@ -39,6 +39,8 @@
         "toggle_overlays": "Alternar capas",
         "toggle_3d": "Alternar 3D",
         "fullscreen": "Pantalla completa",
+        "clean_mode": "Modo limpio",
+        "exit_clean_mode": "Salir del modo limpio",
         "settings": "Configuración",
         "distance_units": "Unidades de distancia",
         "metric": "Métrico",

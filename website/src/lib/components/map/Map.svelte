@@ -176,6 +176,13 @@
         @apply bottom-[42px];
     }
 
+    /* Clean mode: drop MapLibre's whole control layer in one rule — zoom/compass, globe, geocoder,
+       geolocate, scale and attribution, plus LayerControl and StreetViewControl, which are added
+       through `map.addControl` and therefore live in the same container. */
+    .clean :global(.maplibregl-control-container) {
+        @apply hidden;
+    }
+
     div :global(.maplibregl-ctrl-attrib) {
         @apply dark:bg-transparent;
     }

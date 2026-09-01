@@ -45,13 +45,13 @@
         BookOpenText,
         ChartArea,
         Maximize,
-        Maximize2,
-        Minimize2,
+        Fullscreen,
         Waypoints,
         Mountain,
         MountainSnow,
         Server,
         SquareDashed,
+        Scan,
     } from '@lucide/svelte';
     import { editMetadata } from '$lib/components/file-list/metadata/utils.svelte';
     import { editStyle } from '$lib/components/file-list/style/utils.svelte';
@@ -82,6 +82,7 @@
     import { fileActionManager } from '$lib/logic/file-action-manager';
     import { copied, selection } from '$lib/logic/selection';
     import { allHidden } from '$lib/logic/hidden';
+    import { cleanMode, setCleanMode, toggleCleanMode } from '$lib/logic/clean-mode';
     import { boundsManager } from '$lib/logic/bounds';
     import { tick, onMount } from 'svelte';
     import { allowedPastes } from '$lib/components/file-list/sortable-file-list';
@@ -145,7 +146,14 @@
     });
 </script>
 
-<div class="absolute md:top-2 left-0 right-0 z-20 flex flex-row justify-center pointer-events-none">
+<!-- Hidden with CSS rather than `{#if}` in clean mode: everything below this wrapper — the global
+     keydown handler (including the F9 that switches clean mode back off), the drag-and-drop file
+     loader, and the export/settings dialogs — has to stay mounted. -->
+<div
+    class="absolute md:top-2 left-0 right-0 z-20 {$cleanMode
+        ? 'hidden'
+        : 'flex'} flex-row justify-center pointer-events-none"
+>
     <div
         class="w-fit flex flex-row items-center justify-center p-1 bg-background rounded-b-md md:rounded-md pointer-events-auto shadow-md"
     >
@@ -435,12 +443,13 @@
                         {i18n._('menu.toggle_3d')}
                     </Menubar.CheckboxItem>
                     <Menubar.Separator />
+                    <Menubar.CheckboxItem checked={$cleanMode} onCheckedChange={toggleCleanMode}>
+                        <Scan size="16" />
+                        {i18n._('menu.clean_mode')}
+                        <Shortcut key="F9" />
+                    </Menubar.CheckboxItem>
                     <Menubar.CheckboxItem checked={fullscreen} onCheckedChange={toggleFullscreen}>
-                        {#if fullscreen}
-                            <Minimize2 size="16" />
-                        {:else}
-                            <Maximize2 size="16" />
-                        {/if}
+                        <Fullscreen size="16" />
                         {i18n._('menu.fullscreen')}
                         <Shortcut key="F11" />
                     </Menubar.CheckboxItem>
@@ -748,6 +757,16 @@
         } else if (e.key === 'F5') {
             $routing = !$routing;
             e.preventDefault();
+        } else if (e.key === 'F9') {
+            toggleCleanMode();
+            e.preventDefault();
+        } else if (e.key === 'Escape') {
+            // Only meaningful in clean mode, where the menu is gone; outside it this is a no-op so
+            // the toolbar's own Escape (close the active tool panel) keeps working.
+            if (!targetInput && $cleanMode) {
+                setCleanMode(false);
+                e.preventDefault();
+            }
         } else if (
             e.key === 'ArrowRight' ||
             e.key === 'ArrowDown' ||

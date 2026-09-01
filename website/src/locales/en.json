@@ -39,6 +39,8 @@
         "toggle_overlays": "Toggle overlays",
         "toggle_3d": "Toggle 3D",
         "fullscreen": "Full screen",
+        "clean_mode": "Clean mode",
+        "exit_clean_mode": "Exit clean mode",
         "settings": "Settings",
         "distance_units": "Distance units",
         "metric": "Metric",

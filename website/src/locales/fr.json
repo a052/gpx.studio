@@ -39,6 +39,8 @@
         "toggle_overlays": "Afficher/cacher les surcouches",
         "toggle_3d": "Activer/désactiver la 3D",
         "fullscreen": "Plein écran",
+        "clean_mode": "Mode épuré",
+        "exit_clean_mode": "Quitter le mode épuré",
         "settings": "Réglages",
         "distance_units": "Unités de distance",
         "metric": "Métrique",

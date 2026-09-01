@@ -39,6 +39,8 @@
         "toggle_overlays": "Overlay umschalten",
         "toggle_3d": "3D umschalten",
         "fullscreen": "Full screen",
+        "clean_mode": "Aufgeräumter Modus",
+        "exit_clean_mode": "Aufgeräumten Modus verlassen",
         "settings": "Einstellungen",
         "distance_units": "Entfernungseinheiten",
         "metric": "Metrisch",

@@ -11,6 +11,7 @@
     import CoordinatesPopup from '$lib/components/map/CoordinatesPopup.svelte';
     import ViewToggles from '$lib/components/ViewToggles.svelte';
     import CoordinateReadout from '$lib/components/CoordinateReadout.svelte';
+    import CleanModeExit from '$lib/components/CleanModeExit.svelte';
     import Resizer from '$lib/components/Resizer.svelte';
     import { Toaster } from '$lib/components/ui/sonner';
     import { i18n } from '$lib/i18n.svelte';
@@ -24,6 +25,7 @@
     import { fileStateCollection } from '$lib/logic/file-state';
     import { installCorsProxyFetch } from '$lib/logic/cors-proxy';
     import { selection } from '$lib/logic/selection';
+    import { cleanMode } from '$lib/logic/clean-mode';
 
     const {
         treeFileView,
@@ -112,32 +114,41 @@
     <div class="flex flex-col grow h-full min-w-0">
         <div class="grow relative">
             <Menu />
-            <div
-                class="absolute top-0 bottom-0 left-0 z-20 flex flex-col justify-center pointer-events-none"
-            >
-                <Toolbar />
-            </div>
-            <Map class="h-full bottom-bar {$treeFileView ? '' : 'horizontal'}" />
+            {#if !$cleanMode}
+                <div
+                    class="absolute top-0 bottom-0 left-0 z-20 flex flex-col justify-center pointer-events-none"
+                >
+                    <Toolbar />
+                </div>
+            {/if}
+            <Map
+                class="h-full bottom-bar {$treeFileView ? '' : 'horizontal'} {$cleanMode
+                    ? 'clean'
+                    : ''}"
+            />
             <StreetViewControl />
             <LayerControl />
+            <CleanModeExit />
             <GPXLayers />
             <CoordinatesPopup />
             <Toaster richColors />
-            <div
-                class="h-10 -translate-y-10 w-full pointer-events-none absolute z-30 flex flex-row"
-            >
-                {#if !$treeFileView}
-                    <div class="grow min-w-0">
-                        <FileList orientation="horizontal" />
-                    </div>
-                {:else}
-                    <div class="grow min-w-0"></div>
-                {/if}
-                <CoordinateReadout />
-                <ViewToggles />
-            </div>
+            {#if !$cleanMode}
+                <div
+                    class="h-10 -translate-y-10 w-full pointer-events-none absolute z-30 flex flex-row"
+                >
+                    {#if !$treeFileView}
+                        <div class="grow min-w-0">
+                            <FileList orientation="horizontal" />
+                        </div>
+                    {:else}
+                        <div class="grow min-w-0"></div>
+                    {/if}
+                    <CoordinateReadout />
+                    <ViewToggles />
+                </div>
+            {/if}
         </div>
-        {#if $elevationProfile}
+        {#if $elevationProfile && !$cleanMode}
             <Resizer
                 orientation="row"
                 bind:after={$bottomPanelSize}
@@ -145,7 +156,7 @@
                 maxAfter={300}
             />
         {/if}
-        {#if $elevationProfile || $selection.size > 0}
+        {#if !$cleanMode && ($elevationProfile || $selection.size > 0)}
             <div
                 bind:offsetWidth={bottomPanelWidth}
                 class="flex {bottomPanelOrientation == 'vertical'
@@ -171,7 +182,7 @@
             </div>
         {/if}
     </div>
-    {#if $treeFileView}
+    {#if $treeFileView && !$cleanMode}
         <Resizer orientation="col" bind:after={$rightPanelSize} minAfter={100} maxAfter={400} />
         <FileList orientation="vertical" recursive={true} style="width: {$rightPanelSize}px" />
     {/if}

@@ -7,6 +7,7 @@
     import { GoogleRedirect } from './google';
     import { settings } from '$lib/logic/settings';
     import { i18n } from '$lib/i18n.svelte';
+    import { cleanMode } from '$lib/logic/clean-mode';
     import { onMount } from 'svelte';
     import type * as maplibregl from 'maplibre-gl';
     import ButtonWithTooltip from '$lib/components/ButtonWithTooltip.svelte';
@@ -71,7 +72,7 @@
 
 <div
     bind:this={container}
-    class="{mapillaryOpen.value
+    class="{mapillaryOpen.value && !$cleanMode
         ? ''
         : 'hidden'} !absolute bottom-[44px] right-2.5 z-10 w-[40%] h-[40%] bg-background rounded-md overflow-hidden border-background border-2"
 >

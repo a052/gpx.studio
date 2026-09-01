@@ -39,6 +39,8 @@
         "toggle_overlays": "切换叠加层",
         "toggle_3d": "三维视图",
         "fullscreen": "全屏",
+        "clean_mode": "清爽模式",
+        "exit_clean_mode": "退出清爽模式",
         "settings": "设置",
         "distance_units": "距离单位",
         "metric": "公制",

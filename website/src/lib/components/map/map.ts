@@ -18,6 +18,7 @@ import { tick } from 'svelte';
 import { ANCHOR_LAYER_KEY, StyleManager, SKY } from '$lib/components/map/style';
 import { MapLayerEventManager } from '$lib/components/map/map-layer-event-manager';
 import { selection } from '$lib/logic/selection';
+import { cleanMode } from '$lib/logic/clean-mode';
 
 const {
     treeFileView,
@@ -181,6 +182,9 @@ export class MapLibreGLMap {
         this._unsubscribes.push(elevationProfile.subscribe(() => this.resize()));
         this._unsubscribes.push(bottomPanelSize.subscribe(() => this.resize()));
         this._unsubscribes.push(rightPanelSize.subscribe(() => this.resize()));
+        // Clean mode removes the bottom and right panels, which are the only chrome that takes
+        // layout space away from the map container.
+        this._unsubscribes.push(cleanMode.subscribe(() => this.resize()));
         // The selection-gated stats bar changes the map container height when it appears or
         // disappears; resize only when that visibility actually flips, not on every selection change.
         let lastHasSelection = get(selection).size > 0;
