@@ -279,6 +279,7 @@
             "update": "Update time data",
             "clear": "Clear time data",
             "cleared": "Time data cleared.",
+            "nothing_to_clear": "There is no time data to clear in this selection.",
             "clear_error": "Could not clear the time data for this selection.",
             "help": "Use the form to set new time data.",
             "help_invalid_selection": "Select a single trace to manage its time data.",
@@ -309,7 +310,11 @@
             "loading": "Requesting elevation data…",
             "updated": "Elevation data updated.",
             "no_change": "Elevation data already matches the selected source.",
-            "error": "Could not request elevation data."
+            "error": "Could not request elevation data.",
+            "clear": "Clear elevation data",
+            "cleared": "Elevation data cleared.",
+            "nothing_to_clear": "There is no elevation data to clear in this selection.",
+            "clear_error": "Could not clear the elevation data for this selection."
         },
         "waypoint": {
             "tooltip": "Create and edit waypoints",

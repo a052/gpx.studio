@@ -279,6 +279,7 @@
             "update": "Aktualisiere Zeitdaten",
             "clear": "Zeitdaten löschen",
             "cleared": "Zeitdaten gelöscht.",
+            "nothing_to_clear": "In dieser Auswahl gibt es keine Zeitdaten zum Löschen.",
             "clear_error": "Die Zeitdaten für diese Auswahl konnten nicht gelöscht werden.",
             "help": "Verwenden Sie das Formular, um neue Zeitdaten festzulegen.",
             "help_invalid_selection": "",
@@ -309,7 +310,11 @@
             "loading": "Höhendaten werden angefragt…",
             "updated": "Höhendaten aktualisiert.",
             "no_change": "Die Höhendaten stimmen bereits mit der ausgewählten Quelle überein.",
-            "error": "Höhendaten konnten nicht angefragt werden."
+            "error": "Höhendaten konnten nicht angefragt werden.",
+            "clear": "Höhendaten löschen",
+            "cleared": "Höhendaten gelöscht.",
+            "nothing_to_clear": "In dieser Auswahl gibt es keine Höhendaten zum Löschen.",
+            "clear_error": "Die Höhendaten für diese Auswahl konnten nicht gelöscht werden."
         },
         "waypoint": {
             "tooltip": "Wegpunkte erstellen und bearbeiten",

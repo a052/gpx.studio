@@ -279,6 +279,7 @@
             "update": "Mettre à jour les données temporelles",
             "clear": "Effacer les données temporelles",
             "cleared": "Données temporelles effacées.",
+            "nothing_to_clear": "Il n'y a aucune donnée temporelle à effacer dans cette sélection.",
             "clear_error": "Impossible d'effacer les données temporelles pour cette sélection.",
             "help": "Utilisez le formulaire pour définir de nouvelles données temporelles.",
             "help_invalid_selection": "Sélectionnez une seule trace pour gérer ses données temporelles.",
@@ -309,7 +310,11 @@
             "loading": "Demande de données d'altitude…",
             "updated": "Données d'altitude mises à jour.",
             "no_change": "Les données d'altitude correspondent déjà à la source sélectionnée.",
-            "error": "Impossible de récupérer les données d'altitude."
+            "error": "Impossible de récupérer les données d'altitude.",
+            "clear": "Effacer les données d'altitude",
+            "cleared": "Données d'altitude effacées.",
+            "nothing_to_clear": "Il n'y a aucune donnée d'altitude à effacer dans cette sélection.",
+            "clear_error": "Impossible d'effacer les données d'altitude pour cette sélection."
         },
         "waypoint": {
             "tooltip": "Créer et modifier des points de passage",

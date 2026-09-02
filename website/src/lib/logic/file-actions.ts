@@ -124,6 +124,61 @@ export async function loadFile(file: File): Promise<GPXFile | null> {
     return result;
 }
 
+// Walk the current selection and hand each scoped chunk to `clear`, which takes the index-array
+// scoping the `GPXFile.clear*` methods share: `undefined` means everything at that level, `[]` means
+// nothing. Resolves to whether anything actually changed, so callers can tell "cleared" from
+// "there was nothing to clear" — the clear methods leave the draft untouched when the data is
+// already absent, which keeps the immer patch empty and adds no entry to the edit history.
+//
+// Items are narrowed individually rather than dispatched on the `level` the selection callback
+// reports: `applyToOrderedItemsFromFile` assigns that from whichever item comes last, so a selection
+// mixing levels within one file would misroute. Per-item narrowing is exact, and it also expresses
+// segments picked from two different tracks.
+function clearFromSelection(
+    clear: (
+        file: WritableDraft<GPXFile>,
+        trackIndices?: number[],
+        segmentIndices?: number[],
+        waypointIndices?: number[]
+    ) => void
+): Promise<boolean> {
+    if (get(selection).size === 0) {
+        return Promise.resolve(false);
+    }
+    return fileActionManager.applyGlobal((draft) => {
+        selection.applyToOrderedSelectedItemsFromFile((fileId, level, items) => {
+            const file = draft.get(fileId);
+            if (!file) {
+                return;
+            }
+            if (items.some((item) => item instanceof ListFileItem)) {
+                // The whole file, points of interest included; anything narrower here is a subset.
+                clear(file);
+                return;
+            }
+            const waypointIndices: number[] = [];
+            let allWaypoints = false;
+            for (const item of items) {
+                if (item instanceof ListTrackItem) {
+                    clear(file, [item.getTrackIndex()], undefined, []);
+                } else if (item instanceof ListTrackSegmentItem) {
+                    clear(file, [item.getTrackIndex()], [item.getSegmentIndex()], []);
+                } else if (item instanceof ListWaypointsItem) {
+                    allWaypoints = true;
+                } else if (item instanceof ListWaypointItem) {
+                    waypointIndices.push(item.getWaypointIndex());
+                }
+            }
+            // Batched into one call because each call walks the whole `wpt` array.
+            if (allWaypoints) {
+                clear(file, [], [], undefined);
+            } else if (waypointIndices.length > 0) {
+                clear(file, [], [], waypointIndices);
+            }
+        });
+    });
+}
+
 // Helper functions for file operations
 export const fileActions = {
     add: (file: GPXFile) => {
@@ -882,32 +937,14 @@ export const fileActions = {
             });
         });
     },
-    clearTimeDataFromSelection: (): Promise<boolean> => {
-        if (get(selection).size === 0) {
-            return Promise.resolve(false);
-        }
-        return fileActionManager.applyGlobal((draft) => {
-            selection.applyToOrderedSelectedItemsFromFile((fileId, level, items) => {
-                const file = draft.get(fileId);
-                if (file) {
-                    if (level === ListLevel.FILE) {
-                        file.clearTimestamps();
-                    } else if (level === ListLevel.TRACK) {
-                        for (const item of items) {
-                            const trackIndex = (item as ListTrackItem).getTrackIndex();
-                            file.clearTimestamps(trackIndex);
-                        }
-                    } else if (level === ListLevel.SEGMENT) {
-                        for (const item of items) {
-                            const trackIndex = (item as ListTrackSegmentItem).getTrackIndex();
-                            const segmentIndex = (item as ListTrackSegmentItem).getSegmentIndex();
-                            file.clearTimestamps(trackIndex, segmentIndex);
-                        }
-                    }
-                }
-            });
-        });
-    },
+    clearElevationDataFromSelection: (): Promise<boolean> =>
+        clearFromSelection((file, trackIndices, segmentIndices, waypointIndices) =>
+            file.clearElevation(trackIndices, segmentIndices, waypointIndices)
+        ),
+    clearTimeDataFromSelection: (): Promise<boolean> =>
+        clearFromSelection((file, trackIndices, segmentIndices, waypointIndices) =>
+            file.clearTimestamps(trackIndices, segmentIndices, waypointIndices)
+        ),
     deleteSelectedFiles: () => {
         if (get(selection).size === 0) {
             return;

@@ -35,7 +35,6 @@
     import { settings } from '$lib/logic/settings';
     import { fileActionManager } from '$lib/logic/file-action-manager';
     import { fileActions } from '$lib/logic/file-actions';
-    import { fileStateCollection } from '$lib/logic/file-state';
     import { gpxStatistics } from '$lib/logic/statistics';
     import { toast } from 'svelte-sonner';
 
@@ -193,33 +192,27 @@
         $selection.size === 1 && $selection.hasAnyChildren(new ListRootItem(), true, ['waypoints'])
     );
 
-    // The statistics only cover track point timestamps. A whole-file selection can also carry a
-    // file-level timestamp or waypoint timestamps, which are cleared too, so check those as well.
-    let hasTimeData = $derived.by(() => {
-        if ($gpxStatistics.global.time.start !== undefined) {
-            return true;
-        }
-        const item = $selection.getSelected()[0];
-        if (!(item instanceof ListFileItem)) {
-            return false;
-        }
-        const file = $fileStateCollection.get(item.getFileId())?.file;
-        return (
-            file !== undefined &&
-            (file.metadata.time !== undefined || file.wpt.some((wpt) => wpt.time !== undefined))
-        );
-    });
-
-    let canClear = $derived(canUpdate && hasTimeData);
+    // Deliberately looser than `canUpdate`: the form below needs a single trace to work on, but
+    // clearing works on anything selected, points of interest included, across as many items as the
+    // selection holds. It stays enabled even when there is no time data because there is no cheap
+    // presence test for one — the statistics cover track points only, not the file-level timestamp
+    // nor the waypoints — so the "nothing to clear" case is reported from the return value instead.
+    let canClear = $derived($selection.size > 0);
+    let clearing = $state(false);
 
     async function clearTimeData() {
+        clearing = true;
         try {
             if (await fileActions.clearTimeDataFromSelection()) {
                 toast.success(i18n._('toolbar.time.cleared'));
+            } else {
+                toast.success(i18n._('toolbar.time.nothing_to_clear'));
             }
         } catch (e) {
             console.error('Clearing the time data failed:', e);
             toast.error(i18n._('toolbar.time.clear_error'));
+        } finally {
+            clearing = false;
         }
     }
 </script>
@@ -449,7 +442,7 @@
         </Button>
         <Button
             variant="outline"
-            disabled={!canClear}
+            disabled={!canClear || clearing}
             class="grow shrink whitespace-normal h-fit min-h-8 py-1"
             onclick={clearTimeData}
         >

@@ -467,25 +467,35 @@ export class GPXFile extends GPXTreeNode<Track> {
         });
     }
 
-    // Remove all timestamps from the selected scope. When the whole file is targeted, the file-level
-    // metadata timestamp and the waypoint timestamps go as well, since they belong to the file rather
-    // than to a single track or segment.
-    clearTimestamps(trackIndex?: number, segmentIndex?: number) {
-        this.trk.forEach((track, index) => {
-            if (trackIndex === undefined || trackIndex === index) {
-                track.clearTimestamps(segmentIndex);
+    // Remove all timestamps from the selected scope, using `addElevation`'s index-array scoping:
+    // `undefined` means everything at that level, `[]` means nothing. Waypoint timestamps belong to
+    // the file rather than to a single track, and so does the metadata timestamp — but that one only
+    // goes when the whole file is targeted, since it describes the file as a whole.
+    clearTimestamps(
+        trackIndices?: number[],
+        segmentIndices?: number[],
+        waypointIndices?: number[]
+    ) {
+        this.trk.forEach((track, trackIndex) => {
+            if (trackIndices === undefined || trackIndices.includes(trackIndex)) {
+                track.clearTimestamps(segmentIndices);
             }
         });
-        if (trackIndex === undefined) {
-            if (this.metadata.time !== undefined) {
-                delete this.metadata.time;
-            }
-            this.wpt.forEach((waypoint) => {
+        if (
+            trackIndices === undefined &&
+            segmentIndices === undefined &&
+            waypointIndices === undefined &&
+            this.metadata.time !== undefined
+        ) {
+            delete this.metadata.time;
+        }
+        this.wpt.forEach((waypoint, waypointIndex) => {
+            if (waypointIndices === undefined || waypointIndices.includes(waypointIndex)) {
                 if (waypoint.time !== undefined) {
                     waypoint.time = undefined;
                 }
-            });
-        }
+            }
+        });
     }
 
     addElevation(
@@ -512,6 +522,26 @@ export class GPXFile extends GPXTreeNode<Track> {
             }
         });
         elevations.splice(0, index);
+    }
+
+    // Remove all elevation data from the selected scope, using `addElevation`'s index-array scoping:
+    // `undefined` means everything at that level, `[]` means nothing. Waypoint elevations belong to
+    // the file rather than to a single track, so a whole-file clear takes them as well.
+    clearElevation(trackIndices?: number[], segmentIndices?: number[], waypointIndices?: number[]) {
+        this.trk.forEach((track, trackIndex) => {
+            if (trackIndices === undefined || trackIndices.includes(trackIndex)) {
+                track.clearElevation(segmentIndices);
+            }
+        });
+        this.wpt.forEach((waypoint, waypointIndex) => {
+            if (waypointIndices === undefined || waypointIndices.includes(waypointIndex)) {
+                // Mutated in place, never cloned: `Waypoint.clone()` drops `_data`, and with it
+                // `_data.index` (used to delete a waypoint from its popup) and `_data.hidden`.
+                if (waypoint.ele !== undefined) {
+                    waypoint.ele = undefined;
+                }
+            }
+        });
     }
 
     setStyle(style: LineStyleExtension) {
@@ -796,10 +826,18 @@ export class Track extends GPXTreeNode<TrackSegment> {
         });
     }
 
-    clearTimestamps(segmentIndex?: number) {
+    clearTimestamps(segmentIndices?: number[]) {
         this.trkseg.forEach((segment, index) => {
-            if (segmentIndex === undefined || segmentIndex === index) {
+            if (segmentIndices === undefined || segmentIndices.includes(index)) {
                 segment.clearTimestamps();
+            }
+        });
+    }
+
+    clearElevation(segmentIndices?: number[]) {
+        this.trkseg.forEach((segment, index) => {
+            if (segmentIndices === undefined || segmentIndices.includes(index)) {
+                segment.clearElevation();
             }
         });
     }
@@ -1391,6 +1429,21 @@ export class TrackSegment extends GPXTreeLeaf {
         let trkpt = og.trkpt.map((point) => {
             let pt = point.clone();
             pt.time = undefined;
+            return pt;
+        });
+        this.trkpt = freeze(trkpt); // Pre-freeze the array, faster as well
+    }
+
+    clearElevation() {
+        let og = getOriginal(this); // Read as much as possible from the original object because it is faster
+        if (!og.trkpt.some((point) => point.ele !== undefined)) {
+            // Nothing to clear. Leaving the draft untouched keeps the immer patch empty, so no
+            // no-op entry is added to the edit history.
+            return;
+        }
+        let trkpt = og.trkpt.map((point) => {
+            let pt = point.clone();
+            pt.ele = undefined;
             return pt;
         });
         this.trkpt = freeze(trkpt); // Pre-freeze the array, faster as well

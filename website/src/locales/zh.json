@@ -279,6 +279,7 @@
             "update": "更新时间数据",
             "clear": "清除时间数据",
             "cleared": "时间数据已清除。",
+            "nothing_to_clear": "所选内容中没有可清除的时间数据。",
             "clear_error": "无法清除此选区的时间数据。",
             "help": "使用表单设置新的时间数据。",
             "help_invalid_selection": "选择一个单一的轨迹来管理其时间数据。",
@@ -309,7 +310,11 @@
             "loading": "正在请求海拔数据…",
             "updated": "海拔数据已更新。",
             "no_change": "海拔数据已与所选数据源一致。",
-            "error": "无法请求海拔数据。"
+            "error": "无法请求海拔数据。",
+            "clear": "清除海拔数据",
+            "cleared": "海拔数据已清除。",
+            "nothing_to_clear": "所选内容中没有可清除的海拔数据。",
+            "clear_error": "无法清除此选区的海拔数据。"
         },
         "waypoint": {
             "tooltip": "创建或编辑路点",
