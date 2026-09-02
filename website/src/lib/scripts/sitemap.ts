@@ -7,7 +7,10 @@ function getURLForLanguage(lang: string, path: string): string {
 }
 
 function generateSitemap() {
-    const pages = glob.sync('**/*.html', { cwd: 'build' }).map((page) => `/${page}`);
+    // `posix: true` keeps the separators as `/` on Windows too. Without it, glob returns
+    // `zh\help\toolbar\waypoint.html` locally, the `rootDir` language check below never matches,
+    // and every localized page gets re-emitted under all five language prefixes.
+    const pages = glob.sync('**/*.html', { cwd: 'build', posix: true }).map((page) => `/${page}`);
 
     let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n';
     sitemap +=

@@ -427,7 +427,7 @@
                     </Menubar.Item>
                     <Menubar.Separator />
                     <Menubar.CheckboxItem bind:checked={$showWaypoints}>
-                        <Bookmark size="16" />{i18n._('menu.points_of_interest')}
+                        <Bookmark size="16" />{i18n._('menu.waypoints')}
                     </Menubar.CheckboxItem>
                     <Menubar.CheckboxItem bind:checked={$distanceMarkers}>
                         <Coins size="16" />{i18n._('menu.distance_markers')}<Shortcut key="F3" />

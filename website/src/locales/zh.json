@@ -98,7 +98,7 @@
         },
         "distance_markers": "距离标记",
         "direction_markers": "方向箭头",
-        "points_of_interest": "路点",
+        "waypoints": "标注点",
         "coordinate_readout": "光标坐标与海拔",
         "zoom_in_for_elevation": "放大以获取海拔",
         "help": "帮助",
@@ -317,15 +317,15 @@
             "clear_error": "无法清除此选区的海拔数据。"
         },
         "waypoint": {
-            "tooltip": "创建或编辑路点",
+            "tooltip": "创建或编辑标注点",
             "icon": "图标",
             "link": "链接",
             "longitude": "经度",
             "latitude": "纬度",
-            "create": "创建路点",
-            "add": "将兴趣点添加到文件",
-            "help": "通过表单创建新路点，或点击现有路点以编辑。 点击地图并填充坐标点，或拖动路点以移动坐标。",
-            "help_no_selection": "选择文件以创建或编辑路点。"
+            "create": "创建标注点",
+            "add": "将标注点添加到文件",
+            "help": "通过表单创建新标注点，或点击现有标注点以编辑。 点击地图并填充坐标点，或拖动标注点以移动坐标。",
+            "help_no_selection": "选择文件以创建或编辑标注点。"
         },
         "reduce": {
             "tooltip": "精简 GPS 点数量",
@@ -338,12 +338,12 @@
         "clean": {
             "tooltip": "使用矩形选区清除要素",
             "delete_trackpoints": "删除 GPS 点",
-            "delete_waypoints": "删除兴趣点",
+            "delete_waypoints": "删除标注点",
             "delete_inside": "清除选区内部要素",
             "delete_outside": "清除选区外部要素",
             "button": "删除",
             "help": "在地图上绘制矩形选区以清除。",
-            "help_no_selection": "选择一个轨迹以清除其 GPS 点和兴趣点。"
+            "help_no_selection": "选择一个轨迹以清除其 GPS 点和标注点。"
         }
     },
     "layers": {
@@ -528,8 +528,8 @@
         "tracks": "轨迹",
         "segment": "路段",
         "segments": "路段",
-        "waypoint": "兴趣点",
-        "waypoints": "兴趣点",
+        "waypoint": "标注点",
+        "waypoints": "标注点",
         "symbol": {
             "alert": "警告",
             "anchor": "锚点",

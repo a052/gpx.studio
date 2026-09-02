@@ -152,7 +152,7 @@ function clearFromSelection(
                 return;
             }
             if (items.some((item) => item instanceof ListFileItem)) {
-                // The whole file, points of interest included; anything narrower here is a subset.
+                // The whole file, waypoints included; anything narrower here is a subset.
                 clear(file);
                 return;
             }

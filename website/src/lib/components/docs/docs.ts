@@ -22,7 +22,7 @@ export const guides: Record<string, string[]> = {
     'files-and-stats': [],
     toolbar: [
         'routing',
-        'poi',
+        'waypoint',
         'scissors',
         'time',
         'merge',
@@ -47,7 +47,7 @@ export const guideIcons: Record<string, string | Component<IconProps>> = {
     'files-and-stats': '🗂 📈',
     toolbar: '🧰',
     routing: Pencil,
-    poi: MapPin,
+    waypoint: MapPin,
     scissors: Scissors,
     time: CalendarClock,
     merge: Group,

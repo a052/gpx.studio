@@ -98,7 +98,7 @@
         },
         "distance_markers": "Distance markers",
         "direction_markers": "Direction arrows",
-        "points_of_interest": "Waypoints",
+        "waypoints": "Waypoints",
         "coordinate_readout": "Cursor coordinates and elevation",
         "zoom_in_for_elevation": "Zoom in for elevation",
         "help": "Help",
@@ -323,7 +323,7 @@
             "longitude": "Longitude",
             "latitude": "Latitude",
             "create": "Create waypoint",
-            "add": "Add point of interest to file",
+            "add": "Add waypoint to file",
             "help": "Fill in the form to create a new waypoint, or click on an existing one to edit it. Click on the map to fill the coordinates, or drag waypoints to move them.",
             "help_no_selection": "Select a file to create or edit waypoints."
         },
@@ -336,14 +336,14 @@
             "help_no_selection": "Select a trace to reduce the number of its GPS points."
         },
         "clean": {
-            "tooltip": "Clean GPS points and points of interest with a rectangle selection",
+            "tooltip": "Clean GPS points and waypoints with a rectangle selection",
             "delete_trackpoints": "Delete GPS points",
-            "delete_waypoints": "Delete points of interest",
+            "delete_waypoints": "Delete waypoints",
             "delete_inside": "Delete inside selection",
             "delete_outside": "Delete outside selection",
             "button": "Delete",
-            "help": "Select a rectangle area on the map to remove GPS points and points of interest.",
-            "help_no_selection": "Select a trace to clean GPS points and points of interest."
+            "help": "Select a rectangle area on the map to remove GPS points and waypoints.",
+            "help_no_selection": "Select a trace to clean GPS points and waypoints."
         }
     },
     "layers": {
@@ -528,8 +528,8 @@
         "tracks": "Tracks",
         "segment": "Segment",
         "segments": "Segments",
-        "waypoint": "Point of interest",
-        "waypoints": "Points of interest",
+        "waypoint": "Waypoint",
+        "waypoints": "Waypoints",
         "symbol": {
             "alert": "Alert",
             "anchor": "Anchor",

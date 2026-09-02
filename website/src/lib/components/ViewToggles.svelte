@@ -11,7 +11,7 @@
     <ButtonWithTooltip
         variant="outline"
         side="top"
-        label={i18n._('menu.points_of_interest')}
+        label={i18n._('menu.waypoints')}
         class="w-[29px] h-[29px] p-0 flex justify-center bg-background dark:bg-background hover:bg-background dark:hover:bg-background border-0 shadow-md"
         onclick={() => {
             $showWaypoints = !$showWaypoints;

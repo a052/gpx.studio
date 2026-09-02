@@ -1,0 +1,27 @@
+---
+title: Waypoints
+---
+
+<script>
+    import { MapPin } from '@lucide/svelte';
+    import Waypoint from '$lib/components/toolbar/tools/waypoint/Waypoint.svelte';
+</script>
+
+# <MapPin size="24" class="inline-block" style="margin-bottom: 5px" /> { title }
+
+[Waypoints](../gpx) can be added to GPX files to mark locations of interest on the map and display them on your GPS device.
+
+### Creating a waypoint
+
+To create a waypoint, fill in the form shown below.
+You can choose the location of the waypoint either by clicking on the map or by entering the coordinates manually.
+Validate the form when you are done.
+
+<div class="flex flex-row justify-center">
+    <Waypoint class="text-foreground p-3 border rounded-md shadow-lg" />
+</div>
+
+### Editing a waypoint
+
+The form above can also be used to edit an existing waypoint after selecting it on the map.
+If you only need to move the waypoint, you can drag it to the desired location.

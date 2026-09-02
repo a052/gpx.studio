@@ -193,7 +193,7 @@
     );
 
     // Deliberately looser than `canUpdate`: the form below needs a single trace to work on, but
-    // clearing works on anything selected, points of interest included, across as many items as the
+    // clearing works on anything selected, waypoints included, across as many items as the
     // selection holds. It stays enabled even when there is no time data because there is no cheap
     // presence test for one — the statistics cover track points only, not the file-level timestamp
     // nor the waypoints — so the "nothing to clear" case is reported from the return value instead.

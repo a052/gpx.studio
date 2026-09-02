@@ -98,7 +98,7 @@
         },
         "distance_markers": "Entfernungsmarkierungen",
         "direction_markers": "Richtungspfeile",
-        "points_of_interest": "Wegpunkte",
+        "waypoints": "Wegpunkte",
         "coordinate_readout": "Cursor-Koordinaten und Höhe",
         "zoom_in_for_elevation": "Für Höhe heranzoomen",
         "help": "Hilfe",
@@ -323,12 +323,12 @@
             "longitude": "Längengrad",
             "latitude": "Breitengrad",
             "create": "Wegpunkt erstellen",
-            "add": "POI hinzufügen",
+            "add": "Wegpunkt zur Datei hinzufügen",
             "help": "Füllen Sie das Formular aus, um einen neuen Wegpunkt zu erstellen, oder klicken Sie auf einen bestehenden zum Bearbeiten. Klicken Sie auf die Karte, um die Koordinaten zu füllen, oder ziehen Sie Wegpunkte, um sie zu verschieben.",
             "help_no_selection": "Wählen Sie eine Datei aus, um Wegpunkte zu erstellen oder zu bearbeiten."
         },
         "reduce": {
-            "tooltip": "Die Anzahl Wegpunkte verringern",
+            "tooltip": "Die Anzahl der GPS-Punkte verringern",
             "tolerance": "Toleranz",
             "number_of_points": "Anzahl der GPS-Punkte",
             "button": "Minimieren",
@@ -336,14 +336,14 @@
             "help_no_selection": "Wählen Sie eine Spur aus, um die Anzahl der GPS-Punkte zu reduzieren."
         },
         "clean": {
-            "tooltip": "GPS-Punkte und -Punkte mit rechteckiger Auswahl bereinigen",
+            "tooltip": "GPS-Punkte und Wegpunkte mit rechteckiger Auswahl bereinigen",
             "delete_trackpoints": "GPS-Punkte löschen",
-            "delete_waypoints": "POIs löschen",
+            "delete_waypoints": "Wegpunkte löschen",
             "delete_inside": "Innerhalb der Auswahl löschen",
             "delete_outside": "Außerhalb der Auswahl löschen",
             "button": "Löschen",
-            "help": "Wählen Sie einen Rechteck Bereich auf der Karte, um GPS-Punkte und -Punkte zu entfernen.",
-            "help_no_selection": "Wählen Sie eine Spur aus, um GPS-Punkte und -Punkte zu bereinigen."
+            "help": "Wählen Sie einen rechteckigen Bereich auf der Karte, um GPS-Punkte und Wegpunkte zu entfernen.",
+            "help_no_selection": "Wählen Sie eine Spur aus, um GPS-Punkte und Wegpunkte zu bereinigen."
         }
     },
     "layers": {
@@ -528,8 +528,8 @@
         "tracks": "Strecken",
         "segment": "Abschnitt",
         "segments": "Abschnitte",
-        "waypoint": "Interessanter Ort / Sehenswürdigkeit",
-        "waypoints": "Interessanter Ort / Sehenswürdigkeit",
+        "waypoint": "Wegpunkt",
+        "waypoints": "Wegpunkte",
         "symbol": {
             "alert": "Hinweis",
             "anchor": "Anker",

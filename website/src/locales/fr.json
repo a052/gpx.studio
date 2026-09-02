@@ -98,7 +98,7 @@
         },
         "distance_markers": "Marqueurs de distance",
         "direction_markers": "Flèches de direction",
-        "points_of_interest": "Points de passage",
+        "waypoints": "Points de passage",
         "coordinate_readout": "Coordonnées du curseur et altitude",
         "zoom_in_for_elevation": "Zoomez pour afficher l'altitude",
         "help": "Aide",
@@ -323,7 +323,7 @@
             "longitude": "Longitude",
             "latitude": "Latitude",
             "create": "Créer le point de passage",
-            "add": "Ajouter le point d'intérêt au fichier",
+            "add": "Ajouter le point de passage au fichier",
             "help": "Remplissez le formulaire pour créer un nouveau point de passage, ou cliquez sur un point existant pour le modifier. Cliquez sur la carte pour remplir les coordonnées, ou faites glisser les points de passage pour les déplacer.",
             "help_no_selection": "Sélectionnez un fichier pour créer ou éditer des points de passage."
         },
@@ -336,14 +336,14 @@
             "help_no_selection": "Sélectionnez une trace pour réduire le nombre de ses points GPS."
         },
         "clean": {
-            "tooltip": "Nettoyer les points GPS et les points d'intérêt avec une sélection rectangulaire",
+            "tooltip": "Nettoyer les points GPS et les points de passage avec une sélection rectangulaire",
             "delete_trackpoints": "Supprimer les points GPS",
-            "delete_waypoints": "Supprimer les points d'intérêt",
+            "delete_waypoints": "Supprimer les points de passage",
             "delete_inside": "Supprimer à l'intérieur de la sélection",
             "delete_outside": "Supprimer en dehors de la sélection",
             "button": "Supprimer",
-            "help": "Sélectionnez une zone rectangulaire sur la carte pour supprimer les points GPS et les points d'intérêt.",
-            "help_no_selection": "Sélectionnez une trace pour supprimer les points GPS et les points d'intérêt."
+            "help": "Sélectionnez une zone rectangulaire sur la carte pour supprimer les points GPS et les points de passage.",
+            "help_no_selection": "Sélectionnez une trace pour supprimer les points GPS et les points de passage."
         }
     },
     "layers": {
@@ -528,8 +528,8 @@
         "tracks": "Pistes",
         "segment": "Segment",
         "segments": "Segments",
-        "waypoint": "Point d'intérêt",
-        "waypoints": "Points d'intérêt",
+        "waypoint": "Point de passage",
+        "waypoints": "Points de passage",
         "symbol": {
             "alert": "Avertissement",
             "anchor": "Ancre",

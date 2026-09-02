@@ -98,7 +98,7 @@
         },
         "distance_markers": "Indicadores de distancia",
         "direction_markers": "Flechas de dirección",
-        "points_of_interest": "Puntos de ruta",
+        "waypoints": "Puntos de ruta",
         "coordinate_readout": "Coordenadas del cursor y altura",
         "zoom_in_for_elevation": "Acerque para ver la altura",
         "help": "Ayuda",
@@ -323,7 +323,7 @@
             "longitude": "Longitud",
             "latitude": "Latitud",
             "create": "Crear punto de ruta",
-            "add": "Añadir punto de interés al archivo",
+            "add": "Añadir punto de ruta al archivo",
             "help": "Rellene el formulario para crear un nuevo punto de ruta o haga clic en uno existente para editarlo. Haga clic en el mapa para rellenar las coordenadas o arrastre los puntos de ruta para moverlos.",
             "help_no_selection": "Seleccione un archivo para crear o editar puntos de ruta."
         },
@@ -336,14 +336,14 @@
             "help_no_selection": "Seleccione una traza para reducir su cantidad de puntos GPS."
         },
         "clean": {
-            "tooltip": "Limpiar puntos GPS y puntos de interés con una selección rectangular",
+            "tooltip": "Limpiar puntos GPS y puntos de ruta con una selección rectangular",
             "delete_trackpoints": "Eliminar puntos GPS",
-            "delete_waypoints": "Eliminar puntos de interés",
+            "delete_waypoints": "Eliminar puntos de ruta",
             "delete_inside": "Eliminar en el interior de la selección",
             "delete_outside": "Eliminar en el exterior de la selección",
             "button": "Eliminar track",
-            "help": "Seleccione un área rectangular en el mapa para eliminar puntos GPS y puntos de interés.",
-            "help_no_selection": "Seleccione una traza para limpiar puntos GPS y puntos de interés."
+            "help": "Seleccione un área rectangular en el mapa para eliminar puntos GPS y puntos de ruta.",
+            "help_no_selection": "Seleccione una traza para limpiar puntos GPS y puntos de ruta."
         }
     },
     "layers": {
@@ -528,8 +528,8 @@
         "tracks": "Tracks",
         "segment": "Segmento",
         "segments": "Segmentos",
-        "waypoint": "Punto de interés",
-        "waypoints": "Puntos de interés",
+        "waypoint": "Punto de ruta",
+        "waypoints": "Puntos de ruta",
         "symbol": {
             "alert": "Alerta",
             "anchor": "Anclaje",

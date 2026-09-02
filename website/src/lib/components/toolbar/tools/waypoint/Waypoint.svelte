@@ -275,7 +275,7 @@
             <CircleX size="16" />
         </Button>
     </div>
-    <Help link={getURLForLanguage(i18n.lang, '/help/toolbar/poi')}>
+    <Help link={getURLForLanguage(i18n.lang, '/help/toolbar/waypoint')}>
         {#if $selectedWaypoint || canCreate}
             {i18n._('toolbar.waypoint.help')}
         {:else}
