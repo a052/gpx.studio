@@ -240,7 +240,9 @@ function getLayerTreeValidator(allowed: LayerTreeType) {
 type DistanceUnits = 'metric' | 'imperial' | 'nautical';
 type VelocityUnits = 'speed' | 'pace';
 type TemperatureUnits = 'celsius' | 'fahrenheit';
-type AdditionalDataset = 'speed' | 'hr' | 'cad' | 'atemp' | 'power';
+// Exported so the embedding options, which build this list from their own boolean flags, are checked
+// against the same ids the elevation profile looks for.
+export type AdditionalDataset = 'speed' | 'hr' | 'cad' | 'atemp' | 'power';
 type ElevationFill = 'slope' | 'surface' | 'highway' | undefined;
 type ElevationProfileXAxis = 'distance' | 'time';
 type RoutingProfile =

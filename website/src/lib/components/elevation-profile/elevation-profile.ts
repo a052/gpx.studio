@@ -1,3 +1,4 @@
+import { browser } from '$app/environment';
 import { i18n } from '$lib/i18n.svelte';
 import { settings } from '$lib/logic/settings';
 import {
@@ -43,6 +44,23 @@ const { distanceUnits, velocityUnits, temperatureUnits } = settings;
 
 Chart.defaults.font.family =
     'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"'; // Tailwind CSS font
+
+// Kicked off at module load rather than in the constructor: this module is statically imported by
+// ElevationProfile.svelte, which the app, landing and embed pages all pull in eagerly, so the chunk
+// (the plugin plus its hammerjs dependency) is already resolved by the time the user opens the
+// panel. Keeps it out of the initial parse cost without making the first open wait on a round-trip.
+// Skipped while prerendering: hammerjs reads `window` at import time, and no chart is ever built on
+// the server anyway.
+const zoomPluginReady = browser
+    ? import('chartjs-plugin-zoom')
+          .then((module) => {
+              Chart.register(module.default);
+          })
+          .catch((error) => {
+              // The chart still renders without it; only panning and wheel zoom are lost.
+              console.error('Failed to load the elevation profile zoom plugin:', error);
+          })
+    : Promise.resolve();
 
 interface ElevationProfilePoint {
     x: number;
@@ -109,6 +127,12 @@ export class ElevationProfile {
     // updateData() from the xAxis setting AND the presence of time data; read by the x tick
     // formatter and updateOverlay so both stay consistent with the last drawn data.
     private _useTime = false;
+    private _destroyed = false;
+    // Set only while the store subscriptions are being registered. Svelte invokes a new subscriber
+    // synchronously with the current value, so those initial callbacks would each rebuild the chart
+    // before the browser can paint; the constructor does one explicit build instead.
+    private _suspended = false;
+    private _unsubscribes: (() => void)[] = [];
 
     private _gpxStatistics: Readable<GPXStatisticsGroup>;
     private _slicedGPXStatistics: Writable<[GPXGlobalStatistics, number, number] | undefined>;
@@ -136,8 +160,11 @@ export class ElevationProfile {
         this._canvas = canvas;
         this._overlay = overlay;
 
-        import('chartjs-plugin-zoom').then((module) => {
-            Chart.register(module.default);
+        zoomPluginReady.then(() => {
+            if (this._destroyed) {
+                // Panel was closed again before the plugin resolved; the canvases are detached.
+                return;
+            }
             this.initialize();
 
             // These callbacks run inside the shared stores' notification loops. Wrapping each in a guard
@@ -151,29 +178,41 @@ export class ElevationProfile {
                 }
             };
 
-            this._gpxStatistics.subscribe(() => {
-                guard(() => this.updateData());
-            });
-            this._slicedGPXStatistics.subscribe(() => {
-                guard(() => this.updateOverlay());
-            });
-            distanceUnits.subscribe(() => {
-                guard(() => this.updateData());
-            });
-            velocityUnits.subscribe(() => {
-                guard(() => this.updateData());
-            });
-            temperatureUnits.subscribe(() => {
-                guard(() => this.updateData());
-            });
-            this._additionalDatasets.subscribe(() => {
-                guard(() => this.updateDataVisibility());
-            });
-            this._elevationFill.subscribe(() => {
-                guard(() => this.updateFill());
-            });
-            this._xAxis.subscribe(() => {
-                guard(() => this.updateData());
+            this._suspended = true;
+            this._unsubscribes.push(
+                this._gpxStatistics.subscribe(() => {
+                    guard(() => this.updateData());
+                }),
+                this._slicedGPXStatistics.subscribe(() => {
+                    guard(() => this.updateOverlay());
+                }),
+                distanceUnits.subscribe(() => {
+                    guard(() => this.updateData());
+                }),
+                velocityUnits.subscribe(() => {
+                    guard(() => this.updateData());
+                }),
+                temperatureUnits.subscribe(() => {
+                    guard(() => this.updateData());
+                }),
+                this._additionalDatasets.subscribe(() => {
+                    guard(() => this.updateData());
+                }),
+                this._elevationFill.subscribe(() => {
+                    guard(() => this.updateFill());
+                }),
+                this._xAxis.subscribe(() => {
+                    guard(() => this.updateData());
+                })
+            );
+            this._suspended = false;
+
+            // A single rebuild covers every suppressed callback: updateData() reads the unit, dataset
+            // and axis stores through get(), and applies visibility and fill itself. updateOverlay()
+            // runs after it because it depends on _useTime and on the x scale already being laid out.
+            guard(() => {
+                this.updateData();
+                this.updateOverlay();
             });
         });
     }
@@ -523,7 +562,7 @@ export class ElevationProfile {
     }
 
     updateData() {
-        if (!this._chart) {
+        if (!this._chart || this._suspended) {
             return;
         }
         const data = get(this._gpxStatistics);
@@ -532,6 +571,10 @@ export class ElevationProfile {
             velocity: get(velocityUnits),
             temperature: get(temperatureUnits),
         };
+        // Only the curves the user has switched on are built: on a long recording carrying speed,
+        // heart rate, cadence, temperature and power, building all of them would allocate five extra
+        // point objects per track point that are never drawn.
+        const enabled = get(this._additionalDatasets);
 
         // Effective x-axis mode: only plot elapsed time when the setting asks for it AND the file
         // actually has timestamps; otherwise fall back to distance so untimed tracks still render.
@@ -574,35 +617,35 @@ export class ElevationProfile {
                 coordinates: trkpt.getCoordinates(),
                 index: index,
             });
-            if (data.global.time.total > 0) {
+            if (enabled.includes('speed') && data.global.time.total > 0) {
                 datasets[1].push({
                     x: x,
                     y: getConvertedVelocity(speed, units.velocity, units.distance),
                     index: index,
                 });
             }
-            if (data.global.hr.count > 0) {
+            if (enabled.includes('hr') && data.global.hr.count > 0) {
                 datasets[2].push({
                     x: x,
                     y: trkpt.getHeartRate(),
                     index: index,
                 });
             }
-            if (data.global.cad.count > 0) {
+            if (enabled.includes('cad') && data.global.cad.count > 0) {
                 datasets[3].push({
                     x: x,
                     y: trkpt.getCadence(),
                     index: index,
                 });
             }
-            if (data.global.atemp.count > 0) {
+            if (enabled.includes('atemp') && data.global.atemp.count > 0) {
                 datasets[4].push({
                     x: x,
                     y: getConvertedTemperature(trkpt.getTemperature(), units.temperature),
                     index: index,
                 });
             }
-            if (data.global.power.count > 0) {
+            if (enabled.includes('power') && data.global.power.count > 0) {
                 datasets[5].push({
                     x: x,
                     y: trkpt.getPower(),
@@ -670,14 +713,6 @@ export class ElevationProfile {
         this._chart.update();
     }
 
-    updateDataVisibility() {
-        if (!this._chart) {
-            return;
-        }
-        this.setVisibility();
-        this._chart.update();
-    }
-
     setVisibility() {
         if (!this._chart) {
             return;
@@ -686,8 +721,9 @@ export class ElevationProfile {
         const additionalDatasets = get(this._additionalDatasets);
 
         if (this._chart.data.datasets.length == 6) {
-            // Also hide datasets with no data (curve not present in this file), so they don't
-            // render an empty curve and never become candidates for the active axis.
+            // Also hide empty datasets — the curve is either absent from this file or was switched
+            // off when updateData() ran — so they don't render an empty curve and never become
+            // candidates for the active axis.
             for (let i = 1; i < 6; i++) {
                 const dataset = this._chart.data.datasets[i];
                 dataset.hidden =
@@ -718,7 +754,7 @@ export class ElevationProfile {
     }
 
     updateFill() {
-        if (!this._chart) {
+        if (!this._chart || this._suspended) {
             return;
         }
         this.setFill();
@@ -797,7 +833,7 @@ export class ElevationProfile {
     }
 
     updateOverlay() {
-        if (!this._chart) {
+        if (!this._chart || this._suspended) {
             return;
         }
 
@@ -900,6 +936,12 @@ export class ElevationProfile {
     };
 
     destroy() {
+        // The panel is {#if}-gated, so a new instance is built on every open: without releasing the
+        // store subscriptions here, each open/close cycle would leak eight subscribers along with the
+        // canvases and statistics their closures capture.
+        this._destroyed = true;
+        this._unsubscribes.forEach((unsubscribe) => unsubscribe());
+        this._unsubscribes = [];
         if (this._chart) {
             this._chart.destroy();
             this._chart = null;

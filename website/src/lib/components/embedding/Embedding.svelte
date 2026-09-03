@@ -14,7 +14,7 @@
         type EmbeddingOptions,
     } from './embedding';
     import { setMode } from 'mode-watcher';
-    import { settings } from '$lib/logic/settings';
+    import { settings, type AdditionalDataset } from '$lib/logic/settings';
     import { fileStateCollection } from '$lib/logic/file-state';
     import { gpxStatistics, hoveredPoint, slicedGPXStatistics } from '$lib/logic/statistics';
     import { loadFile } from '$lib/logic/file-actions';
@@ -64,14 +64,18 @@
             setMode(options.theme);
         }
 
+        // The `temp` option is named after the URL flag, but the curve id is `atemp` to match the GPX
+        // extension — `satisfies` keeps this list checked against the ids the profile looks for.
         additionalDatasets.set(
-            [
-                options.elevation.speed ? 'speed' : null,
-                options.elevation.hr ? 'hr' : null,
-                options.elevation.cad ? 'cad' : null,
-                options.elevation.temp ? 'temp' : null,
-                options.elevation.power ? 'power' : null,
-            ].filter((dataset) => dataset !== null)
+            (
+                [
+                    options.elevation.speed ? 'speed' : null,
+                    options.elevation.hr ? 'hr' : null,
+                    options.elevation.cad ? 'cad' : null,
+                    options.elevation.temp ? 'atemp' : null,
+                    options.elevation.power ? 'power' : null,
+                ] satisfies (AdditionalDataset | null)[]
+            ).filter((dataset) => dataset !== null)
         );
         elevationFill.set(options.elevation.fill == 'none' ? undefined : options.elevation.fill);
 
