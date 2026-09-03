@@ -41,7 +41,17 @@ const fitBoundsOptions: maplibregl.MapOptions['fitBoundsOptions'] = {
 // Same cap as the MapLibre 3D terrain example. Beyond it the camera looks past the horizon, which
 // multiplies the tiles to load and makes rotate-around-centre degenerate (the centre ray misses the
 // ground), which is what made right-drag jump.
-const MAX_PITCH = 85;
+export const MAX_PITCH = 85;
+
+// The camera as it is persisted between visits, see lib/logic/map-camera.ts. Plain numbers rather
+// than a LngLat so the value round-trips through the database unchanged.
+export type MapCamera = {
+    lng: number;
+    lat: number;
+    zoom: number;
+    bearing: number;
+    pitch: number;
+};
 
 // The fields we read from a Nominatim `/search?format=json` hit. Nominatim returns the
 // coordinates as strings, hence the parseFloat when building the geocoder features below.
@@ -64,7 +74,13 @@ export class MapLibreGLMap {
         return this._mapStore.subscribe(run, invalidate);
     }
 
-    init(language: string, hash: boolean, geocoder: boolean, geolocate: boolean) {
+    init(
+        language: string,
+        hash: boolean,
+        geocoder: boolean,
+        geolocate: boolean,
+        camera?: MapCamera
+    ) {
         this._styleManager = new StyleManager(this._mapStore);
         const map = new maplibregl.Map({
             container: 'map',
@@ -81,8 +97,16 @@ export class MapLibreGLMap {
                 sources: {},
                 layers: [],
             },
-            center: [-98, 38],
-            zoom: 3.85,
+            // `camera` is the viewport of the previous visit, when there is one to restore. MapLibre
+            // applies these options only if the URL hash did not already carry a camera, which is
+            // exactly the precedence we want — a shared link wins over the stored viewport. Restoring
+            // through the constructor rather than with a jumpTo after `load` also matters: the pitch
+            // is then already in place when the `load` handler below derives `enable3D` from it, so
+            // applyThreeD neither clamps it to 0 nor eases it to 70.
+            center: camera ? [camera.lng, camera.lat] : [-98, 38],
+            zoom: camera?.zoom ?? 3.85,
+            bearing: camera?.bearing ?? 0,
+            pitch: camera?.pitch ?? 0,
             hash: hash,
             boxZoom: false,
             maxPitch: MAX_PITCH,
@@ -177,8 +201,9 @@ export class MapLibreGLMap {
             window._map = map; // entry point for extensions
             this.resize();
             scaleControl.setUnit(get(distanceUnits));
-            // A pitched camera restored from the URL hash (shared/embed links) implies 3D,
-            // even if the stored setting says otherwise. Persist it so the menu checkbox agrees.
+            // A pitched camera restored from the URL hash (shared/embed links) or from the camera
+            // saved on the previous visit implies 3D, even if the stored setting says otherwise.
+            // Persist it so the menu checkbox agrees.
             const enable3D = map.getPitch() !== 0 || get(threeD);
             if (enable3D !== get(threeD)) {
                 threeD.set(enable3D);

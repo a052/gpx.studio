@@ -122,6 +122,7 @@
                 </div>
             {/if}
             <Map
+                restoreCamera
                 class="h-full bottom-bar {$treeFileView ? '' : 'horizontal'} {$cleanMode
                     ? 'clean'
                     : ''}"

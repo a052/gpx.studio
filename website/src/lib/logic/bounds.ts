@@ -5,6 +5,7 @@ import { ListFileItem, ListWaypointItem } from '$lib/components/file-list/file-l
 import { fileStateCollection, GPXFileStateCollectionObserver } from '$lib/logic/file-state';
 import { gpxStatistics } from '$lib/logic/statistics';
 import { map } from '$lib/components/map/map';
+import { mapCamera } from '$lib/logic/map-camera';
 import type { GPXFileWithStatistics } from './statistics-tree';
 import type { Coordinates } from 'gpx';
 import { page } from '$app/state';
@@ -18,9 +19,18 @@ export class BoundsManager {
     constructor() {
         this._fileStateCollectionObserver = new GPXFileStateCollectionObserver(
             (newFiles) => {
-                if (page.url.hash.length == 0) {
-                    this.fitBoundsOnLoad(Array.from(newFiles.keys()));
-                }
+                const ids = Array.from(newFiles.keys());
+                // Camera precedence when /app opens: a URL hash wins (shared link), then the camera
+                // saved when the app was last left, and only if neither is there do we frame the
+                // files the database restored. The stored camera is read asynchronously, so
+                // `restored` says nothing until that read lands — and the file liveQuery is a
+                // separate database transaction that can emit first. Deferring the fit is safe: the
+                // files stay in the collection, so fitBoundsOnLoad still finds them.
+                mapCamera.ready().then(() => {
+                    if (page.url.hash.length == 0 && !mapCamera.restored) {
+                        this.fitBoundsOnLoad(ids);
+                    }
+                });
             },
             () => {},
             () => {}

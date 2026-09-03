@@ -4,23 +4,28 @@
     import { i18n } from '$lib/i18n.svelte';
     import { page } from '$app/state';
     import { map } from '$lib/components/map/map';
+    import { mapCamera } from '$lib/logic/map-camera';
 
     let {
         geolocate = true,
         geocoder = true,
         hash = true,
+        restoreCamera = false,
         class: className = '',
     }: {
         geolocate?: boolean;
         geocoder?: boolean;
         hash?: boolean;
+        restoreCamera?: boolean;
         class?: string;
     } = $props();
 
     let webgl2Supported = $state(true);
     let embeddedApp = $state(false);
+    // Plain let, not $state: nothing renders it, it only guards the async gap in onMount below.
+    let destroyed = false;
 
-    onMount(() => {
+    onMount(async () => {
         let gl = document.createElement('canvas').getContext('webgl2');
         if (!gl) {
             webgl2Supported = false;
@@ -40,10 +45,25 @@
             language = 'en';
         }
 
-        map.init(language, hash, geocoder, geolocate);
+        // Opt-in, because embeds share this component and the same origin — and therefore the same
+        // database — as the app itself, and must not read or write the user's stored viewport.
+        // Reading it has to finish before the map is constructed: passing it to the constructor is
+        // what lets a URL hash keep precedence over it and keeps applyThreeD from undoing a restored
+        // pitch. If the component went away while we were waiting, onDestroy has already run and the
+        // container is gone, so there is nothing left to initialise.
+        const camera = restoreCamera ? await mapCamera.enable() : undefined;
+        if (destroyed) {
+            return;
+        }
+
+        map.init(language, hash, geocoder, geolocate, camera);
     });
 
     onDestroy(() => {
+        destroyed = true;
+        if (restoreCamera) {
+            mapCamera.disable();
+        }
         map.destroy();
     });
 </script>
