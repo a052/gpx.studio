@@ -342,7 +342,7 @@
             "delete_inside": "Innerhalb der Auswahl löschen",
             "delete_outside": "Außerhalb der Auswahl löschen",
             "button": "Löschen",
-            "help": "Wählen Sie einen rechteckigen Bereich auf der Karte, um GPS-Punkte und Wegpunkte zu entfernen.",
+            "help": "Ziehen Sie mit der rechten Maustaste, um einen rechteckigen Bereich auf der Karte auszuwählen und die darin enthaltenen GPS-Punkte und Wegpunkte zu entfernen.",
             "help_no_selection": "Wählen Sie eine Spur aus, um GPS-Punkte und Wegpunkte zu bereinigen."
         }
     },

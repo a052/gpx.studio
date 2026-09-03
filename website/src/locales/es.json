@@ -342,7 +342,7 @@
             "delete_inside": "Eliminar en el interior de la selección",
             "delete_outside": "Eliminar en el exterior de la selección",
             "button": "Eliminar track",
-            "help": "Seleccione un área rectangular en el mapa para eliminar puntos GPS y puntos de ruta.",
+            "help": "Arrastre con el botón derecho del ratón para seleccionar un área rectangular en el mapa y eliminar los puntos GPS y puntos de ruta que contiene.",
             "help_no_selection": "Seleccione una traza para limpiar puntos GPS y puntos de ruta."
         }
     },

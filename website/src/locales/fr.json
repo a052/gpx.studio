@@ -342,7 +342,7 @@
             "delete_inside": "Supprimer à l'intérieur de la sélection",
             "delete_outside": "Supprimer en dehors de la sélection",
             "button": "Supprimer",
-            "help": "Sélectionnez une zone rectangulaire sur la carte pour supprimer les points GPS et les points de passage.",
+            "help": "Faites glisser le curseur avec le bouton droit de la souris pour sélectionner une zone rectangulaire sur la carte et supprimer les points GPS et les points de passage qu'elle contient.",
             "help_no_selection": "Sélectionnez une trace pour supprimer les points GPS et les points de passage."
         }
     },

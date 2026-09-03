@@ -83,22 +83,70 @@
         }
     });
 
-    let mousedown = false;
-    // Registered on both the mouse and touch event pairs below, so the parameter is the
-    // structural intersection of MapMouseEvent and MapTouchEvent rather than either one.
-    function onMouseDown(e: { lngLat: maplibregl.LngLat }) {
-        mousedown = true;
-        rectangleCoordinates = [e.lngLat, e.lngLat];
+    let dragging = false;
+    let moved = false;
+
+    function startRectangle(lngLat: maplibregl.LngLat) {
+        dragging = true;
+        moved = false;
+        rectangleCoordinates = [lngLat, lngLat];
     }
 
-    function onMouseMove(e: { lngLat: maplibregl.LngLat }) {
-        if (mousedown) {
-            rectangleCoordinates[1] = e.lngLat;
+    function updateRectangle(lngLat: maplibregl.LngLat) {
+        moved = true;
+        rectangleCoordinates[1] = lngLat;
+    }
+
+    function endRectangle() {
+        if (dragging && !moved) {
+            // A click without a drag leaves a zero-area rectangle, which enables the delete button
+            // and which "Delete outside selection" reads as "delete every point".
+            rectangleCoordinates = [];
         }
+        dragging = false;
     }
 
-    function onMouseUp() {
-        mousedown = false;
+    // The rectangle is drawn with the right button (like the elevation profile selection) so that
+    // the left button keeps panning the map, which is why nothing here disables dragPan.
+    function onMouseDown(e: maplibregl.MapMouseEvent) {
+        if (e.originalEvent.button !== 2) {
+            return;
+        }
+        // Marks the map event as handled, which makes MapLibre reset the remaining handlers for this
+        // dispatch: rotate and pitch own the right button when 3D is on, and the contextmenu that
+        // would otherwise open the coordinates popup on release is swallowed as well.
+        e.preventDefault();
+        startRectangle(e.lngLat);
+    }
+
+    function onMouseMove(e: maplibregl.MapMouseEvent) {
+        if (!dragging) {
+            return;
+        }
+        if ((e.originalEvent.buttons & 2) === 0) {
+            // The right button was released outside the canvas, for which the map fires no mouseup:
+            // end the drag instead of letting the rectangle follow the cursor back in.
+            endRectangle();
+            return;
+        }
+        updateRectangle(e.lngLat);
+    }
+
+    function onTouchStart(e: maplibregl.MapTouchEvent) {
+        if (e.points.length !== 1) {
+            // Hand a second finger to MapLibre so two-finger panning and pinch-zooming still work.
+            endRectangle();
+            return;
+        }
+        e.preventDefault(); // blocks the one-finger pan for this gesture only, as above
+        startRectangle(e.lngLat);
+    }
+
+    function onTouchMove(e: maplibregl.MapTouchEvent) {
+        if (!dragging || e.points.length !== 1) {
+            return;
+        }
+        updateRectangle(e.lngLat);
     }
 
     onMount(() => {
@@ -106,11 +154,10 @@
             mapCursor.notify(MapCursorState.TOOL_WITH_CROSSHAIR, true);
             $map.on('mousedown', onMouseDown);
             $map.on('mousemove', onMouseMove);
-            $map.on('mouseup', onMouseUp);
-            $map.on('touchstart', onMouseDown);
-            $map.on('touchmove', onMouseMove);
-            $map.on('touchend', onMouseUp);
-            $map.dragPan.disable();
+            $map.on('mouseup', endRectangle);
+            $map.on('touchstart', onTouchStart);
+            $map.on('touchmove', onTouchMove);
+            $map.on('touchend', endRectangle);
         }
     });
 
@@ -119,11 +166,10 @@
             mapCursor.notify(MapCursorState.TOOL_WITH_CROSSHAIR, false);
             $map.off('mousedown', onMouseDown);
             $map.off('mousemove', onMouseMove);
-            $map.off('mouseup', onMouseUp);
-            $map.off('touchstart', onMouseDown);
-            $map.off('touchmove', onMouseMove);
-            $map.off('touchend', onMouseUp);
-            $map.dragPan.enable();
+            $map.off('mouseup', endRectangle);
+            $map.off('touchstart', onTouchStart);
+            $map.off('touchmove', onTouchMove);
+            $map.off('touchend', endRectangle);
 
             if ($map.getLayer('rectangle')) {
                 $map.removeLayer('rectangle');

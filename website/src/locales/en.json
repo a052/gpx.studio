@@ -342,7 +342,7 @@
             "delete_inside": "Delete inside selection",
             "delete_outside": "Delete outside selection",
             "button": "Delete",
-            "help": "Select a rectangle area on the map to remove GPS points and waypoints.",
+            "help": "Drag with the right mouse button to select a rectangle area on the map, and remove the GPS points and waypoints it contains.",
             "help_no_selection": "Select a trace to clean GPS points and waypoints."
         }
     },
