@@ -9,6 +9,7 @@
     import type { OverpassPopupItem } from '$lib/components/map/layer-control/overpass-layer';
     import { fileActions } from '$lib/logic/file-actions';
     import { selection } from '$lib/logic/selection';
+    import { safeImageUrl, safeLinkUrl } from '$lib/logic/sanitize';
 
     let {
         poi,
@@ -34,6 +35,10 @@
         return '';
     });
 
+    // OpenStreetMap tags are editable by anyone and unconstrained in format, so every tag value
+    // used as a URL is scheme-checked before it reaches the DOM.
+    let imageUrl = $derived(safeImageUrl(tags.image ?? tags['image:0']));
+
     function addToFile() {
         const desc = Object.entries(tags)
             .map(([key, value]) => `${key}: ${value}`)
@@ -48,10 +53,13 @@
             cmt: desc,
             sym: poi.item.sym,
         };
-        if (tags.website) {
+        // Store the validated URL, not the raw tag: an unchecked value would be persisted in the
+        // user's file, written to their exported GPX, and rendered again by the waypoint popup.
+        const website = safeLinkUrl(tags.website);
+        if (website) {
             wpt.link = {
                 attributes: {
-                    href: tags.website,
+                    href: website,
                 },
             };
         }
@@ -83,10 +91,10 @@
     </Card.Header>
     <Card.Content class="flex flex-col gap-1 p-0 text-sm whitespace-normal break-all">
         <ScrollArea class="flex flex-col max-h-[30dvh]">
-            {#if tags.image || tags['image:0']}
+            {#if imageUrl}
                 <div class="w-full rounded-md overflow-clip my-2 max-w-96 mx-auto">
                     <!-- svelte-ignore a11y_missing_attribute -->
-                    <img src={tags.image ?? tags['image:0']} />
+                    <img src={imageUrl} />
                 </div>
             {/if}
             <div class="grid grid-cols-[auto_auto] gap-x-3">
@@ -94,7 +102,19 @@
                     {#if key !== 'name' && !key.includes('image')}
                         <span class="font-mono">{key}</span>
                         {#if key === 'website' || key.startsWith('website:') || key.endsWith(':website') || key === 'contact:facebook' || key === 'contact:instagram' || key === 'contact:twitter'}
-                            <a href={value} target="_blank" class="text-link underline">{value}</a>
+                            {@const href = safeLinkUrl(value)}
+                            {#if href}
+                                <a
+                                    {href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="text-link underline"
+                                >
+                                    {value}
+                                </a>
+                            {:else}
+                                <span>{value}</span>
+                            {/if}
                         {:else if key === 'wikipedia' || key.startsWith('wikipedia:') || key.endsWith(':wikipedia')}
                             <a
                                 href="https://wikipedia.org/wiki/{value}"

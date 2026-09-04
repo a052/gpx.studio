@@ -37,6 +37,7 @@
     import { selection, copied, cut } from '$lib/logic/selection';
     import { fileActions, pasteSelection } from '$lib/logic/file-actions';
     import { allHidden } from '$lib/logic/hidden';
+    import { isHexColor } from '$lib/logic/sanitize';
     import { boundsManager } from '$lib/logic/bounds';
     import { gpxColors, gpxLayers } from '$lib/components/map/gpx-layer/gpx-layers';
     import { fileStateCollection } from '$lib/logic/file-state';
@@ -60,25 +61,23 @@
 
     let nodeColors: string[] = $derived.by(() => {
         let colors: string[] = [];
-        if (node) {
+        if (node instanceof GPXFile || node instanceof Track) {
             if (node instanceof GPXFile) {
-                let defaultColor = $gpxColors.get(item.getFileId());
-                let style = node.getStyle(defaultColor);
-                colors = style.color;
-            } else if (node instanceof Track) {
+                colors = node.getStyle().color;
+            } else {
                 let style = node.getStyle();
-                if (
-                    style &&
-                    style['gpx_style:color'] &&
-                    !colors.includes(style['gpx_style:color'])
-                ) {
+                if (style && style['gpx_style:color']) {
                     colors.push(style['gpx_style:color']);
                 }
-                if (colors.length === 0) {
-                    let defaultColor = $gpxColors.get(item.getFileId());
-                    if (defaultColor) {
-                        colors.push(defaultColor);
-                    }
+            }
+            // These colors come from the GPX file and are interpolated into a style attribute
+            // below, so anything that is not a plain hex color is dropped rather than given the
+            // chance to close the declaration and inject further CSS.
+            colors = colors.filter(isHexColor);
+            if (colors.length === 0) {
+                let defaultColor = $gpxColors.get(item.getFileId());
+                if (defaultColor) {
+                    colors.push(defaultColor);
                 }
             }
         }

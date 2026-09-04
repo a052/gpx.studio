@@ -9,6 +9,7 @@
     import { getSymbolKey, symbols } from '$lib/assets/symbols';
     import { i18n } from '$lib/i18n.svelte';
     import sanitizeHtml from 'sanitize-html';
+    import { safeLinkUrl } from '$lib/logic/sanitize';
     import type { Waypoint } from 'gpx';
     import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
     import { fileActions } from '$lib/logic/file-actions';
@@ -26,6 +27,9 @@
         waypoint.fileId ? $selection.hasAnyChildren(new ListFileItem(waypoint.fileId)) : false
     );
     let symbolKey = $derived(waypoint ? getSymbolKey(waypoint.item.sym) : undefined);
+    // The <link> of a waypoint comes straight from the GPX file, so its scheme has to be checked
+    // before it becomes a link target: undefined here means "render the title as plain text".
+    let linkHref = $derived(safeLinkUrl(waypoint.item.link?.attributes?.href));
 
     function sanitize(text: string | undefined): string {
         if (text === undefined) {
@@ -44,9 +48,9 @@
 <Card.Root class="border-none shadow-md text-base p-2 max-w-[50dvw] gap-0">
     <Card.Header class="p-0 gap-0">
         <Card.Title class="text-md">
-            {#if waypoint.item.link && waypoint.item.link.attributes && waypoint.item.link.attributes.href}
-                <a href={waypoint.item.link.attributes.href} target="_blank">
-                    {waypoint.item.name ?? waypoint.item.link.attributes.href}
+            {#if linkHref}
+                <a href={linkHref} target="_blank" rel="noopener noreferrer">
+                    {waypoint.item.name ?? linkHref}
                     <ExternalLink size="12" class="inline-block mb-1.5" />
                 </a>
             {:else}
