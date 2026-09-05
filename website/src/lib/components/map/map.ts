@@ -102,7 +102,7 @@ export class MapLibreGLMap {
             // exactly the precedence we want — a shared link wins over the stored viewport. Restoring
             // through the constructor rather than with a jumpTo after `load` also matters: the pitch
             // is then already in place when the `load` handler below derives `enable3D` from it, so
-            // applyThreeD neither clamps it to 0 nor eases it to 70.
+            // applyThreeD neither clamps it to 0 nor eases it to 30.
             center: camera ? [camera.lng, camera.lat] : [-98, 38],
             zoom: camera?.zoom ?? 3.85,
             bearing: camera?.bearing ?? 0,
@@ -220,6 +220,10 @@ export class MapLibreGLMap {
             );
         });
         map.on('style.load', this.callOnLoadBinded);
+        // Every camera animation over terrain leaves MapLibre's elevation freeze set, see
+        // releaseElevationFreeze. Covers the 3D toggle, both fitBounds call sites in
+        // lib/logic/bounds.ts and the geocoder's fitBoundsOptions above.
+        map.on('moveend', () => this.releaseElevationFreeze(map));
 
         this._unsubscribes.push(treeFileView.subscribe(() => this.resize()));
         this._unsubscribes.push(elevationProfile.subscribe(() => this.resize()));
@@ -278,7 +282,7 @@ export class MapLibreGLMap {
             map.touchZoomRotate.enableRotation();
             map.keyboard.enableRotation();
             if (map.getPitch() === 0) {
-                map.easeTo({ pitch: 70 });
+                map.easeTo({ pitch: 30 });
             }
         } else {
             map.dragRotate.disable();
@@ -297,6 +301,24 @@ export class MapLibreGLMap {
             } else {
                 map.setMaxPitch(0);
             }
+        }
+    }
+
+    // MapLibre freezes the camera's ground elevation for the duration of a camera animation
+    // (`_prepareElevation` sets the flag whenever terrain is enabled) but only clears it again for
+    // animations started with `freezeElevation: true`. Every other easeTo/flyTo/fitBounds therefore
+    // leaves it set for good, and `Map._render` then stops syncing `transform.elevation` to the
+    // terrain: the camera keeps the elevation it had when the animation started — 0 m while the DEM
+    // tile is still loading. At zoom ~18 the camera is only ~300 m above its centre, so over any
+    // real terrain it ends up below the surface and the map renders nothing; the next drag then
+    // hits the degenerate branch of `recalculateZoomAndCenter` and teleports the camera kilometres
+    // away at a much lower zoom. Clear the flag once movement is over so the next frame re-reads
+    // the elevation from the terrain. `_camera`/`elevationFreeze` are @internal but declared in
+    // maplibre-gl's .d.ts, and this is a no-op once upstream fixes the asymmetry.
+    private releaseElevationFreeze(map: maplibregl.Map) {
+        if (map._camera.elevationFreeze) {
+            map._camera.elevationFreeze = false;
+            map.triggerRepaint();
         }
     }
 
