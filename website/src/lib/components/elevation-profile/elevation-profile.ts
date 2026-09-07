@@ -16,12 +16,16 @@ import {
     getVelocityWithUnits,
 } from '$lib/units';
 import Chart, {
+    Tooltip,
+    type ActiveElement,
     type ChartEvent,
     type ChartOptions,
+    type ChartType,
     type Color,
     type Scriptable,
     type ScriptableLineSegmentContext,
     type TooltipItem,
+    type TooltipPositionerFunction,
 } from 'chart.js/auto';
 import { get, type Readable, type Writable } from 'svelte/store';
 import type { Coordinates, GPXGlobalStatistics, GPXStatisticsGroup } from 'gpx';
@@ -44,6 +48,41 @@ const { distanceUnits, velocityUnits, temperatureUnits } = settings;
 
 Chart.defaults.font.family =
     'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"'; // Tailwind CSS font
+
+// Choose which active curve the tooltip and the crosshair anchor to: the elevation curve
+// (dataset 0) when it has a point at the hovered x, otherwise the first enabled curve that
+// does (lowest dataset index). Keeping this in one place makes the popup and the vertical
+// line share the same x, so line, dot and popup stay aligned.
+function pickAnchor(items: readonly ActiveElement[]): ActiveElement | undefined {
+    const valued = items.filter((item) => item.element.hasValue());
+    const usable = valued.length > 0 ? valued : items;
+    if (usable.length === 0) {
+        return undefined;
+    }
+    return (
+        usable.find((item) => item.datasetIndex === 0) ??
+        usable.reduce((a, b) => (a.datasetIndex <= b.datasetIndex ? a : b))
+    );
+}
+
+// Register a tooltip positioner pinned to the elevation point instead of Chart.js' default
+// `average` positioner, which anchors the popup at the mean Y of every active curve and so
+// makes it jump vertically once Speed/HR/... are shown alongside elevation. `declare module`
+// targets 'chart.js' (where TooltipPositionerMap is declared) so `position: 'elevationPoint'`
+// type-checks.
+declare module 'chart.js' {
+    interface TooltipPositionerMap {
+        elevationPoint: TooltipPositionerFunction<ChartType>;
+    }
+}
+
+Tooltip.positioners.elevationPoint = function (items) {
+    const anchor = pickAnchor(items);
+    if (!anchor) {
+        return false;
+    }
+    return { x: anchor.element.x, y: anchor.element.y };
+};
 
 // Kicked off at module load rather than in the constructor: this module is statically imported by
 // ElevationProfile.svelte, which the app, landing and embed pages all pull in eagerly, so the chunk
@@ -269,6 +308,7 @@ export class ElevationProfile {
                 },
                 tooltip: {
                     enabled: () => !this._dragging && !this._panning,
+                    position: 'elevationPoint',
                     callbacks: {
                         title: () => {
                             return '';
@@ -437,6 +477,34 @@ export class ElevationProfile {
                         if (args.event.type === 'mouseout') {
                             this._hoveredPoint.set(null);
                         }
+                    },
+                },
+                {
+                    // Thin grey vertical line through the anchor point (see pickAnchor), spanning
+                    // the plot area — a crosshair that follows the cursor across every curve.
+                    // Drawn in afterDatasetsDraw so it sits above the filled area but below the
+                    // tooltip box; Chart.js clears and redraws each frame, so it tracks the hover
+                    // and vanishes on mouseout with no manual bookkeeping.
+                    id: 'verticalCrosshair',
+                    afterDatasetsDraw: (chart: Chart) => {
+                        if (this._dragging || this._panning) {
+                            return;
+                        }
+                        const anchor = pickAnchor(chart.getActiveElements());
+                        if (!anchor) {
+                            return;
+                        }
+                        const x = anchor.element.x;
+                        const { top, bottom } = chart.chartArea;
+                        const ctx = chart.ctx;
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.moveTo(x, top);
+                        ctx.lineTo(x, bottom);
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = 'rgba(128, 128, 128, 0.5)';
+                        ctx.stroke();
+                        ctx.restore();
                     },
                 },
             ],
