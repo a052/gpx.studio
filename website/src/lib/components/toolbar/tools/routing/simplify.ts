@@ -3,7 +3,7 @@ import { ramerDouglasPeucker, type GPXFile, type TrackSegment } from 'gpx';
 const earthRadius = 6371008.8;
 
 export const MIN_ANCHOR_ZOOM = 0;
-export const MAX_ANCHOR_ZOOM = 22;
+export const MAX_ANCHOR_ZOOM = 17;
 
 export function getZoomLevelForDistance(latitude: number, distance?: number): number {
     if (distance === undefined) {
@@ -46,6 +46,13 @@ function computeAnchorPoints(segment: TrackSegment) {
         const point = anchor.point;
         point._data.anchor = true;
         point._data.zoom = getZoomLevelForDistance(point.getLatitude(), anchor.distance);
+    });
+    // All other points become anchors too, visible only from the highest zoom level
+    points.forEach((point) => {
+        if (!point._data.anchor) {
+            point._data.anchor = true;
+            point._data.zoom = MAX_ANCHOR_ZOOM;
+        }
     });
     segment._data.anchors = true;
 }

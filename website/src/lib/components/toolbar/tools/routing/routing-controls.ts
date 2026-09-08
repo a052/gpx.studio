@@ -736,8 +736,13 @@ export class RoutingControls {
             );
         }
 
+        response.forEach((trkpt) => {
+            // Turn all routed points into anchors, visible from the highest zoom level
+            trkpt._data.anchor = true;
+            trkpt._data.zoom = MAX_ANCHOR_ZOOM;
+        });
         anchorTrackPoints.forEach((trkpt) => {
-            // Turn them into permanent anchors
+            // Turn them into permanent anchors, always visible
             trkpt._data.anchor = true;
             trkpt._data.zoom = 0;
         });
@@ -1067,7 +1072,22 @@ export class RoutingControls {
         }
 
         const zoom = map_.getZoom();
+        // With every trackpoint being an anchor, projecting each one is too costly on
+        // mousemove. Pre-filter geographically: an anchor farther than ~15 px cannot pass
+        // the 10 px test below (15 px keeps this a conservative superset).
+        const degPerPx = 360 / (256 * Math.pow(2, zoom));
+        const latThreshold = degPerPx * 15;
+        const lngThreshold = latThreshold / Math.max(0.1, Math.cos((e.lngLat.lat * Math.PI) / 180));
+        const [cursorLng, cursorLat] = [e.lngLat.lng, e.lngLat.lat];
+
         for (const anchor of this.anchors) {
+            const [anchorLng, anchorLat] = anchor.geometry.coordinates as [number, number];
+            if (
+                Math.abs(anchorLat - cursorLat) > latThreshold ||
+                Math.abs(anchorLng - cursorLng) > lngThreshold
+            ) {
+                continue;
+            }
             if (
                 zoom >= anchor.properties.minZoom &&
                 e.point.dist(map_.project(anchor.geometry.coordinates as [number, number])) < 10
