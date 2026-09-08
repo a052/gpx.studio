@@ -46,7 +46,6 @@
         ChartArea,
         Maximize,
         Fullscreen,
-        Waypoints,
         Mountain,
         MountainSnow,
         Server,
@@ -60,7 +59,6 @@
     import { defaultOverlays } from '$lib/assets/layers';
     import LayerControlSettings from '$lib/components/map/layer-control/LayerControlSettings.svelte';
     import RoutingSettings from '$lib/components/toolbar/tools/routing/RoutingSettings.svelte';
-    import CorsProxySettings from '$lib/components/CorsProxySettings.svelte';
     import ElevationSettings from '$lib/components/ElevationSettings.svelte';
     import ElevationSourceSettings from '$lib/components/ElevationSourceSettings.svelte';
     import OverpassSettings from '$lib/components/OverpassSettings.svelte';
@@ -123,7 +121,6 @@
     let layerSettingsOpen = $state(false);
     let routingSettingsOpen = $state(false);
     let overpassSettingsOpen = $state(false);
-    let corsProxySettingsOpen = $state(false);
     let elevationSettingsOpen = $state(false);
     let elevationSourceSettingsOpen = $state(false);
 
@@ -589,10 +586,6 @@
                         <Server size="16" />
                         {i18n._('menu.overpass.title')}
                     </Menubar.Item>
-                    <Menubar.Item onclick={() => (corsProxySettingsOpen = true)}>
-                        <Waypoints size="16" />
-                        {i18n._('menu.cors_proxy.title')}
-                    </Menubar.Item>
                 </Menubar.Content>
             </Menubar.Menu>
         </Menubar.Root>
@@ -630,7 +623,6 @@
 <LayerControlSettings bind:open={layerSettingsOpen} />
 <RoutingSettings bind:open={routingSettingsOpen} />
 <OverpassSettings bind:open={overpassSettingsOpen} />
-<CorsProxySettings bind:open={corsProxySettingsOpen} />
 <ElevationSettings bind:open={elevationSettingsOpen} />
 <ElevationSourceSettings bind:open={elevationSourceSettingsOpen} />
 

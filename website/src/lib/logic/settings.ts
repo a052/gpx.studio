@@ -343,7 +343,6 @@ export const settings = {
         getValueValidator<ElevationSource>(['mapterhorn', 'aws', 'custom'], 'mapterhorn')
     ),
     elevationSourceCustomUrl: new Setting<string>('elevationSourceCustomUrl', ''),
-    corsProxyUrl: new Setting<string>('corsProxyUrl', ''),
     currentBasemap: new Setting(
         'currentBasemap',
         defaultBasemap,

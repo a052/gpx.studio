@@ -77,12 +77,6 @@
         "google": "Google",
         "toggle_street_view": "街景",
         "layers": "地图图层...",
-        "cors_proxy": {
-            "title": "CORS 代理...",
-            "help": "当您自行托管 gpx.studio 时，某些请求可能因缺少 CORS 头而失败。设置一个 CORS 代理后，失败的请求将自动通过它重试。",
-            "url": "代理 URL",
-            "url_help": "目标 URL 会直接附加到此地址后。留空则禁用。示例：https://your-proxy/ 会将对 https://example.com/x 的请求转换为 https://your-proxy/https://example.com/x。"
-        },
         "overpass": {
             "title": "Overpass API",
             "help": "选择用于查询兴趣点的 Overpass 服务器。默认服务器无需配置。",

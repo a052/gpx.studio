@@ -77,12 +77,6 @@
         "google": "Google",
         "toggle_street_view": "Street View",
         "layers": "Kartenebenen...",
-        "cors_proxy": {
-            "title": "CORS-Proxy...",
-            "help": "Wenn du gpx.studio selbst hostest, können einige Anfragen aufgrund fehlender CORS-Header fehlschlagen. Lege einen CORS-Proxy fest, und fehlgeschlagene Anfragen werden automatisch darüber wiederholt.",
-            "url": "Proxy-URL",
-            "url_help": "Die Ziel-URL wird direkt an diese Adresse angehängt. Leer lassen zum Deaktivieren. Beispiel: https://your-proxy/ macht aus einer Anfrage für https://example.com/x die Anfrage https://your-proxy/https://example.com/x."
-        },
         "overpass": {
             "title": "Overpass-API",
             "help": "Wähle, welcher Overpass-Server für Points of Interest abgefragt wird. Der Standardserver erfordert keine Konfiguration.",

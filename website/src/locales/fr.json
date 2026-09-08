@@ -77,12 +77,6 @@
         "google": "Google",
         "toggle_street_view": "Imagerie de rue",
         "layers": "Couches de la carte...",
-        "cors_proxy": {
-            "title": "Proxy CORS...",
-            "help": "Lorsque vous hébergez gpx.studio vous-même, certaines requêtes peuvent échouer à cause d'en-têtes CORS manquants. Définissez un proxy CORS et les requêtes échouées seront automatiquement relancées à travers celui-ci.",
-            "url": "URL du proxy",
-            "url_help": "L'URL cible est ajoutée directement à cette adresse. Laissez vide pour désactiver. Exemple : https://your-proxy/ transforme une requête vers https://example.com/x en https://your-proxy/https://example.com/x."
-        },
         "overpass": {
             "title": "API Overpass",
             "help": "Choisissez le serveur Overpass interrogé pour les points d'intérêt. Le serveur par défaut ne nécessite aucune configuration.",
