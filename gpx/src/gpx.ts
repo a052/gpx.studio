@@ -1113,9 +1113,16 @@ export class TrackSegment extends GPXTreeLeaf {
         const threshold = Math.max(0, elevationOptions.gainThresholdMeters);
         let gain = 0;
         let loss = 0;
+        // Max/min use the raw per-point elevation (matching the profile chart and coordinate
+        // readout), not the smoothed profile that gain/loss are accumulated over.
+        let max = -Infinity;
+        let min = Infinity;
         if (n > 0) {
             let reference = smoothed[0];
             for (let i = 0; i < n; i++) {
+                const ele = points[i].ele ?? 0;
+                if (ele > max) max = ele;
+                if (ele < min) min = ele;
                 const d = smoothed[i] - reference;
                 if (d > 0 && d >= threshold) {
                     gain += d;
@@ -1130,6 +1137,8 @@ export class TrackSegment extends GPXTreeLeaf {
         }
         statistics.global.elevation.gain = gain;
         statistics.global.elevation.loss = loss;
+        statistics.global.elevation.max = max;
+        statistics.global.elevation.min = min;
 
         // 3. Per-point slope shading. RDP segments the profile into significant climbs/descents to
         //    derive an average "segment slope"; a short distance window gives the instantaneous slope.

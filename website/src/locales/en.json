@@ -489,6 +489,7 @@
         "distance": "Distance",
         "elevation": "Elevation",
         "elevation_gain_loss": "Elevation gain and loss",
+        "elevation_max_min": "Maximum and minimum elevation",
         "temperature": "Temperature",
         "speed": "Speed",
         "pace": "Pace",

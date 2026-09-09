@@ -489,6 +489,7 @@
         "distance": "距离",
         "elevation": "海拔",
         "elevation_gain_loss": "累计爬升和下降",
+        "elevation_max_min": "最高与最低海拔",
         "temperature": "温度",
         "speed": "时速",
         "pace": "配速",

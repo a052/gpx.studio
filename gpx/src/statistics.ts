@@ -20,6 +20,8 @@ export class GPXGlobalStatistics {
     elevation: {
         gain: number;
         loss: number;
+        max: number;
+        min: number;
     };
     bounds: {
         southWest: Coordinates;
@@ -62,6 +64,8 @@ export class GPXGlobalStatistics {
         this.elevation = {
             gain: 0,
             loss: 0,
+            max: -Infinity,
+            min: Infinity,
         };
         this.bounds = {
             southWest: {
@@ -116,6 +120,8 @@ export class GPXGlobalStatistics {
 
         this.elevation.gain += other.elevation.gain;
         this.elevation.loss += other.elevation.loss;
+        this.elevation.max = Math.max(this.elevation.max, other.elevation.max);
+        this.elevation.min = Math.min(this.elevation.min, other.elevation.min);
 
         this.bounds.southWest.lat = Math.min(this.bounds.southWest.lat, other.bounds.southWest.lat);
         this.bounds.southWest.lon = Math.min(this.bounds.southWest.lon, other.bounds.southWest.lon);
@@ -264,6 +270,18 @@ export class GPXStatistics {
             this.local.data[end].elevation.gain - this.local.data[start].elevation.gain;
         statistics.elevation.loss =
             this.local.data[end].elevation.loss - this.local.data[start].elevation.loss;
+
+        // Max/min elevation are not cumulative and cannot be derived by subtraction like gain/loss;
+        // scan the raw per-point elevations over the sliced range instead.
+        let maxElevation = -Infinity;
+        let minElevation = Infinity;
+        for (let i = start; i <= end; i++) {
+            const ele = this.local.points[i].ele ?? 0;
+            if (ele > maxElevation) maxElevation = ele;
+            if (ele < minElevation) minElevation = ele;
+        }
+        statistics.elevation.max = maxElevation;
+        statistics.elevation.min = minElevation;
 
         statistics.bounds.southWest.lat = this.global.bounds.southWest.lat;
         statistics.bounds.southWest.lon = this.global.bounds.southWest.lon;
