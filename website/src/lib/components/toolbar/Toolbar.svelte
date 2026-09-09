@@ -12,6 +12,7 @@
         Funnel,
         Scissors,
         MountainSnow,
+        RulerDimensionLine,
     } from '@lucide/svelte';
     import { i18n } from '$lib/i18n.svelte';
 
@@ -51,6 +52,9 @@
         </ToolbarItem>
         <ToolbarItem itemTool={Tool.CLEAN} label={i18n._('toolbar.clean.tooltip')}>
             <SquareDashedMousePointer size="18" class="size-4.5" />
+        </ToolbarItem>
+        <ToolbarItem itemTool={Tool.RULER} label={i18n._('toolbar.ruler.tooltip')}>
+            <RulerDimensionLine size="18" class="size-4.5" />
         </ToolbarItem>
     </div>
     <ToolbarItemMenu class={props.class ?? ''} />

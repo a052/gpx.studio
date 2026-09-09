@@ -11,6 +11,7 @@ export enum Tool {
     ELEVATION,
     REDUCE,
     CLEAN,
+    RULER,
 }
 
 export const currentTool: Writable<Tool | null> = safeWritable(null, 'currentTool');

@@ -338,6 +338,13 @@
             "button": "Eliminar track",
             "help": "Arrastre con el botón derecho del ratón para seleccionar un área rectangular en el mapa y eliminar los puntos GPS y puntos de ruta que contiene.",
             "help_no_selection": "Seleccione una traza para limpiar puntos GPS y puntos de ruta."
+        },
+        "ruler": {
+            "tooltip": "Medir distancia",
+            "total": "Distancia total",
+            "points": "Puntos",
+            "clear": "Borrar",
+            "help": "Haga clic en el mapa para añadir puntos de medición. Arrastre un punto para moverlo, haga clic derecho en un punto para eliminarlo, o pulse Retroceso para eliminar el último. La distancia en línea recta entre los puntos se muestra a medida que avanza."
         }
     },
     "layers": {

@@ -10,6 +10,7 @@
     import Extract from '$lib/components/toolbar/tools/Extract.svelte';
     import Clean from '$lib/components/toolbar/tools/Clean.svelte';
     import Reduce from '$lib/components/toolbar/tools/reduce/Reduce.svelte';
+    import Ruler from '$lib/components/toolbar/tools/ruler/Ruler.svelte';
     import RoutingControlPopup from '$lib/components/toolbar/tools/routing/RoutingControlPopup.svelte';
     import * as maplibregl from 'maplibre-gl';
     import { settings } from '$lib/logic/settings';
@@ -62,6 +63,8 @@
                         <Clean />
                     {:else if $currentTool === Tool.REDUCE}
                         <Reduce />
+                    {:else if $currentTool === Tool.RULER}
+                        <Ruler />
                     {/if}
                 </Card.Content>
             </Card.Root>

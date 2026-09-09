@@ -338,6 +338,13 @@
             "button": "Delete",
             "help": "Drag with the right mouse button to select a rectangle area on the map, and remove the GPS points and waypoints it contains.",
             "help_no_selection": "Select a trace to clean GPS points and waypoints."
+        },
+        "ruler": {
+            "tooltip": "Measure distance",
+            "total": "Total distance",
+            "points": "Points",
+            "clear": "Clear",
+            "help": "Click on the map to add measurement points. Drag a point to move it, right-click a point to remove it, or press Backspace to remove the last one. The straight-line distance between the points is shown as you go."
         }
     },
     "layers": {

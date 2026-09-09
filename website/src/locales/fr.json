@@ -338,6 +338,13 @@
             "button": "Supprimer",
             "help": "Faites glisser le curseur avec le bouton droit de la souris pour sélectionner une zone rectangulaire sur la carte et supprimer les points GPS et les points de passage qu'elle contient.",
             "help_no_selection": "Sélectionnez une trace pour supprimer les points GPS et les points de passage."
+        },
+        "ruler": {
+            "tooltip": "Mesurer une distance",
+            "total": "Distance totale",
+            "points": "Points",
+            "clear": "Effacer",
+            "help": "Cliquez sur la carte pour ajouter des points de mesure. Faites glisser un point pour le déplacer, faites un clic droit sur un point pour le supprimer, ou appuyez sur Retour arrière pour supprimer le dernier. La distance à vol d'oiseau entre les points s'affiche au fur et à mesure."
         }
     },
     "layers": {
