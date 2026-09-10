@@ -5,8 +5,6 @@
     import Routing from '$lib/components/toolbar/tools/routing/Routing.svelte';
     import {
         BookOpenText,
-        Heart,
-        HeartHandshake,
         ChartArea,
         Map,
         PencilRuler,
@@ -176,7 +174,7 @@
         <h2>
             {i18n._('homepage.philosophy')}
         </h2>
-        <div class="w-full grid md:grid-cols-2 gap-12 border-t pt-6">
+        <div class="w-full grid md:grid-cols-2 gap-12 border-t pt-6 mb-24">
             <div class="w-full">
                 <h3>
                     <Scale size="20" class="inline-block align-baseline" />
@@ -186,7 +184,7 @@
                     {i18n._('homepage.foss_description')}
                     <Button
                         variant="link"
-                        href="https://github.com/gpxstudio/gpx.studio"
+                        href="https://github.com/a052/gpx.studio"
                         target="_blank"
                         class="p-0 has-[>svg]:p-0 h-fit"
                     >
@@ -200,26 +198,6 @@
                     {i18n._('homepage.privacy')}
                 </h3>
                 <p>{i18n._('homepage.privacy_description')}</p>
-            </div>
-        </div>
-        <div
-            class="md:text-center flex flex-col md:items-center mt-12 mb-24 p-6 border bg-secondary/50 rounded-xl"
-        >
-            <h3>
-                {i18n._('homepage.community')}
-            </h3>
-            <p class="md:max-w-3/4">{i18n._('homepage.community_description')}</p>
-            <HeartHandshake size="80" class="mt-6 self-center" />
-            <div class="flex flex-row flex-wrap gap-x-4 gap-y-1.5 justify-center mt-6">
-                <Button
-                    variant="outline"
-                    href="https://opencollective.com/gpxstudio"
-                    target="_blank"
-                    class="text-support py-1.5 text-base max-w-full h-auto whitespace-normal"
-                >
-                    <span>{i18n._('homepage.support_button')}</span>
-                    <Heart size="16" fill="var(--support)" color="var(--support)" />
-                </Button>
             </div>
         </div>
     </div>

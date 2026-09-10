@@ -4,7 +4,7 @@
     import DocsContainer from '$lib/components/docs/DocsContainer.svelte';
     import { Button } from '$lib/components/ui/button';
     import { getURLForLanguage } from '$lib/utils';
-    import { ChevronLeft, ChevronRight, PenLine, CornerDownRight } from '@lucide/svelte';
+    import { ChevronLeft, ChevronRight } from '@lucide/svelte';
     import { i18n } from '$lib/i18n.svelte';
     import type { Component } from 'svelte';
 
@@ -40,33 +40,6 @@
         >
             {data.guideTitles[nextGuide]}
             <ChevronRight size="14" class="mt-0.5" />
-        </Button>
-    {/if}
-</div>
-
-<div class="flex flex-row flex-wrap justify-between items-start mt-10 gap-3">
-    <div class="flex flex-col items-start">
-        <p class="text-sm text-muted-foreground">{i18n._('docs.answer_not_found')}</p>
-        <Button
-            variant="link"
-            href="https://www.reddit.com/r/gpxstudio/"
-            target="_blank"
-            class="p-0 h-6 text-link"
-        >
-            <CornerDownRight size="16" />
-            {i18n._('docs.ask_on_reddit')}
-        </Button>
-    </div>
-    {#if i18n.lang === 'en'}
-        <Button
-            variant="link"
-            href="https://github.com/gpxstudio/gpx.studio/edit/dev/website/src/lib/docs/en/{page
-                .params.guide}.mdx"
-            target="_blank"
-            class="p-0 has-[>svg]:px-0 h-6 ml-auto text-link"
-        >
-            <PenLine size="16" />
-            Edit this page on GitHub
         </Button>
     {/if}
 </div>

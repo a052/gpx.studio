@@ -32,20 +32,20 @@
         <ToolbarItem itemTool={Tool.WAYPOINT} label={i18n._('toolbar.waypoint.tooltip')}>
             <Bookmark size="18" class="size-4.5" />
         </ToolbarItem>
-        <ToolbarItem itemTool={Tool.SCISSORS} label={i18n._('toolbar.scissors.tooltip')}>
-            <Scissors size="18" class="size-4.5" />
-        </ToolbarItem>
         <ToolbarItem itemTool={Tool.TIME} label={i18n._('toolbar.time.tooltip')}>
             <CalendarClock size="18" class="size-4.5" />
+        </ToolbarItem>
+        <ToolbarItem itemTool={Tool.ELEVATION} label={i18n._('toolbar.elevation.button')}>
+            <MountainSnow size="18" class="size-4.5" />
+        </ToolbarItem>
+        <ToolbarItem itemTool={Tool.SCISSORS} label={i18n._('toolbar.scissors.tooltip')}>
+            <Scissors size="18" class="size-4.5" />
         </ToolbarItem>
         <ToolbarItem itemTool={Tool.MERGE} label={i18n._('toolbar.merge.tooltip')}>
             <Group size="18" class="size-4.5" />
         </ToolbarItem>
         <ToolbarItem itemTool={Tool.EXTRACT} label={i18n._('toolbar.extract.tooltip')}>
             <Ungroup size="18" class="size-4.5" />
-        </ToolbarItem>
-        <ToolbarItem itemTool={Tool.ELEVATION} label={i18n._('toolbar.elevation.button')}>
-            <MountainSnow size="18" class="size-4.5" />
         </ToolbarItem>
         <ToolbarItem itemTool={Tool.REDUCE} label={i18n._('toolbar.reduce.tooltip')}>
             <Funnel size="18" class="size-4.5" />

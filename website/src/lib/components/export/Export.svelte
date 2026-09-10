@@ -91,23 +91,7 @@
         <Dialog.Content
             class="fixed left-[50%] top-[50%] z-50 w-fit max-w-full translate-x-[-50%] translate-y-[-50%] flex flex-col items-center gap-3 border bg-background p-3 shadow-lg rounded-md"
         >
-            <div
-                class="w-full flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 border rounded-md p-2 bg-secondary"
-            >
-                <span class="w-12 shrink-0 text-center text-xl">⚠️</span>
-                <span class="text-sm">
-                    {i18n._('menu.support_message')}
-                </span>
-            </div>
             <div class="w-full flex flex-row flex-wrap gap-2">
-                <Button
-                    class="bg-support grow"
-                    href="https://opencollective.com/gpxstudio"
-                    target="_blank"
-                >
-                    {i18n._('menu.support_button')}
-                    <span>🙏</span>
-                </Button>
                 <Button
                     variant="outline"
                     class="grow"

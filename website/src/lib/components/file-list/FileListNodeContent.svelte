@@ -135,6 +135,6 @@
     }
 
     .horizontal :global(.sortable-selected button) {
-        @apply bg-background;
+        @apply bg-background font-bold;
     }
 </style>
