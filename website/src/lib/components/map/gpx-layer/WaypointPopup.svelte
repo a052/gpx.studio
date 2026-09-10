@@ -10,6 +10,7 @@
     import { i18n } from '$lib/i18n.svelte';
     import sanitizeHtml from 'sanitize-html';
     import { safeLinkUrl } from '$lib/logic/sanitize';
+    import * as Dialog from '$lib/components/ui/dialog';
     import type { Waypoint } from 'gpx';
     import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
     import { fileActions } from '$lib/logic/file-actions';
@@ -43,9 +44,22 @@
             },
         }).trim();
     }
+
+    // Images inside the description come from {@html sanitize(...)}, so their click events can
+    // only be caught via delegation; clicking one opens the full-size lightbox below.
+    let lightboxSrc = $state<string | undefined>(undefined);
+
+    function handleDescriptionClick(e: MouseEvent) {
+        if (e.target instanceof HTMLImageElement) {
+            // Description images are often wrapped in an <a> pointing at the image itself;
+            // suppress that navigation — the lightbox below replaces it.
+            e.preventDefault();
+            lightboxSrc = e.target.src;
+        }
+    }
 </script>
 
-<Card.Root class="border-none shadow-md text-base p-2 max-w-[50dvw] gap-0">
+<Card.Root class="border-none shadow-md text-base p-2 max-w-[25dvw] gap-0">
     <Card.Header class="p-0 gap-0">
         <Card.Title class="text-md">
             {#if linkHref}
@@ -79,19 +93,28 @@
                 <Dot size="16" />
                 <WithUnits value={waypoint.item.ele} type="elevation" />
             {/if}
+            {#if waypoint.item.time}
+                <Dot size="16" />
+                {i18n.df.format(waypoint.item.time)}
+            {/if}
         </div>
-        <ScrollArea class="flex flex-col max-h-[30dvh]">
+        <!-- Delegated click handler on the ScrollArea: images come from {@html} so only event
+             delegation can see them. -->
+        <ScrollArea class="flex flex-col max-h-[30dvh]" onclick={handleDescriptionClick}>
             <!-- GPX descriptions may contain markup (links, line breaks, images), so they are
                  rendered as HTML after passing through sanitize() above, which allows only
-                 a/br/img with href/target/src. -->
-            {#if waypoint.item.desc}
-                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                <span class="whitespace-pre-wrap">{@html sanitize(waypoint.item.desc)}</span>
-            {/if}
-            {#if waypoint.item.cmt && waypoint.item.cmt !== waypoint.item.desc}
-                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                <span class="whitespace-pre-wrap">{@html sanitize(waypoint.item.cmt)}</span>
-            {/if}
+                 a/br/img with href/target/src. The .contents wrapper is the scoping anchor for
+                 the img/a styles below. -->
+            <div class="contents description">
+                {#if waypoint.item.desc}
+                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                    <span class="whitespace-pre-wrap">{@html sanitize(waypoint.item.desc)}</span>
+                {/if}
+                {#if waypoint.item.cmt && waypoint.item.cmt !== waypoint.item.desc}
+                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                    <span class="whitespace-pre-wrap">{@html sanitize(waypoint.item.cmt)}</span>
+                {/if}
+            </div>
         </ScrollArea>
         <div class="mt-2 flex flex-col gap-1">
             <CopyCoordinates coordinates={waypoint.item.attributes} />
@@ -112,18 +135,60 @@
             {/if}
         </div>
     </Card.Content>
+
+    <!-- Full-screen viewer for description images: portal-based so it renders at document.body
+         (the popup content is reparented into a MapLibre popup element where position:fixed is
+         unreliable), with Esc / click-anywhere to close. -->
+    <Dialog.Root
+        open={lightboxSrc !== undefined}
+        onOpenChange={(isOpen) => {
+            if (!isOpen) {
+                lightboxSrc = undefined;
+            }
+        }}
+    >
+        <Dialog.Trigger class="hidden" />
+        <Dialog.Portal>
+            <Dialog.Overlay class="bg-black/80 z-50" />
+            <Dialog.Content
+                class="fixed left-[50%] top-[50%] z-50 max-w-[95dvw] max-h-[95dvh] translate-x-[-50%] translate-y-[-50%] border-none bg-transparent p-0 shadow-none focus:outline-none"
+                onclick={() => (lightboxSrc = undefined)}
+            >
+                {#if lightboxSrc}
+                    <img
+                        src={lightboxSrc}
+                        alt=""
+                        class="max-w-[95dvw] max-h-[95dvh] object-contain rounded-md"
+                    />
+                {/if}
+                <Dialog.Title class="sr-only">
+                    {waypoint.item.name ?? i18n._('gpx.waypoint')}
+                </Dialog.Title>
+            </Dialog.Content>
+        </Dialog.Portal>
+    </Dialog.Root>
 </Card.Root>
 
 <style lang="postcss">
     @reference "../../../../app.css";
 
-    div :global(a) {
+    .description :global(a) {
         @apply text-link;
         @apply hover:underline;
     }
 
-    div :global(img) {
+    /* Scoped through the .contents wrapper around the description: `div :global(img)` alone
+       would compile to `div.svelte-<hash> img`, matching nothing since the description sits
+       inside child components (Card/ScrollArea) that don't carry this component's scoping
+       class. */
+    .description :global(img) {
         @apply my-0;
+        @apply mx-auto;
         @apply rounded-md;
+        /* Keep any image orientation fully visible inside the popup (no scrolling) and hint
+           that clicking opens the full-size lightbox. */
+        @apply max-w-full;
+        @apply max-h-[25dvh];
+        @apply cursor-zoom-in;
     }
 </style>
