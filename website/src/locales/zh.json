@@ -318,7 +318,9 @@
             "create": "创建标注点",
             "add": "将标注点添加到文件",
             "help": "通过表单创建新标注点，或点击现有标注点以编辑。 点击地图并填充坐标点，或拖动标注点以移动坐标。",
-            "help_no_selection": "选择文件以创建或编辑标注点。"
+            "help_no_selection": "选择文件以创建或编辑标注点。",
+            "expand_description": "展开描述",
+            "collapse_description": "收起描述"
         },
         "reduce": {
             "tooltip": "精简 GPS 点数量",

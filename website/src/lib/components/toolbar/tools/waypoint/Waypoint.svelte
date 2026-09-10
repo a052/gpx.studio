@@ -9,7 +9,7 @@
     import Help from '$lib/components/Help.svelte';
     import { onDestroy, onMount, untrack } from 'svelte';
     import { getURLForLanguage, getElevation } from '$lib/utils';
-    import { Bookmark, CircleX, Save } from '@lucide/svelte';
+    import { Bookmark, CircleX, Maximize2, Minimize2, Save } from '@lucide/svelte';
     import { getSymbolKey, symbols } from '$lib/assets/symbols';
     import { selection } from '$lib/logic/selection';
     import { selectedWaypoint } from './waypoint';
@@ -42,6 +42,8 @@
     let elevation: number | null = $state(null);
     let waypointDate: DateValue | undefined = $state(undefined);
     let waypointTime: string | undefined = $state(undefined);
+    // Whether the description textarea is enlarged in place for easier editing.
+    let expanded = $state(false);
     let symbolKey = $derived(getSymbolKey(sym));
 
     const { distanceUnits } = settings;
@@ -243,12 +245,35 @@
         </div>
         <div class="flex flex-col gap-1">
             <Label for="description">{i18n._('menu.metadata.description')}</Label>
-            <Textarea
-                bind:value={description}
-                id="description"
-                disabled={!canCreate && !$selectedWaypoint}
-                class="min-h-8 h-8 py-1 px-3 text-sm"
-            />
+            <div class="relative">
+                <Textarea
+                    bind:value={description}
+                    id="description"
+                    disabled={!canCreate && !$selectedWaypoint}
+                    class="field-sizing-fixed min-w-0 w-full h-[4.5rem] {expanded
+                        ? 'h-[min(30vh,12rem)]'
+                        : ''} py-1.5 px-3 pr-9 text-sm resize-none"
+                />
+                <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    class="absolute right-2.5 bottom-1.5 size-6 text-muted-foreground"
+                    title={expanded
+                        ? i18n._('toolbar.waypoint.collapse_description')
+                        : i18n._('toolbar.waypoint.expand_description')}
+                    aria-label={expanded
+                        ? i18n._('toolbar.waypoint.collapse_description')
+                        : i18n._('toolbar.waypoint.expand_description')}
+                    disabled={!canCreate && !$selectedWaypoint}
+                    onclick={() => (expanded = !expanded)}
+                >
+                    {#if expanded}
+                        <Minimize2 size="14" />
+                    {:else}
+                        <Maximize2 size="14" />
+                    {/if}
+                </Button>
+            </div>
         </div>
         <div class="flex flex-col gap-1">
             <Label for="symbol">{i18n._('toolbar.waypoint.icon')}</Label>
@@ -297,7 +322,7 @@
             />
         </div>
         <div class="flex flex-row gap-1.5">
-            <div class="grow flex flex-col gap-1">
+            <div class="grow basis-0 flex flex-col gap-1">
                 <Label for="latitude">{i18n._('toolbar.waypoint.latitude')}</Label>
                 <Input
                     bind:value={latitude}
@@ -310,7 +335,7 @@
                     disabled={!canCreate && !$selectedWaypoint}
                 />
             </div>
-            <div class="grow flex flex-col gap-1">
+            <div class="grow basis-0 flex flex-col gap-1">
                 <Label for="longitude">{i18n._('toolbar.waypoint.longitude')}</Label>
                 <Input
                     bind:value={longitude}
@@ -323,19 +348,19 @@
                     disabled={!canCreate && !$selectedWaypoint}
                 />
             </div>
-        </div>
-        <div class="flex flex-col gap-1">
-            <Label for="elevation">{i18n._('toolbar.waypoint.elevation')}</Label>
-            <div class="flex flex-row gap-1 items-center">
+            <div class="grow basis-0 flex flex-col gap-1">
+                <Label for="elevation">
+                    {i18n._('toolbar.waypoint.elevation')}
+                    ({getElevationUnits($distanceUnits)})
+                </Label>
                 <Input
                     bind:value={elevation}
                     type="number"
                     id="elevation"
                     step="any"
-                    class="text-xs h-8 grow"
+                    class="text-xs h-8"
                     disabled={!canCreate && !$selectedWaypoint}
                 />
-                <span class="text-xs shrink-0">{getElevationUnits($distanceUnits)}</span>
             </div>
         </div>
         <div class="flex flex-col gap-1">

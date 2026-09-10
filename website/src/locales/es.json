@@ -318,7 +318,9 @@
             "create": "Crear punto de ruta",
             "add": "Añadir punto de ruta al archivo",
             "help": "Rellene el formulario para crear un nuevo punto de ruta o haga clic en uno existente para editarlo. Haga clic en el mapa para rellenar las coordenadas o arrastre los puntos de ruta para moverlos.",
-            "help_no_selection": "Seleccione un archivo para crear o editar puntos de ruta."
+            "help_no_selection": "Seleccione un archivo para crear o editar puntos de ruta.",
+            "expand_description": "Expandir descripción",
+            "collapse_description": "Contraer descripción"
         },
         "reduce": {
             "tooltip": "Reducir la cantidad de puntos GPS",
