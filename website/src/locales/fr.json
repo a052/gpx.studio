@@ -313,6 +313,8 @@
             "link": "Lien",
             "longitude": "Longitude",
             "latitude": "Latitude",
+            "elevation": "Altitude",
+            "time": "Heure",
             "create": "Créer le point de passage",
             "add": "Ajouter le point de passage au fichier",
             "help": "Remplissez le formulaire pour créer un nouveau point de passage, ou cliquez sur un point existant pour le modifier. Cliquez sur la carte pour remplir les coordonnées, ou faites glisser les points de passage pour les déplacer.",

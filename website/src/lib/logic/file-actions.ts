@@ -737,7 +737,7 @@ export const fileActions = {
         });
     },
     addOrUpdateWaypoint: (waypoint: WaypointType, item?: ListWaypointItem) => {
-        getElevation([waypoint.attributes]).then((elevation) => {
+        const apply = (elevation: number | undefined) => {
             if (item) {
                 fileActionManager.applyToFile(item.getFileId(), (file) => {
                     const wpt = file.wpt[item.getWaypointIndex()];
@@ -747,7 +747,8 @@ export const fileActions = {
                     wpt.sym = waypoint.sym;
                     wpt.link = waypoint.link;
                     wpt.setCoordinates(waypoint.attributes);
-                    wpt.ele = elevation[0];
+                    wpt.ele = elevation;
+                    wpt.time = waypoint.time;
                 });
             } else {
                 const fileIds = new Set<string>();
@@ -756,13 +757,22 @@ export const fileActions = {
                     .forEach((item) => {
                         fileIds.add(item.getFileId());
                     });
+                // new Waypoint(waypoint) already copies waypoint.time via its constructor.
                 const wpt = new Waypoint(waypoint);
-                wpt.ele = elevation[0];
+                wpt.ele = elevation;
                 fileActionManager.applyToFiles(Array.from(fileIds), (file) =>
                     file.replaceWaypoints(file.wpt.length, file.wpt.length, [wpt])
                 );
             }
-        });
+        };
+
+        // A user-supplied elevation wins; otherwise fall back to fetching it from the DEM tiles
+        // (the historical behavior, and what waypoints created from POIs still rely on).
+        if (waypoint.ele !== undefined) {
+            apply(waypoint.ele);
+        } else {
+            getElevation([waypoint.attributes]).then((elevation) => apply(elevation[0]));
+        }
     },
     deleteWaypoint: (fileId: string, waypointIndex: number) => {
         fileActionManager.applyToFile(fileId, (file) =>

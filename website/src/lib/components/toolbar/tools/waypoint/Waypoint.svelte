@@ -8,12 +8,20 @@
     import { ListWaypointItem } from '$lib/components/file-list/file-list';
     import Help from '$lib/components/Help.svelte';
     import { onDestroy, onMount, untrack } from 'svelte';
-    import { getURLForLanguage } from '$lib/utils';
+    import { getURLForLanguage, getElevation } from '$lib/utils';
     import { Bookmark, CircleX, Save } from '@lucide/svelte';
     import { getSymbolKey, symbols } from '$lib/assets/symbols';
     import { selection } from '$lib/logic/selection';
     import { selectedWaypoint } from './waypoint';
     import { fileActions } from '$lib/logic/file-actions';
+    import DatePicker from '$lib/components/ui/date-picker/DatePicker.svelte';
+    import { CalendarDate, type DateValue } from '@internationalized/date';
+    import { settings } from '$lib/logic/settings';
+    import {
+        getConvertedElevation,
+        getConvertedElevationToMeters,
+        getElevationUnits,
+    } from '$lib/units';
     import { map } from '$lib/components/map/map';
     import { mapCursor, MapCursorState } from '$lib/logic/map-cursor';
     import * as maplibregl from 'maplibre-gl';
@@ -30,7 +38,30 @@
     // null while a coordinate input is empty — Svelte's number binding maps '' to null.
     let longitude: number | null = $state(0);
     let latitude: number | null = $state(0);
+    // Elevation is kept in the display units; null = empty (auto-fetch from DEM on save).
+    let elevation: number | null = $state(null);
+    let waypointDate: DateValue | undefined = $state(undefined);
+    let waypointTime: string | undefined = $state(undefined);
     let symbolKey = $derived(getSymbolKey(sym));
+
+    const { distanceUnits } = settings;
+
+    // Same pure helpers as the Time tool: DatePicker works with DateValue, GPX with Date.
+    function toCalendarDate(date: Date): CalendarDate {
+        return new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
+    }
+
+    function toTimeString(date: Date): string {
+        return date.toTimeString().split(' ')[0];
+    }
+
+    function getDate(date: DateValue, time: string): Date {
+        let [hours, minutes, seconds] = time.split(':').map((x) => parseInt(x));
+        if (seconds === undefined) {
+            seconds = 0;
+        }
+        return new Date(date.year, date.month - 1, date.day, hours, minutes, seconds);
+    }
 
     let canCreate = $derived($selection.size > 0);
 
@@ -44,7 +75,12 @@
 
     let marker: maplibregl.Marker | null = null;
 
+    // Guards the asynchronous DEM fetch started by map clicks: incremented whenever the form is
+    // repopulated or cleared, so a late-resolving fetch can't overwrite the fresh values.
+    let elevationRequestId = 0;
+
     function reset() {
+        elevationRequestId++;
         if ($selectedWaypoint) {
             selectedWaypoint.reset();
         } else {
@@ -54,10 +90,15 @@
             sym = '';
             longitude = 0;
             latitude = 0;
+            elevation = null;
+            waypointDate = undefined;
+            waypointTime = undefined;
         }
     }
 
     $effect(() => {
+        // Repopulating from a waypoint supersedes any in-flight elevation fetch.
+        elevationRequestId++;
         if ($selectedWaypoint) {
             const wpt = $selectedWaypoint[0];
             untrack(() => {
@@ -70,6 +111,17 @@
                 sym = wpt.sym ?? '';
                 longitude = parseFloat(wpt.getLongitude().toFixed(6));
                 latitude = parseFloat(wpt.getLatitude().toFixed(6));
+                elevation =
+                    wpt.ele !== undefined
+                        ? parseFloat(getConvertedElevation(wpt.ele).toFixed(2))
+                        : null;
+                if (wpt.time) {
+                    waypointDate = toCalendarDate(wpt.time);
+                    waypointTime = toTimeString(wpt.time);
+                } else {
+                    waypointDate = undefined;
+                    waypointTime = undefined;
+                }
             });
         } else {
             untrack(reset);
@@ -94,6 +146,8 @@
                 cmt: description.length > 0 ? description : undefined,
                 link: link.length > 0 ? { attributes: { href: link } } : undefined,
                 sym: sym.length > 0 ? sym : undefined,
+                ele: elevation !== null ? getConvertedElevationToMeters(elevation) : undefined,
+                time: waypointDate ? getDate(waypointDate, waypointTime ?? '00:00:00') : undefined,
             },
             selectedWaypoint.wpt && selectedWaypoint.fileId
                 ? new ListWaypointItem(selectedWaypoint.fileId, selectedWaypoint.wpt._data.index)
@@ -106,6 +160,21 @@
     function setCoordinates(e: maplibregl.MapMouseEvent) {
         latitude = parseFloat(e.lngLat.lat.toFixed(6));
         longitude = parseFloat(e.lngLat.lng.toFixed(6));
+
+        // Clicking an existing waypoint loads its own elevation (or empty if it has none) via
+        // the prefill effect — don't let a DEM fetch overwrite it. The hit test mirrors the one
+        // the layer event manager uses to decide whether its waypoint click handlers fire.
+        const features = e.target.queryRenderedFeatures(e.point);
+        if (features.some((f) => f.layer?.id.endsWith('-waypoints'))) {
+            return;
+        }
+
+        // A fresh click supersedes any earlier in-flight fetch.
+        const requestId = ++elevationRequestId;
+        getElevation([{ lat: latitude, lon: longitude }]).then((elevationFromDEM) => {
+            if (requestId !== elevationRequestId) return;
+            elevation = parseFloat(getConvertedElevation(elevationFromDEM[0]).toFixed(2));
+        });
     }
 
     $effect(() => {
@@ -251,6 +320,39 @@
                     min={-180}
                     max={180}
                     class="text-xs h-8"
+                    disabled={!canCreate && !$selectedWaypoint}
+                />
+            </div>
+        </div>
+        <div class="flex flex-col gap-1">
+            <Label for="elevation">{i18n._('toolbar.waypoint.elevation')}</Label>
+            <div class="flex flex-row gap-1 items-center">
+                <Input
+                    bind:value={elevation}
+                    type="number"
+                    id="elevation"
+                    step="any"
+                    class="text-xs h-8 grow"
+                    disabled={!canCreate && !$selectedWaypoint}
+                />
+                <span class="text-xs shrink-0">{getElevationUnits($distanceUnits)}</span>
+            </div>
+        </div>
+        <div class="flex flex-col gap-1">
+            <Label>{i18n._('toolbar.waypoint.time')}</Label>
+            <div class="flex flex-row gap-1.5">
+                <DatePicker
+                    bind:value={waypointDate}
+                    disabled={!canCreate && !$selectedWaypoint}
+                    locale={i18n.lang}
+                    placeholder={i18n._('toolbar.time.pick_date')}
+                    class="grow"
+                />
+                <Input
+                    type="time"
+                    step={1}
+                    bind:value={waypointTime}
+                    class="w-fit"
                     disabled={!canCreate && !$selectedWaypoint}
                 />
             </div>

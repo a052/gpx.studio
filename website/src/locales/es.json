@@ -313,6 +313,8 @@
             "link": "Enlace",
             "longitude": "Longitud",
             "latitude": "Latitud",
+            "elevation": "Altitud",
+            "time": "Hora",
             "create": "Crear punto de ruta",
             "add": "Añadir punto de ruta al archivo",
             "help": "Rellene el formulario para crear un nuevo punto de ruta o haga clic en uno existente para editarlo. Haga clic en el mapa para rellenar las coordenadas o arrastre los puntos de ruta para moverlos.",

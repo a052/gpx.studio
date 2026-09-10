@@ -313,6 +313,8 @@
             "link": "Link",
             "longitude": "Längengrad",
             "latitude": "Breitengrad",
+            "elevation": "Höhe",
+            "time": "Zeit",
             "create": "Wegpunkt erstellen",
             "add": "Wegpunkt zur Datei hinzufügen",
             "help": "Füllen Sie das Formular aus, um einen neuen Wegpunkt zu erstellen, oder klicken Sie auf einen bestehenden zum Bearbeiten. Klicken Sie auf die Karte, um die Koordinaten zu füllen, oder ziehen Sie Wegpunkte, um sie zu verschieben.",

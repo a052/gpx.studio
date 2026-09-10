@@ -16,6 +16,10 @@ export function metersToFeet(value: number) {
     return value * 3.28084;
 }
 
+export function feetToMeters(value: number) {
+    return value / 3.28084;
+}
+
 export function kilometersToNauticalMiles(value: number) {
     return value * 0.539957;
 }
@@ -199,6 +203,21 @@ export function getConvertedElevation(value: number, targetDistanceUnits = get(d
         case 'imperial':
             return metersToFeet(value);
         case 'nautical':
+            return value;
+    }
+}
+
+export function getConvertedElevationToMeters(
+    value: number,
+    sourceDistanceUnits = get(distanceUnits)
+) {
+    switch (sourceDistanceUnits) {
+        case 'metric':
+            return value;
+        case 'imperial':
+            return feetToMeters(value);
+        case 'nautical':
+            // See https://github.com/gpxstudio/gpx.studio/pull/66#issuecomment-2306568997
             return value;
     }
 }

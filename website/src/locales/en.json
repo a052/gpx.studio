@@ -313,6 +313,8 @@
             "link": "Link",
             "longitude": "Longitude",
             "latitude": "Latitude",
+            "elevation": "Elevation",
+            "time": "Time",
             "create": "Create waypoint",
             "add": "Add waypoint to file",
             "help": "Fill in the form to create a new waypoint, or click on an existing one to edit it. Click on the map to fill the coordinates, or drag waypoints to move them.",
