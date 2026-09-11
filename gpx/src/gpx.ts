@@ -46,6 +46,12 @@ export function setElevationOptions(options: Partial<typeof elevationOptions>): 
 // slope shading (slope.segment). It no longer affects cumulative gain/loss.
 const SLOPE_SEGMENT_EPSILON = 8;
 
+// Grade (percent) below which a leg counts as "flat" when splitting distance into
+// uphill/downhill/flat. Classification uses the smoothed per-point grade (slope.at) rather than the
+// raw inter-point grade to avoid GPS/DEM noise, following the grade-threshold approach used by
+// mainstream trail-analysis tools.
+const FLAT_SLOPE_THRESHOLD = 1;
+
 // An abstract class that groups functions that need to be computed recursively in the GPX file hierarchy
 export abstract class GPXTreeElement<T extends GPXTreeElement<any>> {
     _data: { [key: string]: any } = {};
@@ -1065,6 +1071,16 @@ export class TrackSegment extends GPXTreeLeaf {
             }
         );
 
+        // Fastest speed = max of the per-point (time-window smoothed) speed, which avoids the raw
+        // GPS spikes present in the instantaneous inter-point speed used only for the moving gate.
+        let maxSpeed = 0;
+        for (let i = 0; i < statistics.local.data.length; i++) {
+            if (statistics.local.data[i].speed > maxSpeed) {
+                maxSpeed = statistics.local.data[i].speed;
+            }
+        }
+        statistics.global.speed.max = maxSpeed;
+
         return statistics;
     }
 
@@ -1139,6 +1155,8 @@ export class TrackSegment extends GPXTreeLeaf {
         statistics.global.elevation.loss = loss;
         statistics.global.elevation.max = max;
         statistics.global.elevation.min = min;
+        statistics.global.elevation.start = n > 0 ? (points[0].ele ?? NaN) : NaN;
+        statistics.global.elevation.end = n > 0 ? (points[n - 1].ele ?? NaN) : NaN;
 
         // 3. Per-point slope shading. RDP segments the profile into significant climbs/descents to
         //    derive an average "segment slope"; a short distance window gives the instantaneous slope.
@@ -1177,6 +1195,41 @@ export class TrackSegment extends GPXTreeLeaf {
                 statistics.local.data[index].slope.at = value;
             }
         );
+
+        // Max slope up / down = extremes of the smoothed per-point grade (slope.at); and split the
+        // horizontal distance of each leg into uphill / downhill / flat by that same grade. Using
+        // the smoothed grade (not the raw inter-point grade) avoids GPS/DEM spikes. The three
+        // distance buckets sum to distance.total.
+        let maxSlope = -Infinity;
+        let minSlope = Infinity;
+        let up = 0;
+        let down = 0;
+        let flat = 0;
+        for (let i = 0; i < n; i++) {
+            const grade = statistics.local.data[i].slope.at;
+            if (grade > maxSlope) maxSlope = grade;
+            if (grade < minSlope) minSlope = grade;
+            if (i > 0) {
+                const legDist =
+                    statistics.local.data[i].distance.total -
+                    statistics.local.data[i - 1].distance.total;
+                if (grade > FLAT_SLOPE_THRESHOLD) {
+                    up += legDist;
+                } else if (grade < -FLAT_SLOPE_THRESHOLD) {
+                    down += legDist;
+                } else {
+                    flat += legDist;
+                }
+            }
+            statistics.local.data[i].distance.up = up;
+            statistics.local.data[i].distance.down = down;
+            statistics.local.data[i].distance.flat = flat;
+        }
+        statistics.global.slope.max = maxSlope;
+        statistics.global.slope.min = minSlope;
+        statistics.global.distance.up = up;
+        statistics.global.distance.down = down;
+        statistics.global.distance.flat = flat;
     }
 
     getNumberOfTrackPoints(): number {

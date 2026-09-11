@@ -20,7 +20,7 @@
         class: className = '',
     }: {
         value: number;
-        type: 'distance' | 'elevation' | 'speed' | 'temperature' | 'time';
+        type: 'distance' | 'elevation' | 'speed' | 'temperature' | 'time' | 'slope' | 'vam';
         showUnits?: boolean;
         decimals?: number;
         class?: string;
@@ -52,5 +52,10 @@
         {/if}
     {:else if type === 'time'}
         {secondsToHHMMSS(value)}
+    {:else if type === 'slope'}
+        {value.toFixed(decimals ?? 1)} {showUnits ? '%' : ''}
+    {:else if type === 'vam'}
+        {getConvertedElevation(value, $distanceUnits).toFixed(decimals ?? 0)}
+        {showUnits ? `${getElevationUnits($distanceUnits)}/h` : ''}
     {/if}
 </span>

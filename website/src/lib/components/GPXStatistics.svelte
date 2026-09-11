@@ -1,10 +1,14 @@
 <script lang="ts">
     import * as Card from '$lib/components/ui/card';
+    import * as Popover from '$lib/components/ui/popover/index.js';
     import Tooltip from '$lib/components/Tooltip.svelte';
+    import ButtonWithTooltip from '$lib/components/ButtonWithTooltip.svelte';
     import WithUnits from '$lib/components/WithUnits.svelte';
+    import FullStatistics from '$lib/components/FullStatistics.svelte';
 
     import {
         ArrowDownToLine,
+        List,
         MountainSnow,
         MoveDownRight,
         MoveUpRight,
@@ -54,7 +58,7 @@
         <div
             bind:clientHeight={panelHeight}
             bind:clientWidth={panelWidth}
-            class="flex {orientation === 'vertical'
+            class="relative flex {orientation === 'vertical'
                 ? 'flex-col h-full justify-center'
                 : 'flex-row w-full justify-evenly'} gap-4"
         >
@@ -110,6 +114,25 @@
                     </span>
                 </Tooltip>
             {/if}
+            <div
+                class={orientation === 'vertical' ? 'absolute top-0 right-0' : 'flex items-center'}
+            >
+                <Popover.Root>
+                    <Popover.Trigger>
+                        <ButtonWithTooltip
+                            label={i18n._('quantities.show_all_information')}
+                            variant="outline"
+                            side="top"
+                            class="w-7 h-7 p-0 flex justify-center opacity-70 hover:opacity-100 transition-opacity duration-300 bg-background"
+                        >
+                            <List size="18" />
+                        </ButtonWithTooltip>
+                    </Popover.Trigger>
+                    <Popover.Content class="w-fit p-0 overflow-hidden" side="right" align="end">
+                        <FullStatistics {statistics} />
+                    </Popover.Content>
+                </Popover.Root>
+            </div>
         </div>
     </Card.Content>
 </Card.Root>

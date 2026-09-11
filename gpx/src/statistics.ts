@@ -6,6 +6,9 @@ export class GPXGlobalStatistics {
     distance: {
         moving: number;
         total: number;
+        up: number;
+        down: number;
+        flat: number;
     };
     time: {
         start: Date | undefined;
@@ -16,10 +19,17 @@ export class GPXGlobalStatistics {
     speed: {
         moving: number;
         total: number;
+        max: number;
     };
     elevation: {
         gain: number;
         loss: number;
+        max: number;
+        min: number;
+        start: number;
+        end: number;
+    };
+    slope: {
         max: number;
         min: number;
     };
@@ -50,6 +60,9 @@ export class GPXGlobalStatistics {
         this.distance = {
             moving: 0,
             total: 0,
+            up: 0,
+            down: 0,
+            flat: 0,
         };
         this.time = {
             start: undefined,
@@ -60,10 +73,17 @@ export class GPXGlobalStatistics {
         this.speed = {
             moving: 0,
             total: 0,
+            max: 0,
         };
         this.elevation = {
             gain: 0,
             loss: 0,
+            max: -Infinity,
+            min: Infinity,
+            start: NaN,
+            end: NaN,
+        };
+        this.slope = {
             max: -Infinity,
             min: Infinity,
         };
@@ -101,6 +121,9 @@ export class GPXGlobalStatistics {
 
         this.distance.total += other.distance.total;
         this.distance.moving += other.distance.moving;
+        this.distance.up += other.distance.up;
+        this.distance.down += other.distance.down;
+        this.distance.flat += other.distance.flat;
 
         this.time.start =
             this.time.start !== undefined && other.time.start !== undefined
@@ -117,11 +140,23 @@ export class GPXGlobalStatistics {
         this.speed.moving =
             this.time.moving > 0 ? this.distance.moving / (this.time.moving / 3600) : 0;
         this.speed.total = this.time.total > 0 ? this.distance.total / (this.time.total / 3600) : 0;
+        this.speed.max = Math.max(this.speed.max, other.speed.max);
 
         this.elevation.gain += other.elevation.gain;
         this.elevation.loss += other.elevation.loss;
         this.elevation.max = Math.max(this.elevation.max, other.elevation.max);
         this.elevation.min = Math.min(this.elevation.min, other.elevation.min);
+        // start = first defined (earliest segment), end = last defined (latest segment), analogous
+        // to the time.start (min date) / time.end (max date) handling above.
+        if (Number.isNaN(this.elevation.start)) {
+            this.elevation.start = other.elevation.start;
+        }
+        if (!Number.isNaN(other.elevation.end)) {
+            this.elevation.end = other.elevation.end;
+        }
+
+        this.slope.max = Math.max(this.slope.max, other.slope.max);
+        this.slope.min = Math.min(this.slope.min, other.slope.min);
 
         this.bounds.southWest.lat = Math.min(this.bounds.southWest.lat, other.bounds.southWest.lat);
         this.bounds.southWest.lon = Math.min(this.bounds.southWest.lon, other.bounds.southWest.lon);
@@ -163,6 +198,9 @@ export class TrackPointLocalStatistics {
     distance: {
         moving: number;
         total: number;
+        up: number;
+        down: number;
+        flat: number;
     };
     time: {
         moving: number;
@@ -183,6 +221,9 @@ export class TrackPointLocalStatistics {
         this.distance = {
             moving: 0,
             total: 0,
+            up: 0,
+            down: 0,
+            flat: 0,
         };
         this.time = {
             moving: 0,
@@ -249,6 +290,12 @@ export class GPXStatistics {
             this.local.data[end].distance.total - this.local.data[start].distance.total;
         statistics.distance.moving =
             this.local.data[end].distance.moving - this.local.data[start].distance.moving;
+        statistics.distance.up =
+            this.local.data[end].distance.up - this.local.data[start].distance.up;
+        statistics.distance.down =
+            this.local.data[end].distance.down - this.local.data[start].distance.down;
+        statistics.distance.flat =
+            this.local.data[end].distance.flat - this.local.data[start].distance.flat;
 
         statistics.time.start = this.local.points[start].time;
         statistics.time.end = this.local.points[end].time;
@@ -271,17 +318,32 @@ export class GPXStatistics {
         statistics.elevation.loss =
             this.local.data[end].elevation.loss - this.local.data[start].elevation.loss;
 
-        // Max/min elevation are not cumulative and cannot be derived by subtraction like gain/loss;
-        // scan the raw per-point elevations over the sliced range instead.
+        // Max/min elevation, fastest speed and max/min slope are not cumulative and cannot be
+        // derived by subtraction like gain/loss; scan the per-point values over the sliced range.
         let maxElevation = -Infinity;
         let minElevation = Infinity;
+        let maxSpeed = 0;
+        let maxSlope = -Infinity;
+        let minSlope = Infinity;
         for (let i = start; i <= end; i++) {
             const ele = this.local.points[i].ele ?? 0;
             if (ele > maxElevation) maxElevation = ele;
             if (ele < minElevation) minElevation = ele;
+            const spd = this.local.data[i].speed;
+            if (spd > maxSpeed) maxSpeed = spd;
+            const slp = this.local.data[i].slope.at;
+            if (slp > maxSlope) maxSlope = slp;
+            if (slp < minSlope) minSlope = slp;
         }
         statistics.elevation.max = maxElevation;
         statistics.elevation.min = minElevation;
+        statistics.speed.max = maxSpeed;
+        statistics.slope.max = maxSlope;
+        statistics.slope.min = minSlope;
+
+        // Start/end elevation are the first/last point's raw elevation within the sliced range.
+        statistics.elevation.start = this.local.points[start].ele ?? NaN;
+        statistics.elevation.end = this.local.points[end].ele ?? NaN;
 
         statistics.bounds.southWest.lat = this.global.bounds.southWest.lat;
         statistics.bounds.southWest.lon = this.global.bounds.southWest.lon;
@@ -375,6 +437,9 @@ export class GPXStatisticsGroup {
             distance: {
                 moving: statistics.local.data[index].distance.moving + cumulative.distance.moving,
                 total: statistics.local.data[index].distance.total + cumulative.distance.total,
+                up: statistics.local.data[index].distance.up + cumulative.distance.up,
+                down: statistics.local.data[index].distance.down + cumulative.distance.down,
+                flat: statistics.local.data[index].distance.flat + cumulative.distance.flat,
             },
             time: {
                 moving: statistics.local.data[index].time.moving + cumulative.time.moving,
